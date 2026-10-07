@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open Ended Lab Portal - Control Systems</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#0f172a',    // slate-900
+                        secondary: '#3b82f6',  // blue-500
+                        accent: '#8b5cf6',     // violet-500
+                        surface: '#f8fafc',    // slate-50
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+            /* Engineering grid background pattern */
+            background-image: linear-gradient(#e2e8f0 1px, transparent 1px), linear-gradient(90deg, #e2e8f0 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+        
+        .card-hover-effect {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .card-hover-effect:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .icon-pulse:hover i {
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* Glassmorphism for Navbar */
+        .glass-nav {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+
+<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+
+    <nav class="glass-nav sticky top-0 z-50 border-b border-slate-700 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center text-white shadow-lg">
+                        <i class="fa-solid fa-flask text-xl"></i>
+                    </div>
+                    <div>
+                        <span class="font-bold text-xl text-white tracking-tight">OEL Portal</span>
+                        <span class="block text-xs text-slate-400 font-medium tracking-wider uppercase" data-en="Faculty of Engineering" data-ms="Fakulti Kejuruteraan">Faculty of Engineering</span>
+                    </div>
+                </div>
+                <div class="hidden md:flex items-baseline space-x-8">
+                    <a href="#" class="text-white hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium transition-colors" data-en="Home" data-ms="Laman Utama">Home</a>
+                    <a href="#experiments" class="text-slate-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors" data-en="Experiments" data-ms="Eksperimen">Experiments</a>
+                    <a href="#" class="text-slate-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors" data-en="Resources" data-ms="Sumber">Resources</a>
+                    <a href="#" class="text-slate-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors" data-en="Contact" data-ms="Hubungi">Contact</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <!-- Language Toggle Button -->
+                    <button id="langToggleBtn" onclick="toggleLanguage()" class="flex items-center space-x-2 bg-slate-800 hover:bg-slate-700 text-white px-3 py-1.5 rounded-full border border-slate-600 transition-colors text-sm font-semibold">
+                        <i class="fa-solid fa-language"></i>
+                        <span id="langIndicator">BM</span>
+                    </button>
+                    <!-- Mobile Menu Button -->
+                    <div class="md:hidden">
+                        <button class="text-slate-300 hover:text-white p-2">
+                            <i class="fa-solid fa-bars text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow">
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16 text-center">
+            <div class="inline-block mb-4 px-4 py-1.5 rounded-full bg-blue-100 border border-blue-200 text-blue-700 text-sm font-semibold tracking-wide shadow-sm" data-en="Control Systems & Robotics" data-ms="Sistem Kawalan & Robotik">
+                Control Systems & Robotics 
+            </div>
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-primary tracking-tight mb-6">
+                <span data-en="Welcome to" data-ms="Selamat Datang ke">Welcome to</span> <br class="hidden sm:block"/>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-violet-600" data-en="Open Ended Lab" data-ms="Makmal Terbuka">Open Ended Lab</span>
+            </h1>
+            <p class="mt-4 max-w-2xl mx-auto text-lg text-slate-600" data-en="Explore advanced concepts in control theory, sensor fusion, and system stability through our interactive and hands-on laboratory modules. Select an experiment below to begin." data-ms="Terokai konsep lanjutan dalam teori kawalan, pelakuran penderia (sensor fusion), dan kestabilan sistem melalui modul makmal interaktif kami. Pilih eksperimen di bawah untuk bermula.">
+                Explore advanced concepts in control theory, sensor fusion, and system stability through our interactive and hands-on laboratory modules. Select an experiment below to begin.
+            </p>
+        </div>
+
+        <div id="experiments" class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
+            <div class="flex items-center justify-between mb-8">
+                <h2 class="text-2xl font-bold text-slate-800 flex items-center">
+                    <i class="fa-solid fa-layer-group text-blue-500 mr-3"></i> 
+                    <span data-en="Available Experiments" data-ms="Eksperimen Tersedia">Available Experiments</span>
+                </h2>
+                <span class="text-sm font-medium text-slate-500 bg-white px-3 py-1 rounded-full shadow-sm border border-slate-200" data-en="2 Modules" data-ms="2 Modul">2 Modules</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                
+                <!-- Experiment 1 -->
+                <div class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden card-hover-effect flex flex-col group icon-pulse">
+                    <div class="h-48 bg-gradient-to-br from-blue-500 to-cyan-600 relative overflow-hidden flex items-center justify-center">
+                        <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 20px 20px;"></div>
+                        <i class="fa-solid fa-scale-unbalanced text-white text-7xl drop-shadow-lg z-10 transition-transform duration-500 group-hover:scale-110"></i>
+                        <div class="absolute bottom-3 right-4 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-white text-xs font-semibold border border-white/30" data-en="Experiment 1" data-ms="Eksperimen 1">
+                            Experiment 1
+                        </div>
+                    </div>
+                    
+                    <div class="p-8 flex flex-col flex-grow">
+                        <div class="flex items-center space-x-2 mb-3">
+                            <span class="bg-cyan-100 text-cyan-700 text-xs px-2 py-1 rounded font-bold uppercase tracking-wider" data-en="Classical Control" data-ms="Kawalan Klasikal">Classical Control</span>
+                            <span class="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded font-bold uppercase tracking-wider">PID</span>
+                        </div>
+                        <h3 class="text-2xl font-bold text-slate-800 mb-3" data-en="Ball and Beam System" data-ms="Sistem Bola dan Rasuk">Ball and Beam System</h3>
+                        <p class="text-slate-600 mb-6 flex-grow leading-relaxed" data-en="Stabilize a rolling ball on a tilting beam using feedback control. This highly nonlinear and unstable system is a classic benchmark for studying PID tuning, steady-state error, and closed-loop transfer functions." data-ms="Stabilkan bola yang bergolek pada rasuk menyenget menggunakan kawalan suap balik. Sistem tak linear dan tidak stabil ini adalah penanda aras klasik untuk mengkaji penalaan PID, ralat keadaan mantap, dan rangkap pindah gelung tertutup.">
+                            Stabilize a rolling ball on a tilting beam using feedback control. This highly nonlinear and unstable system is a classic benchmark for studying PID tuning, steady-state error, and closed-loop transfer functions.
+                        </p>
+                        
+                        <ul class="text-sm text-slate-500 space-y-2 mb-8">
+                            <li class="flex items-center"><i class="fa-solid fa-check text-green-500 mr-2"></i> <span data-en="Mathematical Modeling & Linearization" data-ms="Pemodelan Matematik & Pelinearan">Mathematical Modeling & Linearization</span></li>
+                            <li class="flex items-center"><i class="fa-solid fa-check text-green-500 mr-2"></i> <span data-en="PID Controller Design" data-ms="Reka Bentuk Pengawal PID">PID Controller Design</span></li>
+                            <li class="flex items-center"><i class="fa-solid fa-check text-green-500 mr-2"></i> <span data-en="Real-time Position Tracking" data-ms="Penjejakan Kedudukan Masa Nyata">Real-time Position Tracking</span></li>
+                        </ul>
+                        
+                        <a href="bda37601_ultrasonic.html" class="w-full py-3.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-colors duration-200 shadow-md shadow-blue-500/30 flex justify-center items-center group/btn">
+                            <span data-en="Access Lab Portal" data-ms="Akses Portal Makmal">Access Lab Portal</span>
+                            <i class="fa-solid fa-arrow-right ml-2 transform group-hover/btn:translate-x-1 transition-transform"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Experiment 2 -->
+                <div class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden card-hover-effect flex flex-col group icon-pulse">
+                    <div class="h-48 bg-gradient-to-br from-violet-600 to-purple-800 relative overflow-hidden flex items-center justify-center">
+                        <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 20px 20px;"></div>
+                        <i class="fa-solid fa-robot text-white text-7xl drop-shadow-lg z-10 transition-transform duration-500 group-hover:scale-110"></i>
+                        <div class="absolute bottom-3 right-4 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-white text-xs font-semibold border border-white/30" data-en="Experiment 2" data-ms="Eksperimen 2">
+                            Experiment 2
+                        </div>
+                    </div>
+                    
+                    <div class="p-8 flex flex-col flex-grow">
+                        <div class="flex items-center space-x-2 mb-3">
+                            <span class="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded font-bold uppercase tracking-wider" data-en="Modern Robotics" data-ms="Robotik Moden">Modern Robotics</span>
+                            <span class="bg-violet-100 text-violet-700 text-xs px-2 py-1 rounded font-bold uppercase tracking-wider" data-en="IMU Fusion" data-ms="Gabungan IMU">IMU Fusion</span>
+                        </div>
+                        <h3 class="text-2xl font-bold text-slate-800 mb-3" data-en="MPU6050 Stability System" data-ms="Sistem Kestabilan MPU6050">MPU6050 Stability System</h3>
+                        <p class="text-slate-600 mb-6 flex-grow leading-relaxed" data-en="Develop a self-balancing robot or inverted pendulum. Utilize the MPU6050 6-DOF IMU to capture accelerometer and gyroscope data, apply complementary filters, and implement cascade PID to maintain vertical equilibrium." data-ms="Bangunkan robot pengimbang kendiri atau bandul songsang. Gunakan IMU 6-DOF MPU6050 untuk menangkap data meter pecutan dan giroskop, gunakan penapis pelengkap, dan laksanakan PID lata (cascade) untuk mengekalkan keseimbangan menegak.">
+                            Develop a self-balancing robot or inverted pendulum. Utilize the MPU6050 6-DOF IMU to capture accelerometer and gyroscope data, apply complementary filters, and implement cascade PID to maintain vertical equilibrium.
+                        </p>
+                        
+                        <ul class="text-sm text-slate-500 space-y-2 mb-8">
+                            <li class="flex items-center"><i class="fa-solid fa-check text-green-500 mr-2"></i> <span data-en="I2C Communication & Sensor Fusion" data-ms="Komunikasi I2C & Pelakuran Penderia">I2C Communication & Sensor Fusion</span></li>
+                            <li class="flex items-center"><i class="fa-solid fa-check text-green-500 mr-2"></i> <span data-en="Complementary & Kalman Filtering" data-ms="Penapisan Pelengkap & Kalman">Complementary & Kalman Filtering</span></li>
+                            <li class="flex items-center"><i class="fa-solid fa-check text-green-500 mr-2"></i> <span data-en="LQR / Cascade PID Balancing" data-ms="Pengimbangan LQR / PID Lata">LQR / Cascade PID Balancing</span></li>
+                        </ul>
+                        
+                        <a href="bda37601_mpu6050.html" class="w-full py-3.5 px-4 bg-violet-600 hover:bg-violet-700 text-white rounded-xl font-semibold transition-colors duration-200 shadow-md shadow-violet-500/30 flex justify-center items-center group/btn">
+                            <span data-en="Access Lab Portal" data-ms="Akses Portal Makmal">Access Lab Portal</span>
+                            <i class="fa-solid fa-arrow-right ml-2 transform group-hover/btn:translate-x-1 transition-transform"></i>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 py-10 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center">
+            <div class="flex items-center space-x-3 mb-4 md:mb-0">
+                <i class="fa-solid fa-flask border-2 border-slate-800 rounded text-slate-800 p-1"></i>
+                <span class="text-slate-800 font-semibold" data-en="Open Ended Lab Portal" data-ms="Portal Makmal Terbuka">Open Ended Lab Portal</span>
+            </div>
+            <div class="text-slate-500 text-sm" data-en="&copy; 2026 Faculty of Engineering. All rights reserved." data-ms="&copy; 2026 Fakulti Kejuruteraan. Hak cipta terpelihara.">
+                &copy; 2026 Faculty of Engineering. All rights reserved.
+            </div>
+            <div class="flex space-x-6 mt-4 md:mt-0">
+                <a href="#" class="text-slate-400 hover:text-slate-600"><i class="fa-brands fa-github text-xl"></i></a>
+                <a href="#" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-book text-xl"></i></a>
+                <a href="#" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-envelope text-xl"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        let currentLang = 'en';
+
+        function toggleLanguage() {
+            // Toggle language variable
+            currentLang = currentLang === 'en' ? 'ms' : 'en';
+            
+            // Update the button text to show the *target* language to switch to
+            document.getElementById('langIndicator').innerText = currentLang === 'en' ? 'BM' : 'EN';
+            
+            // Apply translations
+            applyTranslations();
+        }
+
+        function applyTranslations() {
+            // Select all elements that have a translation data attribute
+            const translatableElements = document.querySelectorAll('[data-en]');
+            
+            translatableElements.forEach(el => {
+                // Update the inner text based on the selected language
+                if (el.hasAttribute(`data-${currentLang}`)) {
+                    el.innerText = el.getAttribute(`data-${currentLang}`);
+                }
+            });
+        }
+        
+        // Initialize with default language on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            applyTranslations();
+        });
+    </script>
+</body>
+</html>
