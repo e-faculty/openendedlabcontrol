@@ -1,0 +1,2578 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BDA37601: Ball & Beam Balancing Control (PID Control) - Ts. Dr. Hanani Abd Wahab</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            900: '#064e3b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar { width: 7px; height: 7px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Language display filter styling */
+        body.lang-bm .lang-en-only { display: none !important; }
+        body.lang-en .lang-bm-only { display: none !important; }
+        body.lang-dwi .bilingual-en {
+            color: #64748b;
+            font-size: 0.9em;
+            font-style: italic;
+        }
+        body.lang-bm .bilingual-en { display: none !important; }
+        body.lang-en .bilingual-bm { display: none !important; }
+        body.lang-en .bilingual-en {
+            color: inherit;
+            font-style: normal;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased lang-dwi">
+
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Branding -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-600 to-emerald-500 flex items-center justify-center text-white shadow-md">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 18h18M4 14l16-4M14 9a2 2 0 11-4 0 2 2 0 014 0zM12 18v-4"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="font-bold text-base sm:text-lg text-slate-900 leading-tight">BDA37601 Open-Ended Control Lab</span>
+                            <span class="text-xs bg-emerald-100 text-emerald-800 font-semibold px-2 py-0.5 rounded-full hidden sm:inline-block">PID Control</span>
+                        </div>
+                        <p class="text-xs text-slate-500">
+                            <span class="bilingual-bm">Sistem Keseimbangan Bebola & Rasuk</span>
+                            <span class="bilingual-en"> / Ball & Beam Balancing System</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Instructor Badge (Desktop) -->
+                <div class="hidden lg:flex items-center space-x-2 bg-teal-50 border border-teal-200/80 px-3 py-1.5 rounded-lg text-xs">
+                    <span class="w-2 h-2 rounded-full bg-teal-500"></span>
+                    <span class="text-slate-600 font-medium">
+                        <span class="bilingual-bm">Pensyarah / Pembangun:</span>
+                        <span class="bilingual-en">Lecturer / Developer:</span>
+                    </span>
+                    <span class="font-bold text-teal-900">Ts. Dr. Hanani Abd Wahab</span>
+                </div>
+
+                <!-- Language Switcher Controls -->
+                <div class="flex items-center space-x-2">
+                    <div class="flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200 text-xs font-semibold">
+                        <button id="btn-lang-dwi" onclick="setLanguage('dwi')" class="px-2.5 py-1 rounded-md transition bg-white text-teal-800 shadow-xs">
+                            🌐 Dwi
+                        </button>
+                        <button id="btn-lang-bm" onclick="setLanguage('bm')" class="px-2.5 py-1 rounded-md transition text-slate-600 hover:text-slate-900">
+                            🇲🇾 BM
+                        </button>
+                        <button id="btn-lang-en" onclick="setLanguage('en')" class="px-2.5 py-1 rounded-md transition text-slate-600 hover:text-slate-900">
+                            🇬🇧 EN
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <div class="flex md:hidden">
+                    <button onclick="toggleMobileNav()" class="p-2 rounded-lg text-slate-600 hover:bg-slate-100 focus:outline-none">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Desktop Nav Bar -->
+            <div class="hidden md:flex space-x-1 lg:space-x-2 py-2 border-t border-slate-100">
+                <button onclick="switchTab('schedule')" id="btn-tab-schedule" class="nav-btn px-3 py-1.5 text-xs font-semibold rounded-lg text-teal-800 bg-teal-50 border border-teal-200">
+                    <span class="bilingual-bm">Jadual Kerja (7 Minggu)</span>
+                    <span class="bilingual-en"> / Work Schedule (7 Weeks)</span>
+                </button>
+                <button onclick="switchTab('simulator')" id="btn-tab-simulator" class="nav-btn px-3 py-1.5 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+                    <span class="bilingual-bm">Simulator PID Maya</span>
+                    <span class="bilingual-en"> / Virtual PID Simulator</span>
+                </button>
+                <button onclick="switchTab('projects')" id="btn-tab-projects" class="nav-btn px-3 py-1.5 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+                    <span class="bilingual-bm">5 Tema Aplikasi</span>
+                    <span class="bilingual-en"> / 5 Project Themes</span>
+                </button>
+                <button onclick="switchTab('rubric')" id="btn-tab-rubric" class="nav-btn px-3 py-1.5 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+                    <span class="bilingual-bm">Penilai Rubrik (100%)</span>
+                    <span class="bilingual-en"> / Rubric Evaluator (100%)</span>
+                </button>
+                <button onclick="switchTab('resources')" id="btn-tab-resources" class="nav-btn px-3 py-1.5 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+                    <span class="bilingual-bm">Litar & Kod PID</span>
+                    <span class="bilingual-en"> / Circuit & PID Code</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Dropdown Navigation -->
+        <div id="mobile-nav" class="hidden md:hidden border-t border-slate-200 bg-white px-4 pt-2 pb-3 space-y-1 text-xs font-medium">
+            <div class="px-3 py-2 bg-teal-50 rounded-md text-teal-900 text-xs mb-2">
+                <span class="font-bold">Pensyarah / Pembangun:</span> Ts. Dr. Hanani Abd Wahab
+            </div>
+            <button onclick="switchTab('schedule'); toggleMobileNav();" class="block w-full text-left px-3 py-2 rounded-md hover:bg-teal-50 hover:text-teal-800">
+                <span class="bilingual-bm">Jadual Kerja (7 Minggu Sahaja)</span>
+                <span class="bilingual-en"> / Work Schedule (7 Weeks Only)</span>
+            </button>
+            <button onclick="switchTab('simulator'); toggleMobileNav();" class="block w-full text-left px-3 py-2 rounded-md hover:bg-teal-50 hover:text-teal-800">
+                <span class="bilingual-bm">Simulator PID Maya</span>
+                <span class="bilingual-en"> / Virtual PID Simulator</span>
+            </button>
+            <button onclick="switchTab('projects'); toggleMobileNav();" class="block w-full text-left px-3 py-2 rounded-md hover:bg-teal-50 hover:text-teal-800">
+                <span class="bilingual-bm">5 Tema Aplikasi Projek</span>
+                <span class="bilingual-en"> / 5 Project Themes</span>
+            </button>
+            <button onclick="switchTab('rubric'); toggleMobileNav();" class="block w-full text-left px-3 py-2 rounded-md hover:bg-teal-50 hover:text-teal-800">
+                <span class="bilingual-bm">Rubrik Penilaian (100%)</span>
+                <span class="bilingual-en"> / Rubric Evaluator (100%)</span>
+            </button>
+            <button onclick="switchTab('resources'); toggleMobileNav();" class="block w-full text-left px-3 py-2 rounded-md hover:bg-teal-50 hover:text-teal-800">
+                <span class="bilingual-bm">Panduan Litar & Kod Sumber</span>
+                <span class="bilingual-en"> / Circuit Wiring & Master Code</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- ==================== TAB 1: 7-WEEK WORK SCHEDULE (BM/EN) ==================== -->
+        <section id="tab-schedule" class="tab-content space-y-6">
+            <!-- Hero Banner -->
+            <div class="bg-gradient-to-r from-slate-900 via-teal-950 to-slate-900 rounded-2xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+                <div class="absolute -right-10 -bottom-10 w-80 h-80 bg-teal-500/20 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="max-w-3xl relative z-10">
+                    <div class="inline-flex items-center space-x-2 bg-teal-500/30 backdrop-blur px-3 py-1 rounded-full text-xs font-semibold text-teal-200 mb-3 border border-teal-400/30">
+                        <span>BDA37601 Control Lab</span>
+                        <span>•</span>
+                        <span class="bilingual-bm">Pensyarah: Ts. Dr. Hanani Abd Wahab</span>
+                        <span class="bilingual-en">Lecturer: Ts. Dr. Hanani Abd Wahab</span>
+                    </div>
+                    <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight">BDA37601 Open-Ended Control Laboratory</h1>
+                    <p class="mt-2 text-slate-300 text-sm sm:text-base leading-relaxed">
+                        <span class="bilingual-bm">Topik:</span>
+                        <span class="bilingual-en">Topic:</span>
+                        <strong class="text-teal-300">Ball &amp; Beam Balancing Control</strong>.
+                        <span class="block mt-1 text-slate-300 text-xs sm:text-sm">
+                            <span class="bilingual-bm">Sistem penanda aras kawalan klasik di mana pasukan pelajar mengimbangkan bebola pada kedudukan sasaran (setpoint) menggunakan sensor ultrasonik HC-SR04 dan motor servo dengan algoritma PID gelung tertutup. Modul dan platform dibangunkan oleh <strong>Ts. Dr. Hanani Abd Wahab</strong>.</span>
+                            <span class="bilingual-en">A premier benchmark control system where student teams stabilize a rolling ball at arbitrary setpoints along a beam using HC-SR04 ultrasonic distance sensing and servo motor closed-loop PID feedback. Developed by <strong>Ts. Dr. Hanani Abd Wahab</strong>.</span>
+                        </span>
+                    </p>
+                    <div class="mt-5 flex flex-wrap gap-3 text-xs sm:text-sm">
+                        <div class="flex items-center space-x-2 bg-slate-800/80 px-3 py-2 rounded-lg border border-slate-700">
+                            <span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span>
+                            <span>
+                                <span class="bilingual-bm">Penyelaras: <strong>Ts. Dr. Hanani Abd Wahab</strong></span>
+                                <span class="bilingual-en">Instructor: <strong>Ts. Dr. Hanani Abd Wahab</strong></span>
+                            </span>
+                        </div>
+                        <div class="flex items-center space-x-2 bg-slate-800/80 px-3 py-2 rounded-lg border border-slate-700">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                            <span>
+                                <span class="bilingual-bm">Tempoh: <strong>7 Minggu Sahaja (W1 – W7)</strong></span>
+                                <span class="bilingual-en">Duration: <strong>7 Weeks Only (W1 – W7)</strong></span>
+                            </span>
+                        </div>
+                        <div class="flex items-center space-x-2 bg-slate-800/80 px-3 py-2 rounded-lg border border-slate-700">
+                            <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                            <span>
+                                <span class="bilingual-bm">Kumpulan: <strong>5 Pelajar</strong></span>
+                                <span class="bilingual-en">Team: <strong>5 Students</strong></span>
+                            </span>
+                        </div>
+                        <div class="flex items-center space-x-2 bg-slate-800/80 px-3 py-2 rounded-lg border border-slate-700">
+                            <span class="w-2.5 h-2.5 rounded-full bg-teal-400"></span>
+                            <span>
+                                <span class="bilingual-bm">Teras Kawalan: <strong>PID Controller</strong></span>
+                                <span class="bilingual-en">Core Control: <strong>PID Controller</strong></span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-2">
+                    <div>
+                        <h2 class="text-base sm:text-lg font-bold text-slate-900">
+                            <span class="bilingual-bm">Pelan Kerja 7 Minggu & Pencapaian Utama</span>
+                            <span class="bilingual-en"> / 7-Week Work Plan & Key Deliverables</span>
+                        </h2>
+                        <p class="text-xs text-slate-500">
+                            <span class="bilingual-bm">Jejak tugasan mingguan, serahan projek, dan penilaian tepat 7 minggu (Minggu 1 – Minggu 7) diselia oleh Ts. Dr. Hanani Abd Wahab.</span>
+                            <span class="bilingual-en">Track weekly tasks, project milestones, and evaluation across strictly 7 weeks (Week 1 – Week 7) supervised by Ts. Dr. Hanani Abd Wahab.</span>
+                        </p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-xs text-slate-600 font-medium">
+                            <span class="bilingual-bm">Tapis:</span>
+                            <span class="bilingual-en">Filter:</span>
+                        </span>
+                        <select id="week-selector" onchange="jumpToWeek(this.value)" class="text-xs font-semibold bg-slate-100 text-slate-800 border border-slate-200 rounded-lg px-2.5 py-1.5 focus:ring-2 focus:ring-teal-500">
+                            <option value="all">Papar Semua (7 Minggu / All 7 Weeks)</option>
+                            <option value="w1">Minggu 1 / Week 1: Briefing & Hardware Kit Handover</option>
+                            <option value="w2">Minggu 2 / Week 2: Ultrasonic Sensor & Noise Filter</option>
+                            <option value="w3">Minggu 3 / Week 3: Servo Kinematics & P-Control</option>
+                            <option value="w4">Minggu 4 / Week 4: Full PID Design & Proposal</option>
+                            <option value="w5">Minggu 5 / Week 5: Closed-Loop Integration (70%)</option>
+                            <option value="w6">Minggu 6 / Week 6: Step Response & Draft Report (100%)</option>
+                            <option value="w7">Minggu 7 / Week 7: Final Demo & Evaluation (100%)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Timeline Cards: W1 to W7 -->
+                <div class="mt-6 space-y-4" id="timeline-container">
+                    <!-- Week 1 -->
+                    <div class="week-card border border-slate-200 rounded-xl p-5 hover:border-teal-300 transition bg-slate-50/50" data-week="w1">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-3">
+                            <div class="flex items-start space-x-3.5">
+                                <div class="w-9 h-9 rounded-xl bg-teal-600 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm">W1</div>
+                                <div>
+                                    <div class="flex items-center space-x-2">
+                                        <h3 class="font-bold text-slate-900 text-sm sm:text-base">
+                                            <span class="bilingual-bm">Minggu 1: Taklimat Makmal, Pembentukan Kumpulan & Agihan Kit</span>
+                                            <span class="bilingual-en"> / Week 1: Lab Briefing, Team Formation & Hardware Kit Handover</span>
+                                        </h3>
+                                        <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-200 text-slate-700">Kickoff</span>
+                                    </div>
+                                    <p class="text-xs text-slate-500 mt-0.5">
+                                        <span class="bilingual-bm">Objektif: Memahami mekanik sistem, matlamat kawalan PID, keselamatan motor servo, dan pembentukan pasukan.</span>
+                                        <span class="bilingual-en"> / Objective: Understand system mechanics, PID goals, moving servo safety, and group allocation.</span>
+                                    </p>
+                                    <ul class="mt-3 space-y-2 text-xs text-slate-600">
+                                        <li class="flex items-start space-x-2">
+                                            <span class="text-teal-600 font-bold">•</span>
+                                            <div>
+                                                <span class="bilingual-bm"><strong>Taklimat oleh Pensyarah:</strong> Ts. Dr. Hanani Abd Wahab menerangkan garis panduan kursus, keselamatan makmal, dan pengenalan model matematik fizik sistem bola-rasuk (momen inersia <em>J/R² + m</em>).</span>
+                                                <span class="bilingual-en"><strong>Briefing by Instructor:</strong> Ts. Dr. Hanani Abd Wahab outlines course expectations, lab safety rules, and mathematical modeling of ball-beam dynamics (moment of inertia <em>J/R² + m</em>).</span>
+                                            </div>
+                                        </li>
+                                        <li class="flex items-start space-x-2">
+                                            <span class="text-teal-600 font-bold">•</span>
+                                            <div>
+                                                <span class="bilingual-bm"><strong>Semakan Kit:</strong> Arduino Uno/Nano, sensor ultrasonik HC-SR04, servo SG90/MG996R, trek rasuk (30–45 cm), bola ping-pong, dan bekalan kuasa 5V berasingan.</span>
+                                                <span class="bilingual-en"><strong>Kit Verification:</strong> Arduino Uno/Nano, HC-SR04 sensor, SG90/MG996R servo, beam rail (30–45 cm), ping-pong ball, and external 5V isolated supply.</span>
+                                            </div>
+                                        </li>
+                                        <li class="flex items-start space-x-2">
+                                            <span class="text-teal-600 font-bold">•</span>
+                                            <div>
+                                                <span class="bilingual-bm"><strong>Agihan Tugas Pasukan:</strong> Daftarkan 5 ahli (Ketua Mekanikal, Pengaturcara Firmware, Pakar PID/Kawalan, Jurutera Ujian, dan Penulis Laporan).</span>
+                                                <span class="bilingual-en"><strong>Team Allocation:</strong> Register 5-student group roles (Mechanical Lead, Firmware Programmer, Control/PID Specialist, Test Engineer, Technical Writer).</span>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="shrink-0 md:text-right flex md:flex-col items-center md:items-end justify-between border-t md:border-t-0 pt-2 md:pt-0 border-slate-200">
+                                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                                    <span class="bilingual-bm">Hasil Serahan</span>
+                                    <span class="bilingual-en">Deliverable</span>
+                                </span>
+                                <span class="text-xs font-bold text-teal-800 bg-teal-50 px-2.5 py-1 rounded-md border border-teal-100 mt-1">
+                                    <span class="bilingual-bm">Daftar Pasukan & Semakan Kit</span>
+                                    <span class="bilingual-en">Team Registry & Kit Sign-off</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Week 2 -->
+                    <div class="week-card border border-slate-200 rounded-xl p-5 hover:border-teal-300 transition bg-white" data-week="w2">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-3">
+                            <div class="flex items-start space-x-3.5">
+                                <div class="w-9 h-9 rounded-xl bg-teal-600 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm">W2</div>
+                                <div>
+                                    <div class="flex items-center space-x-2">
+                                        <h3 class="font-bold text-slate-900 text-sm sm:text-base">
+                                            <span class="bilingual-bm">Minggu 2: Antara Muka Sensor Ultrasonik, Formula Jarak & Penapis Hingar</span>
+                                            <span class="bilingual-en"> / Week 2: Ultrasonic Sensor Interfacing, Distance Formula & Noise Filter</span>
+                                        </h3>
+                                        <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-100 text-blue-700">Sensing & Telemetry</span>
+                                    </div>
+                                    <p class="text-xs text-slate-500 mt-0.5">
+                                        <span class="bilingual-bm">Objektif: Mendapatkan bacaan jarak bebola yang stabil, tepat, dan bebas daripada pantulan gema palsu.</span>
+                                        <span class="bilingual-en"> / Objective: Acquire stable, accurate ball distance telemetry free of false acoustic echoes.</span>
+                                    </p>
+                                    <ul class="mt-3 space-y-2 text-xs text-slate-600">
+                                        <li class="flex items-start space-x-2">
+                                            <span class="text-teal-600 font-bold">•</span>
+                                            <div>
+                                                <span class="bilingual-bm"><strong>Pemasaan HC-SR04:</strong> Hantar denyutan 10µs HIGH pada Trig, baca durasi pantulan Echo menggunakan <code class="bg-slate-100 px-1 rounded text-teal-700 font-mono">pulseIn()</code>. Formula: <span class="font-mono font-semibold text-slate-800">Distance = (duration × 0.0343) / 2 cm</span>.</span>
+                                                <span class="bilingual-en"><strong>HC-SR04 Timing:</strong> Transmit 10µs HIGH pulse on Trig, capture Echo bounce with <code class="bg-slate-100 px-1 rounded text-teal-700 font-mono">pulseIn()</code>. Formula: <span class="font-mono font-semibold text-slate-800">Distance = (duration × 0.0343) / 2 cm</span>.</span>
+                                            </div>
+                                        </li>
+                                        <li class="flex items-start space-x-2">
+                                            <span class="text-teal-600 font-bold">•</span>
+                                            <div>
+                                                <span class="bilingual-bm"><strong>Penapis Hingar Median:</strong> Laksanakan penapis 3-point Median Filter atau Exponential Moving Average (EMA) untuk menolak lonjakan data palsu (outliers).</span>
+                                                <span class="bilingual-en"><strong>Median Noise Filter:</strong> Implement 3-point Median Filter or EMA algorithm to discard acoustic spike anomalies.</span>
+                                            </div>
+                                        </li>
+                                        <li class="flex items-start space-x-2">
+                                            <span class="text-teal-600 font-bold">•</span>
+                                            <div>
+                                                <span class="bilingual-bm"><strong>Serial Plotter:</strong> Sahkan graf jarak bola yang lancar tanpa hingar pada skrin Arduino Serial Plotter.</span>
+                                                <span class="bilingual-en"><strong>Serial Plotter:</strong> Confirm smooth, noise-free ball tracking trajectory on Arduino Serial Plotter.</span>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="shrink-0 md:text-right flex md:flex-col items-center md:items-end justify-between border-t md:border-t-0 pt-2 md:pt-0 border-slate-200">
+                                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                                    <span class="bilingual-bm">Hasil Serahan</span>
+                                    <span class="bilingual-en">Deliverable</span>
+                                </span>
+                                <span class="text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100 mt-1">
+                                    <span class="bilingual-bm">Telemetri Jarak Bertapis</span>
+                                    <span class="bilingual-en">Filtered Sonar Telemetry</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Week 3 -->
+                    <div class="week-card border border-slate-200 rounded-xl p-5 hover:border-teal-300 transition bg-white" data-week="w3">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-3">
+                            <div class="flex items-start space-x-3.5">
+                                <div class="w-9 h-9 rounded-xl bg-teal-600 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm">W3</div>
+                                <div>
+                                    <div class="flex items-center space-x-2">
+                                        <h3 class="font-bold text-slate-900 text-sm sm:text-base">
+                                            <span class="bilingual-bm">Minggu 3: Kinematik Servo, Geometri Pautan & Kawalan P Asas</span>
+                                            <span class="bilingual-en"> / Week 3: Servo Kinematics, Linkage Geometry & Proportional (P) Control</span>
+                                        </h3>
+                                        <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-100 text-emerald-700">Actuation & Linkage</span>
+                                    </div>
+                                    <p class="text-xs text-slate-500 mt-0.5">
+                                        <span class="bilingual-bm">Objektif: Memetakan sudut pautan servo ke kecondongan rasuk dan menguji kawalan perkadaran (P-only).</span>
+                                        <span class="bilingual-en"> / Objective: Map servo horn rotation to beam inclination and evaluate basic Proportional control.</span>
+                                    </p>
+                                    <ul class="mt-3 space-y-2 text-xs text-slate-600">
+                                        <li class="flex items-start space-x-2">
+                                            <span class="text-teal-600 font-bold">•</span>
+                                            <div>
+                                                <span class="bilingual-bm"><strong>Bekalan Kuasa Asing 5V:</strong> Wajib gunakan bekalan kuasa luaran 5V 2A berasingan bagi servo dengan penyambungan GND sepunya (elakkan mikropengawal reset).</span>
+                                                <span class="bilingual-en"><strong>External 5V Power:</strong> Strictly power servo from external 5V 2A supply with common ground (prevents MCU brownout).</span>
+                                            </div>
+                                        </li>
+                                        <li class="flex items-start space-x-2">
+                                            <span class="text-teal-600 font-bold">•</span>
+                                            <div>
+                                                <span class="bilingual-bm"><strong>Penentukuran Sudut Mendatar (θ₀):</strong> Laraskan sudut neutral servo (85°–95°) supaya rasuk mendatar secara tepat pada ralat sifar.</span>
+                                                <span class="bilingual-en"><strong>Horizontal Zero Calibration (θ₀):</strong> Calibrate servo resting angle (85°–95°) so beam is perfectly level at zero error.</span>
+                                            </div>
+                                        </li>
+                                        <li class="flex items-start space-x-2">
+                                            <span class="text-teal-600 font-bold">•</span>
+                                            <div>
+                                                <span class="bilingual-bm"><strong>Eksperimen Kawalan P:</strong> Laksanakan <em>u = Kp × (Setpoint − Jarak)</em>. Perhatikan ayunan berterusan sebagai bukti perlunya terbitan (Kd).</span>
+                                                <span class="bilingual-en"><strong>P-Control Test:</strong> Run <em>u = Kp × (Setpoint − Distance)</em>. Observe sustained oscillation proving the need for Derivative (Kd) damping.</span>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="shrink-0 md:text-right flex md:flex-col items-center md:items-end justify-between border-t md:border-t-0 pt-2 md:pt-0 border-slate-200">
+                                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                                    <span class="bilingual-bm">Hasil Serahan</span>
+                                    <span class="bilingual-en">Deliverable</span>
+                                </span>
+                                <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-100 mt-1">
+                                    <span class="bilingual-bm">Kalibrasi Sudut & Demo-P</span>
+                                    <span class="bilingual-en">Servo Leveling & P-Test</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Week 4 -->
+                    <div class="week-card border border-slate-200 rounded-xl p-5 hover:border-teal-300 transition bg-white" data-week="w4">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-3">
+                            <div class="flex items-start space-x-3.5">
+                                <div class="w-9 h-9 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm">W4</div>
+                                <div>
+                                    <div class="flex items-center space-x-2">
+                                        <h3 class="font-bold text-slate-900 text-sm sm:text-base">
+                                            <span class="bilingual-bm">Minggu 4: Reka Bentuk Algoritma PID Lengkap & Penghantaran Kertas Cadangan</span>
+                                            <span class="bilingual-en"> / Week 4: Full PID Algorithm Architecture & Proposal Submission</span>
+                                        </h3>
+                                        <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-purple-100 text-purple-700">Proposal & Control Design</span>
+                                    </div>
+                                    <p class="text-xs text-slate-500 mt-0.5">
+                                        <span class="bilingual-bm">Objektif: Mereka bentuk persamaan diskret PID dan menghantar cadangan projek aplikasi terbuka kepada Ts. Dr. Hanani Abd Wahab.</span>
+                                        <span class="bilingual-en"> / Objective: Formulate discrete PID equations and submit project proposal with block diagrams to Ts. Dr. Hanani Abd Wahab.</span>
+                                    </p>
+                                    <ul class="mt-3 space-y-2 text-xs text-slate-600">
+                                        <li class="flex items-start space-x-2">
+                                            <span class="text-purple-600 font-bold">•</span>
+                                            <div>
+                                                <span class="bilingual-bm"><strong>Persamaan Diskret PID:</strong> <span class="font-mono bg-purple-50 text-purple-900 px-1.5 py-0.5 rounded">P = Kp·e(t)</span>, <span class="font-mono bg-purple-50 text-purple-900 px-1.5 py-0.5 rounded">I = Ki·Σ e(t)Δt</span>, <span class="font-mono bg-purple-50 text-purple-900 px-1.5 py-0.5 rounded">D = Kd·[e(t) − e(t−1)]/Δt</span>.</span>
+                                                <span class="bilingual-en"><strong>Discrete PID Equations:</strong> Formulate discrete Proportional, Integral with anti-windup clamp, and Derivative terms.</span>
+                                            </div>
+                                        </li>
+                                        <li class="flex items-start space-x-2">
+                                            <span class="text-purple-600 font-bold">•</span>
+                                            <div>
+                                                <span class="bilingual-bm"><strong>Pemilihan Tema Projek:</strong> Pilih 1 daripada 5 tema inovasi (Trajektori Dinamik, Penolakan Gangguan Angin, Telemetri IoT, Gandaan Adaptif, atau Tangkapan Bola).</span>
+                                                <span class="bilingual-en"><strong>Theme Selection:</strong> Select 1 of 5 application themes (Dynamic Trajectory, Wind Disturbance, IoT Telemetry, Adaptive Gain, or Soft Landing).</span>
+                                            </div>
+                                        </li>
+                                        <li class="flex items-start space-x-2">
+                                            <span class="text-purple-600 font-bold">•</span>
+                                            <div>
+                                                <span class="bilingual-bm"><strong>Kertas Cadangan:</strong> Sertakan pernyataan masalah, rajah blok sistem, model fungsi pindah, dan carta alir pengawal.</span>
+                                                <span class="bilingual-en"><strong>Proposal Document:</strong> Include problem statement, control system block diagram, transfer function model, and program flowchart.</span>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="shrink-0 md:text-right flex md:flex-col items-center md:items-end justify-between border-t md:border-t-0 pt-2 md:pt-0 border-slate-200">
+                                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                                    <span class="bilingual-bm">Hasil Serahan</span>
+                                    <span class="bilingual-en">Deliverable</span>
+                                </span>
+                                <span class="text-xs font-bold text-purple-700 bg-purple-50 px-2.5 py-1 rounded-md border border-purple-100 mt-1">
+                                    <span class="bilingual-bm">Kertas Cadangan & Carta Alir</span>
+                                    <span class="bilingual-en">Proposal & Flowchart (10%)</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Week 5 -->
+                    <div class="week-card border border-slate-200 rounded-xl p-5 hover:border-teal-300 transition bg-white" data-week="w5">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-3">
+                            <div class="flex items-start space-x-3.5">
+                                <div class="w-9 h-9 rounded-xl bg-amber-600 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm">W5</div>
+                                <div>
+                                    <div class="flex items-center space-x-2">
+                                        <h3 class="font-bold text-slate-900 text-sm sm:text-base">
+                                            <span class="bilingual-bm">Minggu 5: Integrasi Gelung Tertutup & Penalaan PID Awal (Prototaip 70%)</span>
+                                            <span class="bilingual-en"> / Week 5: Closed-Loop Integration & Initial PID Tuning (70% Prototype)</span>
+                                        </h3>
+                                        <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-100 text-amber-700">70% Functional System</span>
+                                    </div>
+                                    <p class="text-xs text-slate-500 mt-0.5">
+                                        <span class="bilingual-bm">Objektif: Mengintegrasikan gelung tertutup penuh dan menala parameter Kp, Ki, Kd menggunakan kaedah eksperimen / Ziegler-Nichols.</span>
+                                        <span class="bilingual-en"> / Objective: Close the loop and tune Kp, Ki, Kd parameters via experimental or Ziegler-Nichols method.</span>
+                                    </p>
+                                    <ul class="mt-3 space-y-2 text-xs text-slate-600">
+                                        <li class="flex items-start space-x-2">
+                                            <span class="text-amber-600 font-bold">•</span>
+                                            <div>
+                                                <span class="bilingual-bm"><strong>Penalaan Ziegler-Nichols / Heuristik:</strong> Tingkatkan Kp hingga ayunan stabil (Ku, Tu), kemudian tentukan redaman Kd bagi mengurangkan lajakan (*overshoot*).</span>
+                                                <span class="bilingual-en"><strong>Ziegler-Nichols / Heuristic Tuning:</strong> Increase Kp to sustain oscillations (Ku, Tu), then inject Kd damping to curtail severe overshoot.</span>
+                                            </div>
+                                        </li>
+                                        <li class="flex items-start space-x-2">
+                                            <span class="text-amber-600 font-bold">•</span>
+                                            <div>
+                                                <span class="bilingual-bm"><strong>Masa Pensampelan Tetap:</strong> Tetapkan kadar gelung tepat (<code class="bg-slate-100 px-1 font-mono text-amber-800">SAMPLE_TIME_MS = 40</code> / 25 Hz) mengelakkan lonjakan derivatif rawak akibat variasi dt.</span>
+                                                <span class="bilingual-en"><strong>Deterministic Loop Frequency:</strong> Enforce steady loop execution (<code class="bg-slate-100 px-1 font-mono text-amber-800">SAMPLE_TIME_MS = 40</code> / 25 Hz) to avoid derivative jitters.</span>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="shrink-0 md:text-right flex md:flex-col items-center md:items-end justify-between border-t md:border-t-0 pt-2 md:pt-0 border-slate-200">
+                                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                                    <span class="bilingual-bm">Hasil Serahan</span>
+                                    <span class="bilingual-en">Deliverable</span>
+                                </span>
+                                <span class="text-xs font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-100 mt-1">
+                                    <span class="bilingual-bm">Prototaip Berfungsi ≥ 70%</span>
+                                    <span class="bilingual-en">≥ 70% Functional Demo</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Week 6 -->
+                    <div class="week-card border border-slate-200 rounded-xl p-5 hover:border-teal-300 transition bg-white" data-week="w6">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-3">
+                            <div class="flex items-start space-x-3.5">
+                                <div class="w-9 h-9 rounded-xl bg-cyan-600 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm">W6</div>
+                                <div>
+                                    <div class="flex items-center space-x-2">
+                                        <h3 class="font-bold text-slate-900 text-sm sm:text-base">
+                                            <span class="bilingual-bm">Minggu 6: Analisis Tindak Balas Langkah, Penolakan Gangguan & Draf Laporan</span>
+                                            <span class="bilingual-en"> / Week 6: Step Response Analysis, Disturbance Rejection & Draft Report</span>
+                                        </h3>
+                                        <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-cyan-100 text-cyan-700">100% System Ready</span>
+                                    </div>
+                                    <p class="text-xs text-slate-500 mt-0.5">
+                                        <span class="bilingual-bm">Objektif: Mengukur masa pengenapan (ts), peratus lajakan (Mp), menguji ketahanan gangguan, dan melengkapkan draf dokumentasi.</span>
+                                        <span class="bilingual-en"> / Objective: Measure settling time (ts), overshoot (Mp), test impulse disturbance rejection, and compile draft report.</span>
+                                    </p>
+                                    <ul class="mt-3 space-y-2 text-xs text-slate-600">
+                                        <li class="flex items-start space-x-2">
+                                            <span class="text-cyan-600 font-bold">•</span>
+                                            <div>
+                                                <span class="bilingual-bm"><strong>Ujian Tindak Balas Langkah:</strong> Ubah setpoint (10 cm → 25 cm). Rekod dan ukur masa pengenapan (<span class="font-serif italic font-semibold">t<sub>s</sub> &lt; 3.0 s</span>) dan peratus lajakan (<span class="font-serif italic font-semibold">M<sub>p</sub> &lt; 20%</span>).</span>
+                                                <span class="bilingual-en"><strong>Step Response Testing:</strong> Shift setpoint (10 cm → 25 cm). Quantify settling time (<span class="font-serif italic font-semibold">t<sub>s</sub> &lt; 3.0 s</span>) and peak overshoot (<span class="font-serif italic font-semibold">M<sub>p</sub> &lt; 20%</span>).</span>
+                                            </div>
+                                        </li>
+                                        <li class="flex items-start space-x-2">
+                                            <span class="text-cyan-600 font-bold">•</span>
+                                            <div>
+                                                <span class="bilingual-bm"><strong>Ujian Ketahanan Gangguan (Disturbance):</strong> Tolak bola secara fizikal menggunakan jari; sahkan pengawal berupaya memulihkan posisi sasaran.</span>
+                                                <span class="bilingual-en"><strong>Disturbance Rejection:</strong> Nudge/flick ball manually; prove PID loop restores target balance without falling off.</span>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="shrink-0 md:text-right flex md:flex-col items-center md:items-end justify-between border-t md:border-t-0 pt-2 md:pt-0 border-slate-200">
+                                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                                    <span class="bilingual-bm">Hasil Serahan</span>
+                                    <span class="bilingual-en">Deliverable</span>
+                                </span>
+                                <span class="text-xs font-bold text-cyan-700 bg-cyan-50 px-2.5 py-1 rounded-md border border-cyan-100 mt-1">
+                                    <span class="bilingual-bm">Prototaip 100% & Draf Laporan</span>
+                                    <span class="bilingual-en">100% Prototype & Draft Report</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Week 7 -->
+                    <div class="week-card border-2 border-teal-500 bg-gradient-to-r from-teal-50/90 to-emerald-50/90 rounded-xl p-5 shadow-sm" data-week="w7">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-3">
+                            <div class="flex items-start space-x-3.5">
+                                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-teal-600 to-emerald-600 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-md">W7</div>
+                                <div>
+                                    <div class="flex items-center space-x-2">
+                                        <h3 class="font-bold text-slate-900 text-sm sm:text-base">
+                                            <span class="bilingual-bm">Minggu 7: Pembentangan Akhir, Demonstrasi Langsung & Penilaian OBE</span>
+                                            <span class="bilingual-en"> / Week 7: Final Presentation, Live Demonstration & OBE Evaluation</span>
+                                        </h3>
+                                        <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-rose-100 text-rose-700 font-bold">Penilaian 100% Final</span>
+                                    </div>
+                                    <p class="text-xs text-slate-600 mt-0.5">
+                                        <span class="bilingual-bm">Objektif: Mendemonstrasikan prestasi sistem di hadapan Ts. Dr. Hanani Abd Wahab & panel penilai, membentangkan dapatan teori, dan menyerahkan laporan akhir.</span>
+                                        <span class="bilingual-en"> / Objective: Demonstrate live hardware balance before Ts. Dr. Hanani Abd Wahab & evaluation panel, defend Q&A, and submit final report.</span>
+                                    </p>
+                                    <ul class="mt-3 space-y-2 text-xs text-slate-600">
+                                        <li class="flex items-start space-x-2">
+                                            <span class="text-rose-600 font-bold">•</span>
+                                            <div>
+                                                <span class="bilingual-bm"><strong>Demonstrasi Langsung (35%):</strong> Pengimbangan jitu sasaran pelbagai, kestabilan dinamik, dan pemulihan tolakan fizikal.</span>
+                                                <span class="bilingual-en"><strong>Live Demonstration (35%):</strong> Step tracking accuracy, steady-state precision, and recovery under physical perturbations.</span>
+                                            </div>
+                                        </li>
+                                        <li class="flex items-start space-x-2">
+                                            <span class="text-rose-600 font-bold">•</span>
+                                            <div>
+                                                <span class="bilingual-bm"><strong>Pembentangan Lisan & Q&A (35%):</strong> Pembentangan 10–15 minit melibatkan semua 5 orang ahli pasukan dan pertahanan teori PID.</span>
+                                                <span class="bilingual-en"><strong>Oral Presentation & Q&A (35%):</strong> 10–15 min presentation with equal participation of all 5 members and theoretical defense.</span>
+                                            </div>
+                                        </li>
+                                        <li class="flex items-start space-x-2">
+                                            <span class="text-rose-600 font-bold">•</span>
+                                            <div>
+                                                <span class="bilingual-bm"><strong>Laporan Makmal Akhir (30%):</strong> Dokumentasi teknikal lengkap bersama graf ujian masa-nyata, skematik litar, dan perbincangan ralat.</span>
+                                                <span class="bilingual-en"><strong>Final Lab Report (30%):</strong> Complete formal report containing schematics, step-response plots, and error analysis.</span>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="shrink-0 md:text-right flex md:flex-col items-center md:items-end justify-between border-t md:border-t-0 pt-2 md:pt-0 border-teal-200">
+                                <span class="text-xs font-semibold text-rose-600 uppercase tracking-wider">
+                                    <span class="bilingual-bm">Penilaian Penuh</span>
+                                    <span class="bilingual-en">Final Evaluation</span>
+                                </span>
+                                <span class="text-xs font-bold text-white bg-teal-600 px-3 py-1 rounded-md shadow-sm mt-1">
+                                    <span class="bilingual-bm">Demo Langsung & Laporan Akhir</span>
+                                    <span class="bilingual-en">Live Demo & Final Report</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB 2: INTERACTIVE SIMULATOR (BM/EN) ==================== -->
+        <section id="tab-simulator" class="tab-content hidden space-y-6">
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                <div class="flex flex-col md:flex-row md:items-center justify-between pb-4 border-b border-slate-100 gap-4">
+                    <div>
+                        <div class="inline-flex items-center space-x-2 bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-full text-xs font-semibold mb-1">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span class="bilingual-bm">Enjin Fizik & Integrasi Numerikal Masa-Nyata</span>
+                            <span class="bilingual-en"> / Live Physics & Numerical Integration Engine</span>
+                        </div>
+                        <h2 class="text-xl font-bold text-slate-900">
+                            <span class="bilingual-bm">Simulator Maya Sistem Ball & Beam PID</span>
+                            <span class="bilingual-en"> / Virtual Ball & Beam PID Testbed</span>
+                        </h2>
+                        <p class="text-xs text-slate-500">
+                            <span class="bilingual-bm">Tala gandaan Proportional (Kp), Integral (Ki), dan Derivative (Kd) secara langsung. Uji tindak balas langkah dan gangguan impuls. Dibangunkan khusus untuk BDA37601 oleh Ts. Dr. Hanani Abd Wahab.</span>
+                            <span class="bilingual-en"> / Tune Proportional, Integral, and Derivative gains in real time. Developed specifically for BDA37601 by Ts. Dr. Hanani Abd Wahab.</span>
+                        </p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button id="btn-audio-toggle" onclick="toggleVirtualAudio()" class="text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-lg border border-slate-300 flex items-center space-x-1.5 transition">
+                            <span id="audio-icon">🔇</span>
+                            <span id="audio-status-text">
+                                <span class="bilingual-bm">Bunyi Servo</span>
+                                <span class="bilingual-en"> / Servo Sound</span>
+                            </span>
+                        </button>
+                        <button onclick="resetSimToCenter()" class="text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-lg border border-slate-300 transition">
+                            <span class="bilingual-bm">Set Semula</span>
+                            <span class="bilingual-en"> / Reset</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Simulation Visual Grid -->
+                <div class="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <!-- Canvas Physics Visualizer -->
+                    <div class="lg:col-span-7 bg-slate-950 rounded-2xl p-4 flex flex-col justify-between text-white relative min-h-[420px] overflow-hidden border border-slate-800">
+                        <div class="w-full flex justify-between items-center z-10 text-xs text-slate-400 mb-2">
+                            <div class="flex items-center space-x-2">
+                                <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+                                <span class="font-mono">Sonar Ultrasonik Aktif (HC-SR04 Active)</span>
+                            </div>
+                            <span id="stability-badge" class="px-2.5 py-0.5 rounded-full font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs">
+                                STABIL (Ralat &lt; 0.6 cm)
+                            </span>
+                        </div>
+
+                        <!-- 2D Canvas where Beam & Ball & Ultrasonic Ping are rendered -->
+                        <div class="relative w-full h-64 bg-slate-900/90 rounded-xl overflow-hidden border border-slate-800 flex items-center justify-center">
+                            <canvas id="simCanvas" width="600" height="260" class="w-full h-full block cursor-crosshair"></canvas>
+                            <div class="absolute bottom-2 left-3 text-[10px] text-slate-500 select-none pointer-events-none">
+                                💡 <span class="bilingual-bm">Klik pada rasuk untuk mengalih bola atau tekan butang tolakan di bawah.</span>
+                                <span class="bilingual-en"> / Tip: Click beam to reposition ball or use disturbance buttons below.</span>
+                            </div>
+                        </div>
+
+                        <!-- Live Telemetry Readouts -->
+                        <div class="w-full grid grid-cols-4 gap-2 mt-4 text-center font-mono text-xs">
+                            <div class="bg-slate-900 p-2 rounded-lg border border-slate-800">
+                                <span class="text-slate-400 block text-[10px]">
+                                    <span class="bilingual-bm">SASARAN (r)</span>
+                                    <span class="bilingual-en">SETPOINT (r)</span>
+                                </span>
+                                <span id="tele-setpoint" class="text-sm font-bold text-emerald-400">20.0 cm</span>
+                            </div>
+                            <div class="bg-slate-900 p-2 rounded-lg border border-slate-800">
+                                <span class="text-slate-400 block text-[10px]">
+                                    <span class="bilingual-bm">KEDUDUKAN (y)</span>
+                                    <span class="bilingual-en">CURRENT (y)</span>
+                                </span>
+                                <span id="tele-pos" class="text-sm font-bold text-cyan-300">20.0 cm</span>
+                            </div>
+                            <div class="bg-slate-900 p-2 rounded-lg border border-slate-800">
+                                <span class="text-slate-400 block text-[10px]">
+                                    <span class="bilingual-bm">RALAT (e)</span>
+                                    <span class="bilingual-en">ERROR (e)</span>
+                                </span>
+                                <span id="tele-error" class="text-sm font-bold text-amber-400">0.0 cm</span>
+                            </div>
+                            <div class="bg-slate-900 p-2 rounded-lg border border-slate-800">
+                                <span class="text-slate-400 block text-[10px]">
+                                    <span class="bilingual-bm">SUDUT RASUK (θ)</span>
+                                    <span class="bilingual-en">BEAM TILT (θ)</span>
+                                </span>
+                                <span id="tele-angle" class="text-sm font-bold text-purple-300">0.0&deg;</span>
+                            </div>
+                        </div>
+
+                        <!-- Mini Oscilloscope / Step Response Graph -->
+                        <div class="mt-3 bg-slate-900/90 p-2.5 rounded-lg border border-slate-800">
+                            <div class="flex justify-between text-[10px] text-slate-400 font-mono mb-1">
+                                <span>
+                                    <span class="bilingual-bm">Graf Tindak Balas Langkah (Step Response Tracker)</span>
+                                    <span class="bilingual-en"> / Real-Time Step Response Tracker</span>
+                                </span>
+                                <span class="text-emerald-400">● Setpoint &nbsp; <span class="text-cyan-400">● Ball Position</span></span>
+                            </div>
+                            <canvas id="scopeCanvas" width="560" height="60" class="w-full h-14 block bg-slate-950 rounded"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- PID Tuning Sliders & Actuator Controls -->
+                    <div class="lg:col-span-5 space-y-4 flex flex-col justify-between">
+                        <!-- Setpoint Selector -->
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="text-xs font-bold text-slate-800">
+                                    <span class="bilingual-bm">Kedudukan Sasaran (Setpoint Jarak)</span>
+                                    <span class="bilingual-en"> / Target Setpoint Distance</span>
+                                </label>
+                                <span id="label-setpoint" class="font-mono text-xs font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded border border-teal-200">20.0 cm</span>
+                            </div>
+                            <input id="slider-setpoint" type="range" min="5" max="35" step="0.5" value="20" oninput="updateSetpointFromSlider(this.value)" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-teal-600">
+                            <div class="flex justify-between text-[10px] text-slate-400 mt-1 font-mono">
+                                <span>5 cm (<span class="bilingual-bm">Dekat</span><span class="bilingual-en">Near</span>)</span>
+                                <span>20 cm (<span class="bilingual-bm">Tengah</span><span class="bilingual-en">Center</span>)</span>
+                                <span>35 cm (<span class="bilingual-bm">Jauh</span><span class="bilingual-en">Far</span>)</span>
+                            </div>
+
+                            <!-- Quick preset targets -->
+                            <div class="mt-3 flex flex-wrap gap-1.5">
+                                <button onclick="setTargetPreset(10)" class="px-2 py-1 bg-white border border-slate-200 hover:bg-slate-100 rounded text-xs font-medium text-slate-700">
+                                    <span class="bilingual-bm">Sasaran 10cm</span>
+                                    <span class="bilingual-en">10cm Target</span>
+                                </button>
+                                <button onclick="setTargetPreset(20)" class="px-2 py-1 bg-white border border-slate-200 hover:bg-slate-100 rounded text-xs font-medium text-slate-700">
+                                    <span class="bilingual-bm">20cm (Tengah)</span>
+                                    <span class="bilingual-en">20cm (Center)</span>
+                                </button>
+                                <button onclick="setTargetPreset(30)" class="px-2 py-1 bg-white border border-slate-200 hover:bg-slate-100 rounded text-xs font-medium text-slate-700">
+                                    <span class="bilingual-bm">Sasaran 30cm</span>
+                                    <span class="bilingual-en">30cm Target</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- PID Gains Controls -->
+                        <div class="bg-white p-4 rounded-xl border border-slate-200 space-y-3.5 shadow-xs">
+                            <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                                <h3 class="font-bold text-slate-900 text-xs uppercase tracking-wider">
+                                    <span class="bilingual-bm">Gandaan Pengawal PID</span>
+                                    <span class="bilingual-en"> / PID Controller Gains</span>
+                                </h3>
+                                <span class="text-[10px] text-teal-700 bg-teal-50 px-2 py-0.5 rounded font-mono">Feedback Loop</span>
+                            </div>
+
+                            <!-- Kp Slider -->
+                            <div>
+                                <div class="flex justify-between text-xs font-semibold text-slate-700 mb-1">
+                                    <span>Proportional (<span class="font-serif italic font-bold">K<sub>p</sub></span>)</span>
+                                    <span id="label-kp" class="font-mono text-teal-700 font-bold">1.80</span>
+                                </div>
+                                <input id="slider-kp" type="range" min="0" max="6.0" step="0.05" value="1.80" oninput="updateGains()" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-teal-600">
+                                <p class="text-[10px] text-slate-400 mt-0.5">
+                                    <span class="bilingual-bm">Menjana daya kembali ke sasaran; nilai lampau menghasilkan ayunan mampan.</span>
+                                    <span class="bilingual-en">Restores ball toward target; high values induce sustained oscillation.</span>
+                                </p>
+                            </div>
+
+                            <!-- Ki Slider -->
+                            <div>
+                                <div class="flex justify-between text-xs font-semibold text-slate-700 mb-1">
+                                    <span>Integral (<span class="font-serif italic font-bold">K<sub>i</sub></span>)</span>
+                                    <span id="label-ki" class="font-mono text-purple-700 font-bold">0.15</span>
+                                </div>
+                                <input id="slider-ki" type="range" min="0" max="1.0" step="0.01" value="0.15" oninput="updateGains()" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-purple-600">
+                                <p class="text-[10px] text-slate-400 mt-0.5">
+                                    <span class="bilingual-bm">Menghapuskan ralat keadaan mantap; nilai terlampau tinggi menyebabkan lajakan windup.</span>
+                                    <span class="bilingual-en">Eliminates steady-state offset; excessive values induce windup overshoot.</span>
+                                </p>
+                            </div>
+
+                            <!-- Kd Slider -->
+                            <div>
+                                <div class="flex justify-between text-xs font-semibold text-slate-700 mb-1">
+                                    <span>Derivative (<span class="font-serif italic font-bold">K<sub>d</sub></span>)</span>
+                                    <span id="label-kd" class="font-mono text-blue-700 font-bold">2.40</span>
+                                </div>
+                                <input id="slider-kd" type="range" min="0" max="8.0" step="0.1" value="2.40" oninput="updateGains()" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                                <p class="text-[10px] text-slate-400 mt-0.5">
+                                    <span class="bilingual-bm">Bertindak sebagai peredam kelajuan bola; penting untuk mengelakkan bola terlontar.</span>
+                                    <span class="bilingual-en">Dampens ball speed; essential to arrest inertia and prevent runaway.</span>
+                                </p>
+                            </div>
+
+                            <!-- Tuning Preset Modes -->
+                            <div class="pt-2 border-t border-slate-100 flex flex-wrap gap-2 text-xs">
+                                <span class="text-[11px] text-slate-500 font-medium self-center">
+                                    <span class="bilingual-bm">Pratetap:</span>
+                                    <span class="bilingual-en">Presets:</span>
+                                </span>
+                                <button onclick="setTuningPreset(1.8, 0.15, 2.4)" class="px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-md font-semibold text-[11px] hover:bg-emerald-100">
+                                    <span class="bilingual-bm">Optimum (Ditala)</span>
+                                    <span class="bilingual-en">Optimum (Tuned)</span>
+                                </button>
+                                <button onclick="setTuningPreset(3.5, 0.0, 0.2)" class="px-2.5 py-1 bg-rose-50 text-rose-700 border border-rose-200 rounded-md font-semibold text-[11px] hover:bg-rose-100">
+                                    <span class="bilingual-bm">Kurang Redaman (Ayunan)</span>
+                                    <span class="bilingual-en">Under-Damped (Oscillating)</span>
+                                </button>
+                                <button onclick="setTuningPreset(0.8, 0.0, 4.5)" class="px-2.5 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-md font-semibold text-[11px] hover:bg-amber-100">
+                                    <span class="bilingual-bm">Lebih Redaman (Perlahan)</span>
+                                    <span class="bilingual-en">Over-Damped (Sluggish)</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Disturbance / Perturbation Injection -->
+                        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 text-white flex flex-col justify-between">
+                            <div class="flex justify-between items-center mb-1">
+                                <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-300">
+                                    <span class="bilingual-bm">Ujian Penolakan Gangguan Luaran</span>
+                                    <span class="bilingual-en"> / Disturbance Rejection Test</span>
+                                </h4>
+                                <span class="text-[10px] bg-slate-800 px-2 py-0.5 rounded text-slate-400">Impulse Force</span>
+                            </div>
+                            <p class="text-[11px] text-slate-400 mb-3">
+                                <span class="bilingual-bm">Simulasikan tolakan fizikal jari pada bebola untuk menguji kestabilan pemulihan pengawal PID.</span>
+                                <span class="bilingual-en">Simulate manual finger taps to observe how well your PID loop rejects perturbations.</span>
+                            </p>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button onclick="applyImpulse(-25)" class="py-2 px-3 bg-slate-800 hover:bg-slate-700 text-amber-300 rounded-lg text-xs font-semibold border border-slate-700 transition flex items-center justify-center space-x-1">
+                                    <span>👈 <span class="bilingual-bm">Tolak Kiri</span><span class="bilingual-en">Push Left</span></span>
+                                </button>
+                                <button onclick="applyImpulse(25)" class="py-2 px-3 bg-slate-800 hover:bg-slate-700 text-amber-300 rounded-lg text-xs font-semibold border border-slate-700 transition flex items-center justify-center space-x-1">
+                                    <span><span class="bilingual-bm">Tolak Kanan</span><span class="bilingual-en">Push Right</span> 👉</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB 3: PROJECT THEMES (BM/EN) ==================== -->
+        <section id="tab-projects" class="tab-content hidden space-y-6">
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-2">
+                    <div>
+                        <div class="inline-flex items-center space-x-2 bg-teal-50 text-teal-700 px-2.5 py-0.5 rounded-full text-xs font-semibold mb-1">
+                            <span class="bilingual-bm">Pilihan Tema Terbuka (Minggu 4 &amp; 7)</span>
+                            <span class="bilingual-en"> / Open-Ended Application Tracks (W4 &amp; W7)</span>
+                        </div>
+                        <h2 class="text-xl font-bold text-slate-900">
+                            <span class="bilingual-bm">5 Cadangan Tema Aplikasi Kejuruteraan</span>
+                            <span class="bilingual-en"> / 5 Recommended Project Application Themes</span>
+                        </h2>
+                        <p class="text-xs text-slate-500">
+                            <span class="bilingual-bm">Diselia oleh Ts. Dr. Hanani Abd Wahab. Kumpulan 5 pelajar boleh memilih atau menyesuaikan 1 daripada konsep kawalan ini untuk kertas cadangan Minggu 4 &amp; penilaian demonstrasi Minggu 7.</span>
+                            <span class="bilingual-en">Supervised by Ts. Dr. Hanani Abd Wahab. Student groups may select or adapt one of these concepts for the Week 4 proposal and Week 7 final demo evaluation.</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 5 Projects Card Grid -->
+                <div class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+
+                    <!-- Theme 1 -->
+                    <div class="bg-white rounded-xl border border-slate-200 hover:border-teal-400 hover:shadow-md transition-all p-5 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="w-8 h-8 rounded-lg bg-teal-100 text-teal-800 flex items-center justify-center font-bold text-xs">01</span>
+                                <span class="text-[11px] font-semibold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full">Trajectory Tracking</span>
+                            </div>
+                            <h3 class="font-bold text-slate-900 text-base">
+                                <span class="bilingual-bm">Penjejak Trajektori Multi-Setpoint Dinamik</span>
+                                <span class="bilingual-en">Dynamic Multi-Setpoint Trajectory Follower</span>
+                            </h3>
+                            <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+                                <span class="bilingual-bm">Sistem tidak sekadar mengimbang pada 1 titik pegun; ia menggerakkan bola secara automatik mengikut jadual koordinat (contohnya 12cm &rarr; 28cm &rarr; 20cm).</span>
+                                <span class="bilingual-en">The system stabilizes across dynamic target waypoints, smoothly moving the ball between scheduled locations with minimal derivative kick.</span>
+                            </p>
+                        </div>
+                        <button onclick="openProjectDetails(1)" class="mt-4 w-full py-2 bg-teal-50 hover:bg-teal-100 text-teal-800 font-semibold text-xs rounded-lg transition border border-teal-200">
+                            <span class="bilingual-bm">Lihat Blueprint &amp; Kod Pemula &rarr;</span>
+                            <span class="bilingual-en">View Blueprint &amp; Starter Code &rarr;</span>
+                        </button>
+                    </div>
+
+                    <!-- Theme 2 -->
+                    <div class="bg-white rounded-xl border border-slate-200 hover:border-teal-400 hover:shadow-md transition-all p-5 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="w-8 h-8 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-xs">02</span>
+                                <span class="text-[11px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">Industrial Testbed</span>
+                            </div>
+                            <h3 class="font-bold text-slate-900 text-base">
+                                <span class="bilingual-bm">Rig Penolakan Gangguan Aliran Udara / Angin</span>
+                                <span class="bilingual-en">Aerodynamic Wind Disturbance Rejection Rig</span>
+                            </h3>
+                            <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+                                <span class="bilingual-bm">Kipas DC 5V mengenakan daya tiupan berterusan terhadap bebola. Tindakan integral (Ki) membina kecondongan pengimbang bagi menghapuskan ralat.</span>
+                                <span class="bilingual-en">An external air stream displaces the ball, demonstrating how integral action (Ki) dynamically counters persistent unmodeled bias forces.</span>
+                            </p>
+                        </div>
+                        <button onclick="openProjectDetails(2)" class="mt-4 w-full py-2 bg-teal-50 hover:bg-teal-100 text-teal-800 font-semibold text-xs rounded-lg transition border border-teal-200">
+                            <span class="bilingual-bm">Lihat Blueprint &amp; Kod Pemula &rarr;</span>
+                            <span class="bilingual-en">View Blueprint &amp; Starter Code &rarr;</span>
+                        </button>
+                    </div>
+
+                    <!-- Theme 3 -->
+                    <div class="bg-white rounded-xl border border-slate-200 hover:border-teal-400 hover:shadow-md transition-all p-5 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs">03</span>
+                                <span class="text-[11px] font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full">IoT Telemetry</span>
+                            </div>
+                            <h3 class="font-bold text-slate-900 text-base">
+                                <span class="bilingual-bm">Papan Pemuka Telemetri & Kawalan IoT Masa-Nyata</span>
+                                <span class="bilingual-en">IoT Real-Time Control & Telemetry Dashboard</span>
+                            </h3>
+                            <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+                                <span class="bilingual-bm">Menstrim data jarak, usaha servo, dan ralat melalui WebSerial atau WiFi ke komputer untuk analisis graf tindak balas langkah secara langsung.</span>
+                                <span class="bilingual-en">Streams high-speed distance and actuator telemetry over WebSerial or WiFi, enabling live gain-tuning and transient parameter calculation.</span>
+                            </p>
+                        </div>
+                        <button onclick="openProjectDetails(3)" class="mt-4 w-full py-2 bg-teal-50 hover:bg-teal-100 text-teal-800 font-semibold text-xs rounded-lg transition border border-teal-200">
+                            <span class="bilingual-bm">Lihat Blueprint &amp; Kod Pemula &rarr;</span>
+                            <span class="bilingual-en">View Blueprint &amp; Starter Code &rarr;</span>
+                        </button>
+                    </div>
+
+                    <!-- Theme 4 -->
+                    <div class="bg-white rounded-xl border border-slate-200 hover:border-teal-400 hover:shadow-md transition-all p-5 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="w-8 h-8 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-xs">04</span>
+                                <span class="text-[11px] font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full">Adaptive Control</span>
+                            </div>
+                            <h3 class="font-bold text-slate-900 text-base">
+                                <span class="bilingual-bm">Pengawal Penjadualan Gandaan Adaptif Dwi-Zon</span>
+                                <span class="bilingual-en">Dual-Zone Adaptive Gain-Scheduled Controller</span>
+                            </h3>
+                            <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+                                <span class="bilingual-bm">Mengubah nilai gandaan Kp & Kd secara dinamik apabila bebola menghampiri zon sempadan hujung rasuk bagi mengelakkan bola terlajak keluar.</span>
+                                <span class="bilingual-en">Switches between fast center gains and aggressive edge-braking derivative gains to arrest high velocities near beam boundaries.</span>
+                            </p>
+                        </div>
+                        <button onclick="openProjectDetails(4)" class="mt-4 w-full py-2 bg-teal-50 hover:bg-teal-100 text-teal-800 font-semibold text-xs rounded-lg transition border border-teal-200">
+                            <span class="bilingual-bm">Lihat Blueprint &amp; Kod Pemula &rarr;</span>
+                            <span class="bilingual-en">View Blueprint &amp; Starter Code &rarr;</span>
+                        </button>
+                    </div>
+
+                    <!-- Theme 5 -->
+                    <div class="bg-white rounded-xl border border-slate-200 hover:border-teal-400 hover:shadow-md transition-all p-5 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="w-8 h-8 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center font-bold text-xs">05</span>
+                                <span class="text-[11px] font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full">Kinetic Control</span>
+                            </div>
+                            <h3 class="font-bold text-slate-900 text-base">
+                                <span class="bilingual-bm">Sistem Tangkapan Bebola & Penstabilan Pantas</span>
+                                <span class="bilingual-en">Ball Catch, Soft-Landing & Quick-Balance System</span>
+                            </h3>
+                            <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+                                <span class="bilingual-bm">Bebola dijatuhkan dari tanjakan luar. Mesin keadaan (FSM) mengesan impak ketibaan serta-merta dan mencondongkan rasuk untuk menyerap tenaga impuls.</span>
+                                <span class="bilingual-en">A ball introduced from a ramp is cushioned through instantaneous counter-tilt shock absorption before transitioning into fine PID balance.</span>
+                            </p>
+                        </div>
+                        <button onclick="openProjectDetails(5)" class="mt-4 w-full py-2 bg-teal-50 hover:bg-teal-100 text-teal-800 font-semibold text-xs rounded-lg transition border border-teal-200">
+                            <span class="bilingual-bm">Lihat Blueprint &amp; Kod Pemula &rarr;</span>
+                            <span class="bilingual-en">View Blueprint &amp; Starter Code &rarr;</span>
+                        </button>
+                    </div>
+
+                    <!-- Custom Proposal Idea Card -->
+                    <div class="bg-gradient-to-br from-slate-900 to-teal-950 rounded-xl p-5 text-white flex flex-col justify-between border border-slate-800">
+                        <div>
+                            <span class="text-xs font-semibold text-teal-300 uppercase tracking-wide">Autonomous Innovation</span>
+                            <h3 class="font-bold text-white text-base mt-1">
+                                <span class="bilingual-bm">Cadang Idea Kumpulan Sendiri</span>
+                                <span class="bilingual-en"> / Propose Custom Team Idea</span>
+                            </h3>
+                            <p class="text-xs text-slate-300 mt-2 leading-relaxed">
+                                <span class="bilingual-bm">Pasukan boleh mencadangkan variasi tersuai (contohnya plat bola 2-DOF, penyusun bola berasaskan konveyor, atau brek magnetik).</span>
+                                <span class="bilingual-en">Teams may propose original variants (such as 2-axis balancing plates or magnetic eddy-current braking).</span>
+                            </p>
+                            <div class="mt-4 p-3 bg-white/10 rounded-lg text-[11px] text-slate-200 space-y-1">
+                                <div>✓ <span class="bilingual-bm">Wajib guna sensor jarak HC-SR04</span><span class="bilingual-en">Must use HC-SR04 ultrasonic sensor</span></div>
+                                <div>✓ <span class="bilingual-bm">Wajib guna maklum balas algoritma PID</span><span class="bilingual-en">Must implement closed-loop PID control</span></div>
+                                <div>✓ <span class="bilingual-bm">Tertakluk kepada kelulusan Ts. Dr. Hanani Abd Wahab (W4)</span><span class="bilingual-en">Subject to Ts. Dr. Hanani Abd Wahab's approval (W4)</span></div>
+                            </div>
+                        </div>
+                        <button onclick="switchTab('rubric')" class="mt-4 w-full py-2 bg-white text-slate-900 hover:bg-slate-100 font-semibold text-xs rounded-lg transition">
+                            <span class="bilingual-bm">Semak Rubrik Penilaian (100%) &rarr;</span>
+                            <span class="bilingual-en">Check Grading Rubric (100%) &rarr;</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Blueprint Modal Popup -->
+            <div id="project-detail-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+                <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 shadow-2xl border border-slate-200">
+                    <div class="flex justify-between items-start pb-3 border-b border-slate-100">
+                        <div>
+                            <span id="modal-theme-id" class="text-xs font-semibold px-2 py-0.5 rounded bg-teal-100 text-teal-800">Theme</span>
+                            <h3 id="modal-title" class="text-lg font-bold text-slate-900 mt-1">Project Title</h3>
+                        </div>
+                        <button onclick="closeProjectDetails()" class="text-slate-400 hover:text-slate-600 text-xl font-bold p-1">&times;</button>
+                    </div>
+
+                    <div class="mt-4 space-y-4 text-xs text-slate-700">
+                        <div>
+                            <h4 class="font-bold text-slate-900 text-sm">
+                                <span class="bilingual-bm">Penerangan Sistem &amp; Teori Kawalan</span>
+                                <span class="bilingual-en"> / System Description &amp; Methodology</span>
+                            </h4>
+                            <p id="modal-description" class="mt-1 text-slate-600 leading-relaxed"></p>
+                        </div>
+
+                        <div>
+                            <h4 class="font-bold text-slate-900 text-sm">
+                                <span class="bilingual-bm">Carta Alir Logik Gelung Tertutup</span>
+                                <span class="bilingual-en"> / Closed-Loop Flowchart</span>
+                            </h4>
+                            <div id="modal-flowchart" class="p-3 bg-slate-50 rounded-lg border border-slate-200 font-mono text-[11px] text-teal-950 whitespace-pre-wrap"></div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <h4 class="font-bold text-slate-900 text-sm">
+                                    <span class="bilingual-bm">Contoh Kod Algoritma Arduino</span>
+                                    <span class="bilingual-en"> / Arduino Code Implementation</span>
+                                </h4>
+                                <button onclick="copyCodeSnippet()" class="text-[11px] text-teal-700 hover:text-teal-900 font-semibold flex items-center space-x-1">
+                                    <span>Salin Kod / Copy Code</span>
+                                </button>
+                            </div>
+                            <pre id="modal-code" class="p-3 bg-slate-900 text-slate-200 rounded-lg overflow-x-auto font-mono text-[11px]"></pre>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 pt-3 border-t border-slate-100 flex justify-end">
+                        <button onclick="closeProjectDetails()" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-semibold">Tutup / Close</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB 4: RUBRIC EVALUATOR (BM/EN) ==================== -->
+        <section id="tab-rubric" class="tab-content hidden space-y-6">
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                <!-- Header and Live Score Summary -->
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between pb-5 border-b border-slate-100 gap-4">
+                    <div>
+                        <div class="inline-flex items-center space-x-2 bg-teal-50 text-teal-800 px-2.5 py-0.5 rounded-full text-xs font-semibold mb-1">
+                            <span class="bilingual-bm">Rubrik Penilaian Rasmi OBE (100%)</span>
+                            <span class="bilingual-en"> / Official OBE Assessment Rubric (100%)</span>
+                        </div>
+                        <h2 class="text-xl font-bold text-slate-900">
+                            <span class="bilingual-bm">Penilai Rubrik &amp; Pengira Skor Akhir</span>
+                            <span class="bilingual-en"> / Interactive Rubric &amp; Final Score Evaluator</span>
+                        </h2>
+                        <p class="text-xs text-slate-500">
+                            <span class="bilingual-bm">Penyelaras: <strong>Ts. Dr. Hanani Abd Wahab</strong>. Panel penilai dan pelajar boleh menguji skor pencapaian bagi fungsi prototaip (35%), pembentangan/demonstrasi (35%), dan laporan akhir (30%).</span>
+                            <span class="bilingual-en">Coordinator: <strong>Ts. Dr. Hanani Abd Wahab</strong>. Evaluators and students can test assessment criteria across hardware performance, demo presentation, and report quality.</span>
+                        </p>
+                    </div>
+
+                    <!-- Total Score Display Card -->
+                    <div class="bg-gradient-to-r from-slate-900 to-teal-950 text-white px-5 py-3 rounded-xl flex items-center space-x-5 shadow-sm">
+                        <div>
+                            <span class="text-[10px] text-teal-300 font-semibold uppercase tracking-wider block">
+                                <span class="bilingual-bm">JUMLAH MARKAH</span>
+                                <span class="bilingual-en">TOTAL SCORE</span>
+                            </span>
+                            <span id="rubric-grand-total" class="text-2xl font-black tracking-tight text-white">85.0%</span>
+                        </div>
+                        <div class="h-8 w-px bg-slate-700"></div>
+                        <div>
+                            <span class="text-[10px] text-teal-300 font-semibold uppercase tracking-wider block">
+                                <span class="bilingual-bm">GRED PRESTASI</span>
+                                <span class="bilingual-en">GRADE</span>
+                            </span>
+                            <span id="rubric-grade-letter" class="text-xl font-bold text-emerald-400">A (Cemerlang)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rubric Sections -->
+                <div class="mt-6 space-y-8">
+                    <!-- Component 1: Prototype & Control Functionality (35%) -->
+                    <div class="border border-slate-200 rounded-xl overflow-hidden shadow-xs">
+                        <div class="bg-slate-100/80 px-4 py-3 border-b border-slate-200 flex justify-between items-center">
+                            <div>
+                                <h3 class="font-bold text-slate-900 text-sm">
+                                    <span class="bilingual-bm">1. Fungsi Prototaip &amp; Perkakasan</span>
+                                    <span class="bilingual-en"> / 1. Prototype &amp; Hardware Functionality</span>
+                                </h3>
+                                <p class="text-xs text-slate-500">
+                                    <span class="bilingual-bm">Pemberat: <strong>35%</strong> (3 Kriteria &times; 5 Markah maks)</span>
+                                    <span class="bilingual-en">Weightage: <strong>35%</strong> (3 Criteria &times; 5 Marks max)</span>
+                                </p>
+                            </div>
+                            <span id="subtotal-cat1" class="text-xs font-bold text-teal-800 bg-teal-50 px-2.5 py-1 rounded border border-teal-200">
+                                29.2 / 35.0%
+                            </span>
+                        </div>
+
+                        <div class="p-4 space-y-4 divide-y divide-slate-100">
+                            <!-- Criterion 1.1 -->
+                            <div class="pt-3 first:pt-0">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                    <div>
+                                        <h4 class="font-semibold text-slate-800 text-xs">
+                                            <span class="bilingual-bm">Kekukuhan Mekanikal &amp; Kinematik Servo</span>
+                                            <span class="bilingual-en"> / Hardware Rigidity &amp; Servo Kinematics</span>
+                                        </h4>
+                                        <p class="text-[11px] text-slate-500">
+                                            <span class="bilingual-bm">Kelancaran engsel rasuk, minimakan celah pautan (*backlash*), penjajaran tepat ultrasonik, bekalan kuasa 5V luar stabil.</span>
+                                            <span class="bilingual-en">Smooth beam pivot, backlash minimization, sonar alignment, external 5V power stability.</span>
+                                        </p>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                        <select id="score-c1-1" onchange="calculateRubricScores()" class="text-xs font-semibold bg-slate-50 border border-slate-300 rounded px-2 py-1 text-slate-800 max-w-[280px]">
+                                            <option value="5" selected>5 - Cemerlang / Excellent (Zero backlash, 5V isolated, neat)</option>
+                                            <option value="4">4 - Baik / Good (Minor horn play, stable mechanics)</option>
+                                            <option value="3">3 - Memuaskan / Satisfactory (Noticeable slop or friction)</option>
+                                            <option value="2">2 - Lemah / Fair (Jittering servo, loose wiring)</option>
+                                            <option value="1">1 - Sangat Lemah / Poor (Binding mechanical, brownout resets)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Criterion 1.2 -->
+                            <div class="pt-3">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                    <div>
+                                        <h4 class="font-semibold text-slate-800 text-xs">
+                                            <span class="bilingual-bm">Kualiti Gelung Kawalan PID</span>
+                                            <span class="bilingual-en"> / Closed-Loop PID Controller Quality</span>
+                                        </h4>
+                                        <p class="text-[11px] text-slate-500">
+                                            <span class="bilingual-bm">Struktur PID diskret betul, penapis hingar median ultrasonik, anti-windup clamp, masa pengenapan pantas (<span class="font-serif italic font-semibold">t<sub>s</sub> &lt; 3.0 s</span>).</span>
+                                            <span class="bilingual-en">Discrete PID math, noise filtering, anti-windup clamping, and quick settling (<span class="font-serif italic font-semibold">t<sub>s</sub> &lt; 3.0 s</span>).</span>
+                                        </p>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                        <select id="score-c1-2" onchange="calculateRubricScores()" class="text-xs font-semibold bg-slate-50 border border-slate-300 rounded px-2 py-1 text-slate-800 max-w-[280px]">
+                                            <option value="5">5 - Cemerlang / Excellent (Error &lt; 0.5cm, smooth damping)</option>
+                                            <option value="4" selected>4 - Sangat Baik / Very Good (Error &lt; 1cm, slight oscillation)</option>
+                                            <option value="3">3 - Memuaskan / Satisfactory (Slow settling &gt; 5s, overshoot)</option>
+                                            <option value="2">2 - Lemah / Fair (Under-damped, ball de-rails often)</option>
+                                            <option value="1">1 - Sangat Lemah / Poor (Open-loop bang-bang or unstable)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Criterion 1.3 -->
+                            <div class="pt-3">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                    <div>
+                                        <h4 class="font-semibold text-slate-800 text-xs">
+                                            <span class="bilingual-bm">Inovasi &amp; Relevansi Terbuka</span>
+                                            <span class="bilingual-en"> / Innovation &amp; Open-Ended Relevance</span>
+                                        </h4>
+                                        <p class="text-[11px] text-slate-500">
+                                            <span class="bilingual-bm">Ciri tambahan melangkaui pengimbangan asas (penjejakan trajektori, penolakan gangguan angin, IoT telemetri, adaptif).</span>
+                                            <span class="bilingual-en">Custom extensions beyond basic center balancing (trajectory, wind test, IoT, adaptive gains).</span>
+                                        </p>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                        <select id="score-c1-3" onchange="calculateRubricScores()" class="text-xs font-semibold bg-slate-50 border border-slate-300 rounded px-2 py-1 text-slate-800 max-w-[280px]">
+                                            <option value="5">5 - Cemerlang / Excellent (High innovation, seamless feature)</option>
+                                            <option value="4">4 - Baik / Good (Clear engineering enhancement)</option>
+                                            <option value="3" selected>3 - Memuaskan / Satisfactory (Meets minimum open-ended requirement)</option>
+                                            <option value="2">2 - Lemah / Fair (Superficial addition to standard tutorial)</option>
+                                            <option value="1">1 - Sangat Lemah / Poor (Zero originality)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Component 2: Presentation & Soft Skills (35%) -->
+                    <div class="border border-slate-200 rounded-xl overflow-hidden shadow-xs">
+                        <div class="bg-slate-100/80 px-4 py-3 border-b border-slate-200 flex justify-between items-center">
+                            <div>
+                                <h3 class="font-bold text-slate-900 text-sm">
+                                    <span class="bilingual-bm">2. Pembentangan, Demonstrasi &amp; Kemahiran Insaniah</span>
+                                    <span class="bilingual-en"> / 2. Presentation, Demonstration &amp; Soft Skills</span>
+                                </h3>
+                                <p class="text-xs text-slate-500">
+                                    <span class="bilingual-bm">Pemberat: <strong>35%</strong> (4 Kriteria &times; 5 Markah maks)</span>
+                                    <span class="bilingual-en">Weightage: <strong>35%</strong> (4 Criteria &times; 5 Marks max)</span>
+                                </p>
+                            </div>
+                            <span id="subtotal-cat2" class="text-xs font-bold text-teal-800 bg-teal-50 px-2.5 py-1 rounded border border-teal-200">
+                                29.8 / 35.0%
+                            </span>
+                        </div>
+
+                        <div class="p-4 space-y-4 divide-y divide-slate-100">
+                            <!-- Criterion 2.1 -->
+                            <div class="pt-3 first:pt-0">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                    <div>
+                                        <h4 class="font-semibold text-slate-800 text-xs">
+                                            <span class="bilingual-bm">Demonstrasi Langsung Prototaip</span>
+                                            <span class="bilingual-en"> / Live Prototype Demonstration</span>
+                                        </h4>
+                                        <p class="text-[11px] text-slate-500">
+                                            <span class="bilingual-bm">Pengimbangan titik sasaran dan ujian pemulihan tolakan jari secara langsung di hadapan panel penilai.</span>
+                                            <span class="bilingual-en">Live step response and manual disturbance recovery in front of evaluators.</span>
+                                        </p>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                        <select id="score-c2-1" onchange="calculateRubricScores()" class="text-xs font-semibold bg-slate-50 border border-slate-300 rounded px-2 py-1 text-slate-800 max-w-[280px]">
+                                            <option value="5" selected>5 - Cemerlang / Excellent (Flawless disturbance recovery)</option>
+                                            <option value="4">4 - Sangat Baik / Very Good (Functions well, 1 minor reset)</option>
+                                            <option value="3">3 - Memuaskan / Satisfactory (Balances under static condition only)</option>
+                                            <option value="2">2 - Lemah / Fair (Constant ball runaway / lost tracking)</option>
+                                            <option value="1">1 - Sangat Lemah / Poor (Fails to balance ball at all)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Criterion 2.2 -->
+                            <div class="pt-3">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                    <div>
+                                        <h4 class="font-semibold text-slate-800 text-xs">
+                                            <span class="bilingual-bm">Kemahiran Komunikasi (Penyampaian &amp; Bahasa)</span>
+                                            <span class="bilingual-en"> / Communication Skills</span>
+                                        </h4>
+                                        <p class="text-[11px] text-slate-500">
+                                            <span class="bilingual-bm">Slaid profesional, kefasihan istilah teori kawalan (kutub/sifar, redaman, fungsi pindah), kawalan masa (10–15 minit).</span>
+                                            <span class="bilingual-en">Professional slides, control theory vocabulary fluency, and 10–15 min time pacing.</span>
+                                        </p>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                        <select id="score-c2-2" onchange="calculateRubricScores()" class="text-xs font-semibold bg-slate-50 border border-slate-300 rounded px-2 py-1 text-slate-800 max-w-[280px]">
+                                            <option value="5">5 - Cemerlang / Excellent (Articulate, fluent, authoritative)</option>
+                                            <option value="4" selected>4 - Baik / Good (Clear delivery, well-structured)</option>
+                                            <option value="3">3 - Memuaskan / Satisfactory (Understandable but rushed or dry)</option>
+                                            <option value="2">2 - Lemah / Fair (Disorganized, confusing terminology)</option>
+                                            <option value="1">1 - Sangat Lemah / Poor (Incoherent delivery, severe time breach)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Criterion 2.3 -->
+                            <div class="pt-3">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                    <div>
+                                        <h4 class="font-semibold text-slate-800 text-xs">
+                                            <span class="bilingual-bm">Kerjasama Pasukan (Teamwork)</span>
+                                            <span class="bilingual-en"> / Teamwork &amp; Collaboration</span>
+                                        </h4>
+                                        <p class="text-[11px] text-slate-500">
+                                            <span class="bilingual-bm">Penyertaan seimbang semua 5 ahli pasukan semasa pembentangan dan persediaan perkakasan.</span>
+                                            <span class="bilingual-en">Balanced participation of all 5 team members during presentation and setup.</span>
+                                        </p>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                        <select id="score-c2-3" onchange="calculateRubricScores()" class="text-xs font-semibold bg-slate-50 border border-slate-300 rounded px-2 py-1 text-slate-800 max-w-[280px]">
+                                            <option value="5">5 - Cemerlang / Excellent (Perfect synchrony, all 5 members master)</option>
+                                            <option value="4" selected>4 - Baik / Good (Active contribution by all members)</option>
+                                            <option value="3">3 - Memuaskan / Satisfactory (Dominated by 2 speakers)</option>
+                                            <option value="2">2 - Lemah / Fair (Only 1 person explains technical PID concepts)</option>
+                                            <option value="1">1 - Sangat Lemah / Poor (Total lack of coordination)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Criterion 2.4 -->
+                            <div class="pt-3">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                    <div>
+                                        <h4 class="font-semibold text-slate-800 text-xs">
+                                            <span class="bilingual-bm">Pengetahuan Teknikal &amp; Pertahanan Q&amp;A</span>
+                                            <span class="bilingual-en"> / Technical Knowledge &amp; Q&amp;A Defense</span>
+                                        </h4>
+                                        <p class="text-[11px] text-slate-500">
+                                            <span class="bilingual-bm">Pemahaman mendalam tentang pemasaan ultrasonik, kitaran tugas servo PWM, formula diskret, hingar derivatif, dan rasional penalaan.</span>
+                                            <span class="bilingual-en">Deep comprehension of sonar acoustics, servo PWM duty cycles, discretization, and tuning logic.</span>
+                                        </p>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                        <select id="score-c2-4" onchange="calculateRubricScores()" class="text-xs font-semibold bg-slate-50 border border-slate-300 rounded px-2 py-1 text-slate-800 max-w-[280px]">
+                                            <option value="5">5 - Cemerlang / Excellent (Flawless defense of Kp/Ki/Kd gain selection)</option>
+                                            <option value="4" selected>4 - Baik / Good (Confident technical answers to panel queries)</option>
+                                            <option value="3">3 - Memuaskan / Satisfactory (Answered basics, struggled with math)</option>
+                                            <option value="2">2 - Lemah / Fair (Unable to explain servo jitter or sonar math)</option>
+                                            <option value="1">1 - Sangat Lemah / Poor (Unable to explain own firmware)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Component 3: Final Lab Report (30%) -->
+                    <div class="border border-slate-200 rounded-xl overflow-hidden shadow-xs">
+                        <div class="bg-slate-100/80 px-4 py-3 border-b border-slate-200 flex justify-between items-center">
+                            <div>
+                                <h3 class="font-bold text-slate-900 text-sm">
+                                    <span class="bilingual-bm">3. Laporan Makmal Akhir</span>
+                                    <span class="bilingual-en"> / 3. Final Lab Report</span>
+                                </h3>
+                                <p class="text-xs text-slate-500">
+                                    <span class="bilingual-bm">Pemberat: <strong>30%</strong> (3 Kriteria &times; 5 Markah maks)</span>
+                                    <span class="bilingual-en">Weightage: <strong>30%</strong> (3 Criteria &times; 5 Marks max)</span>
+                                </p>
+                            </div>
+                            <span id="subtotal-cat3" class="text-xs font-bold text-teal-800 bg-teal-50 px-2.5 py-1 rounded border border-teal-200">
+                                26.0 / 30.0%
+                            </span>
+                        </div>
+
+                        <div class="p-4 space-y-4 divide-y divide-slate-100">
+                            <!-- Criterion 3.1 -->
+                            <div class="pt-3 first:pt-0">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                    <div>
+                                        <h4 class="font-semibold text-slate-800 text-xs">
+                                            <span class="bilingual-bm">Pernyataan Masalah &amp; Pemodelan Matematik Fizik</span>
+                                            <span class="bilingual-en"> / Problem Statement &amp; Physics Modeling</span>
+                                        </h4>
+                                        <p class="text-[11px] text-slate-500">
+                                            <span class="bilingual-bm">Terbitan persamaan gerakan (<span class="font-mono font-semibold">a = (5/7)·g·sin(θ)</span>), model Laplace / fungsi pindah, dan carta alir kawalan ISO.</span>
+                                            <span class="bilingual-en">Derivation of equation of motion (<span class="font-mono font-semibold">a = (5/7)·g·sin(θ)</span>), transfer function, and ISO logic flowchart.</span>
+                                        </p>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                        <select id="score-c3-1" onchange="calculateRubricScores()" class="text-xs font-semibold bg-slate-50 border border-slate-300 rounded px-2 py-1 text-slate-800 max-w-[280px]">
+                                            <option value="5">5 - Cemerlang / Excellent (Rigorous physics derivation, clear model)</option>
+                                            <option value="4" selected>4 - Baik / Good (Well-defined equations, complete flowchart)</option>
+                                            <option value="3">3 - Memuaskan / Satisfactory (Basic model, minor logical gaps)</option>
+                                            <option value="2">2 - Lemah / Fair (Hand-drawn, incomplete physics equations)</option>
+                                            <option value="1">1 - Sangat Lemah / Poor (Missing mathematical model)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Criterion 3.2 -->
+                            <div class="pt-3">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                    <div>
+                                        <h4 class="font-semibold text-slate-800 text-xs">
+                                            <span class="bilingual-bm">Skematik Litar &amp; Penjelasan Kod Sumber</span>
+                                            <span class="bilingual-en"> / Circuit Schematics &amp; Firmware Breakdown</span>
+                                        </h4>
+                                        <p class="text-[11px] text-slate-500">
+                                            <span class="bilingual-bm">Rajah skematik Fritzing/Proteus dengan pengasingan kuasa servo 5V dan kod C++ beranotasi lengkap.</span>
+                                            <span class="bilingual-en">Fritzing/Proteus EDA schematic with 5V external isolation and thoroughly commented C++ code.</span>
+                                        </p>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                        <select id="score-c3-2" onchange="calculateRubricScores()" class="text-xs font-semibold bg-slate-50 border border-slate-300 rounded px-2 py-1 text-slate-800 max-w-[280px]">
+                                            <option value="5">5 - Cemerlang / Excellent (Professional EDA, anti-windup breakdown)</option>
+                                            <option value="4" selected>4 - Baik / Good (Clean schematic, well-annotated functions)</option>
+                                            <option value="3">3 - Memuaskan / Satisfactory (Basic wiring sketch, code lacks details)</option>
+                                            <option value="2">2 - Lemah / Fair (Illegible diagram, code without comments)</option>
+                                            <option value="1">1 - Sangat Lemah / Poor (Missing schematics, raw unformatted dump)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Criterion 3.3 -->
+                            <div class="pt-3">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                    <div>
+                                        <h4 class="font-semibold text-slate-800 text-xs">
+                                            <span class="bilingual-bm">Graf Tindak Balas Langkah &amp; Analisis Ralat</span>
+                                            <span class="bilingual-en"> / Step-Response Results &amp; Error Analysis</span>
+                                        </h4>
+                                        <p class="text-[11px] text-slate-500">
+                                            <span class="bilingual-bm">Graf Serial Plotter menunjukkan tindak balas langkah, masa pengenapan (<span class="font-serif italic font-semibold">t<sub>r</sub>, t<sub>s</sub>, M<sub>p</sub></span>), dan perbincangan penapis hingar.</span>
+                                            <span class="bilingual-en">Serial Plotter response curves, settling time measurements (<span class="font-serif italic font-semibold">t<sub>r</sub>, t<sub>s</sub>, M<sub>p</sub></span>), and noise budget.</span>
+                                        </p>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                        <select id="score-c3-3" onchange="calculateRubricScores()" class="text-xs font-semibold bg-slate-50 border border-slate-300 rounded px-2 py-1 text-slate-800 max-w-[280px]">
+                                            <option value="5">5 - Cemerlang / Excellent (Quantitative transient plots, clear budget)</option>
+                                            <option value="4">4 - Baik / Good (Clear step plots, logical tuning discussion)</option>
+                                            <option value="3" selected>3 - Memuaskan / Satisfactory (Minimal graphs, generic conclusions)</option>
+                                            <option value="2">2 - Lemah / Fair (Sparse records, superficial discussion)</option>
+                                            <option value="1">1 - Sangat Lemah / Poor (No experimental curves presented)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Export / Print Evaluation Sheet -->
+                <div class="mt-6 flex flex-wrap justify-between items-center pt-4 border-t border-slate-200 gap-3">
+                    <span class="text-xs text-slate-500">
+                        <span class="bilingual-bm">Format Pembelajaran Berasaskan Hasil (OBE) • Pensyarah: Ts. Dr. Hanani Abd Wahab.</span>
+                        <span class="bilingual-en">Outcome-Based Education (OBE) format • Instructor: Ts. Dr. Hanani Abd Wahab.</span>
+                    </span>
+                    <button onclick="printEvaluationSummary()" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold flex items-center space-x-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                        <span>
+                            <span class="bilingual-bm">Cetak Ringkasan Penilaian</span>
+                            <span class="bilingual-en">Print Evaluation Summary</span>
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB 5: WIRING & MASTER CODE (BM/EN) ==================== -->
+        <section id="tab-resources" class="tab-content hidden space-y-6">
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-6">
+                <div>
+                    <div class="inline-flex items-center space-x-2 bg-slate-100 text-slate-700 px-2.5 py-0.5 rounded-full text-xs font-semibold mb-1">
+                        <span class="bilingual-bm">Rujukan Pendawaian &amp; Kod C++</span>
+                        <span class="bilingual-en"> / Wiring Reference &amp; C++ Code</span>
+                    </div>
+                    <h2 class="text-xl font-bold text-slate-900">
+                        <span class="bilingual-bm">Panduan Pendawaian &amp; Skematik Litar</span>
+                        <span class="bilingual-en"> / Pinout Interfacing &amp; Circuit Guide</span>
+                    </h2>
+                    <p class="text-xs text-slate-500">
+                        <span class="bilingual-bm">Sambungan pin piawai untuk Arduino Uno/Nano + Sensor HC-SR04 + Servo Motor + Pengasingan Kuasa Luaran 5V. Disediakan oleh Ts. Dr. Hanani Abd Wahab.</span>
+                        <span class="bilingual-en">Standard schematic pin connections for Arduino Uno/Nano + HC-SR04 + Servo Motor + External Power Isolation. Prepared by Ts. Dr. Hanani Abd Wahab.</span>
+                    </p>
+                </div>
+
+                <!-- Safety Warning Card -->
+                <div class="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start space-x-3">
+                    <span class="text-xl">⚠️</span>
+                    <div>
+                        <span class="font-bold block text-sm">
+                            <span class="bilingual-bm">Peringatan Keselamatan Penting: Kuasa Luaran 5V Berasingan untuk Servo!</span>
+                            <span class="bilingual-en">Critical Safety Warning: External 5V Power for Servo!</span>
+                        </span>
+                        <p class="mt-0.5 leading-relaxed">
+                            <span class="bilingual-bm">Motor servo menarik arus puncak setinggi <strong>500mA–1000mA</strong> ketika menggerakkan rasuk. <strong>DILARANG</strong> menyambung kuasa servo terus dari pin 5V Arduino kerana ini menyebabkan mikropengawal mengalami *brownout*, reset berulang, dan bacaan sensor ultrasonik menjadi rawak. Gunakan penyesuai kuasa 5V 2A dengan <strong>Ground (GND) sepunya</strong>.</span>
+                            <span class="bilingual-en">A loaded servo draws up to <strong>500mA–1000mA</strong> peak current. <strong>DO NOT</strong> power the servo directly from the Arduino 5V pin as this causes voltage brownouts, MCU resets, and ultrasonic data corruption. Use an external 5V 2A power rail with <strong>shared common GND</strong>.</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Pinout Table -->
+                <div class="overflow-x-auto rounded-xl border border-slate-200">
+                    <table class="w-full text-left text-xs text-slate-700">
+                        <thead class="bg-slate-100 text-slate-900 uppercase font-semibold text-[11px] border-b border-slate-200">
+                            <tr>
+                                <th class="p-3">
+                                    <span class="bilingual-bm">Komponen</span>
+                                    <span class="bilingual-en">Component</span>
+                                </th>
+                                <th class="p-3">
+                                    <span class="bilingual-bm">Pin Komponen</span>
+                                    <span class="bilingual-en">Component Pin</span>
+                                </th>
+                                <th class="p-3">
+                                    <span class="bilingual-bm">Pin Arduino</span>
+                                    <span class="bilingual-en">Arduino Pin</span>
+                                </th>
+                                <th class="p-3">
+                                    <span class="bilingual-bm">Panduan Elektrikal</span>
+                                    <span class="bilingual-en">Electrical Guidance</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 font-mono text-[11px]">
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-bold text-teal-800 font-sans">HC-SR04 Sensor</td>
+                                <td class="p-3">VCC</td>
+                                <td class="p-3 font-semibold text-emerald-600">5V (Arduino)</td>
+                                <td class="p-3 font-sans text-slate-600">
+                                    <span class="bilingual-bm">Bekalan 5V stabil rendah hingar (&approx;15mA).</span>
+                                    <span class="bilingual-en">Stable low-noise 5V rail (&approx;15mA).</span>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-bold text-teal-800 font-sans">HC-SR04 Sensor</td>
+                                <td class="p-3">GND</td>
+                                <td class="p-3 font-semibold text-slate-700">GND</td>
+                                <td class="p-3 font-sans text-slate-600">
+                                    <span class="bilingual-bm">Rujukan bumi sepunya (Common ground).</span>
+                                    <span class="bilingual-en">Common ground reference line.</span>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-bold text-teal-800 font-sans">HC-SR04 Sensor</td>
+                                <td class="p-3">Trig</td>
+                                <td class="p-3 font-semibold text-blue-600">Digital Pin 9</td>
+                                <td class="p-3 font-sans text-slate-600">
+                                    <span class="bilingual-bm">Denyutan picu 10µs HIGH.</span>
+                                    <span class="bilingual-en">10µs HIGH trigger pulse burst.</span>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-bold text-teal-800 font-sans">HC-SR04 Sensor</td>
+                                <td class="p-3">Echo</td>
+                                <td class="p-3 font-semibold text-blue-600">Digital Pin 10</td>
+                                <td class="p-3 font-sans text-slate-600">
+                                    <span class="bilingual-bm">Menerima denyutan pantulan gema akustik melalui <code class="bg-slate-100 px-1">pulseIn()</code>.</span>
+                                    <span class="bilingual-en">Receives ultrasonic echo pulse duration via <code class="bg-slate-100 px-1">pulseIn()</code>.</span>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-bold text-purple-800 font-sans">Servo Motor</td>
+                                <td class="p-3 font-sans">
+                                    <span class="bilingual-bm">Signal (Oren / Kuning)</span>
+                                    <span class="bilingual-en">Signal (Orange / Yellow)</span>
+                                </td>
+                                <td class="p-3 font-semibold text-blue-600">Digital Pin 6 (PWM)</td>
+                                <td class="p-3 font-sans text-slate-600">
+                                    <span class="bilingual-bm">Isyarat kawalan servo PWM pustaka <code class="bg-slate-100 px-1">&lt;Servo.h&gt;</code>.</span>
+                                    <span class="bilingual-en">PWM servo position control signal via <code class="bg-slate-100 px-1">&lt;Servo.h&gt;</code>.</span>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-bold text-purple-800 font-sans">Servo Motor</td>
+                                <td class="p-3 font-sans">
+                                    <span class="bilingual-bm">Power (Merah)</span>
+                                    <span class="bilingual-en">Power (Red)</span>
+                                </td>
+                                <td class="p-3 font-semibold text-rose-600 font-sans">
+                                    <span class="bilingual-bm">Bekalan Kuasa Luar +5V</span>
+                                    <span class="bilingual-en">External +5V Power Rail</span>
+                                </td>
+                                <td class="p-3 font-sans text-slate-600">
+                                    <span class="bilingual-bm"><strong>Bekalan luar 5V sahaja!</strong> Pasang kapasitor 100µF bagi mengelakkan gangguan voltan.</span>
+                                    <span class="bilingual-en"><strong>External 5V supply only!</strong> Add 100µF bypass capacitor to absorb current spikes.</span>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-bold text-purple-800 font-sans">Servo Motor</td>
+                                <td class="p-3 font-sans">
+                                    <span class="bilingual-bm">GND (Coklat / Hitam)</span>
+                                    <span class="bilingual-en">GND (Brown / Black)</span>
+                                </td>
+                                <td class="p-3 font-semibold text-slate-700 font-sans">
+                                    <span class="bilingual-bm">GND Sepunya</span>
+                                    <span class="bilingual-en">Common Ground (GND)</span>
+                                </td>
+                                <td class="p-3 font-sans text-slate-600">
+                                    <span class="bilingual-bm">Sambungkan GND bekalan luar bersama-sama GND Arduino.</span>
+                                    <span class="bilingual-en">Tie external power supply GND together with Arduino GND.</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Arduino Master PID Code Template -->
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="font-bold text-slate-900 text-sm">
+                            <span class="bilingual-bm">Kod Sumber Induk PID Arduino C++</span>
+                            <span class="bilingual-en"> / Master PID Control Firmware (Arduino C++)</span>
+                        </h3>
+                        <button onclick="copyMasterPIDCode()" class="px-3 py-1 bg-teal-50 hover:bg-teal-100 text-teal-800 rounded-md font-semibold text-xs border border-teal-200">
+                            <span class="bilingual-bm">Salin Templat Kod Penuh</span>
+                            <span class="bilingual-en"> / Copy Full Template</span>
+                        </button>
+                    </div>
+                    <pre id="master-pid-code-block" class="p-4 bg-slate-900 text-slate-200 rounded-xl overflow-x-auto font-mono text-xs leading-relaxed max-h-96">
+/*
+ * BDA37601: Ball and Beam Balancing Control
+ * Pensyarah / Pembangun Modul: Ts. Dr. Hanani Abd Wahab
+ * HC-SR04 Ultrasonic Distance Sensor + SG90/MG996R Servo Motor
+ * Algorithm: Discrete PID Control with Median Noise Filter & Anti-Windup
+ */
+
+#include &lt;Servo.h&gt;
+
+// --- Hardware Pin Definitions ---
+const int PIN_TRIG = 9;
+const int PIN_ECHO = 10;
+const int PIN_SERVO = 6;
+
+Servo beamServo;
+
+// --- Mechanical Calibration Parameters ---
+const int SERVO_HORIZONTAL = 95;  // Servo angle when beam is perfectly level (θ₀)
+const int SERVO_MIN = 65;         // Max downward tilt limit (-30 deg)
+const int SERVO_MAX = 125;        // Max upward tilt limit (+30 deg)
+
+// --- Control Parameters ---
+double setpoint = 20.0;           // Desired ball position (cm from sensor)
+double distance = 20.0;           // Current filtered ball position (cm)
+
+// PID Controller Gains (Tune via experimental Ziegler-Nichols method)
+double Kp = 1.80;                 // Proportional Gain
+double Ki = 0.15;                 // Integral Gain
+double Kd = 2.40;                 // Derivative Gain
+
+// State Tracking
+double error = 0.0;
+double previousError = 0.0;
+double integral = 0.0;
+double derivative = 0.0;
+unsigned long lastTime = 0;
+const unsigned long SAMPLE_TIME_MS = 40; // 25 Hz loop frequency
+
+// Helper Function: Measure Raw Ultrasonic Distance with 3-Point Median Filter
+double readUltrasonicDistance() {
+  double readings[3];
+  for (int i = 0; i &lt; 3; i++) {
+    digitalWrite(PIN_TRIG, LOW);
+    delayMicroseconds(2);
+    digitalWrite(PIN_TRIG, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(PIN_TRIG, LOW);
+
+    long duration = pulseIn(PIN_ECHO, HIGH, 30000); // 30ms timeout (~5m)
+    if (duration == 0) {
+      readings[i] = distance; // Fallback to last valid reading if echo drops
+    } else {
+      readings[i] = (duration * 0.0343) / 2.0;
+    }
+    delay(5);
+  }
+
+  // 3-value median selection
+  if ((readings[0] &lt;= readings[1] &amp;&amp; readings[1] &lt;= readings[2]) || (readings[2] &lt;= readings[1] &amp;&amp; readings[1] &lt;= readings[0]))
+    return readings[1];
+  else if ((readings[1] &lt;= readings[0] &amp;&amp; readings[0] &lt;= readings[2]) || (readings[2] &lt;= readings[0] &amp;&amp; readings[0] &lt;= readings[1]))
+    return readings[0];
+  else
+    return readings[2];
+}
+
+void setup() {
+  Serial.begin(115200);
+
+  pinMode(PIN_TRIG, OUTPUT);
+  pinMode(PIN_ECHO, INPUT);
+
+  beamServo.attach(PIN_SERVO);
+  beamServo.write(SERVO_HORIZONTAL); // Initialize beam level
+  delay(1000);
+
+  Serial.println("Ball &amp; Beam PID Controller Initialized.");
+  Serial.println("Developed for BDA37601 by Ts. Dr. Hanani Abd Wahab");
+  Serial.println("Format: Setpoint, CurrentDistance, ServoAngle");
+  lastTime = millis();
+}
+
+void loop() {
+  unsigned long now = millis();
+  unsigned long timeChange = (now - lastTime);
+
+  if (timeChange &gt;= SAMPLE_TIME_MS) {
+    // 1. Acquire Filtered Ball Position
+    distance = readUltrasonicDistance();
+
+    // Bound check: Ignore out-of-track reflection spikes
+    if (distance &lt; 3.0) distance = 3.0;
+    if (distance &gt; 40.0) distance = 40.0;
+
+    // 2. Compute PID Terms
+    double dt = (double)timeChange / 1000.0; // convert to seconds
+    error = setpoint - distance;
+
+    // Integral with Anti-Windup Clamping
+    integral += (error * dt);
+    integral = constrain(integral, -25.0, 25.0);
+
+    // Derivative on Error
+    derivative = (error - previousError) / dt;
+
+    // Total PID Output (Control Effort)
+    double output = (Kp * error) + (Ki * integral) + (Kd * derivative);
+
+    // 3. Map PID Output to Servo Angle
+    int servoAngle = SERVO_HORIZONTAL - (int)output;
+    servoAngle = constrain(servoAngle, SERVO_MIN, SERVO_MAX);
+
+    beamServo.write(servoAngle);
+
+    // 4. Telemetry Output for Serial Plotter
+    Serial.print("Setpoint:"); Serial.print(setpoint);
+    Serial.print(" Distance:"); Serial.print(distance);
+    Serial.print(" Angle:"); Serial.println(servoAngle);
+
+    // Update state for next cycle
+    previousError = error;
+    lastTime = now;
+  }
+}
+                    </pre>
+                </div>
+
+                <!-- Reference & Video Tutorials Grid -->
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <h3 class="font-bold text-slate-900 text-sm">
+                                <span class="bilingual-bm">Video Tutorial & Panduan Projek Rujukan</span>
+                                <span class="bilingual-en"> / Video Tutorials & Benchmark Resources</span>
+                            </h3>
+                            <p class="text-xs text-slate-500">
+                                <span class="bilingual-bm">Tonton demonstrasi pembinaan perkakasan dan penalaan PID langkah demi langkah.</span>
+                                <span class="bilingual-en">Watch step-by-step hardware construction and PID tuning demonstrations.</span>
+                            </p>
+                        </div>
+                        <span class="text-[11px] bg-red-100 text-red-700 px-2.5 py-0.5 rounded-full font-semibold">YouTube Learning</span>
+                    </div>
+
+                    <!-- 3 Symmetrical Reference Cards (Matching Attached Screenshot Design) -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Card 1: New Ball Balance Project Arduino PID Video (SriTu Hobby) -->
+                        <div class="bg-rose-50/70 p-4 rounded-xl border border-rose-100 flex flex-col justify-between gap-3 shadow-xs hover:border-rose-300 transition">
+                            <div class="flex items-start space-x-3">
+                                <div class="w-9 h-9 rounded-lg bg-rose-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-900 text-xs">
+                                        <span class="bilingual-bm">Tutorial Video: Sistem Kawalan PID Ball Balance</span>
+                                        <span class="bilingual-en">Video Tutorial: Ball Balance Project with Arduino PID</span>
+                                    </h4>
+                                    <p class="text-[11px] text-slate-600 mt-1 leading-relaxed">
+                                        <span class="bilingual-bm">Panduan lengkap pemasangan perkakasan, pendawaian servo &amp; HC-SR04, serta ujian penalaan PID masa nyata.</span>
+                                        <span class="bilingual-en">Complete step-by-step mechanical assembly, servo &amp; HC-SR04 wiring, and live closed-loop PID testing.</span>
+                                    </p>
+                                </div>
+                            </div>
+                            <a href="https://www.youtube.com/watch?v=YOPTksabdbM" target="_blank" rel="noopener noreferrer" class="mt-1 w-full py-2 px-3 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-semibold flex items-center justify-center space-x-1.5 transition shadow-xs">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M10 15l5-3-5-3v6z"/></svg>
+                                <span>
+                                    <span class="bilingual-bm">Tonton Video di YouTube</span>
+                                    <span class="bilingual-en">Watch Video on YouTube</span>
+                                </span>
+                                <svg class="w-3.5 h-3.5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                            </a>
+                        </div>
+
+                        <!-- Card 2: YouTube Tutorial Link: HC-SR04 Ultrasonic Sensor -->
+                        <div class="bg-rose-50/70 p-4 rounded-xl border border-rose-100 flex flex-col justify-between gap-3 shadow-xs hover:border-rose-300 transition">
+                            <div class="flex items-start space-x-3">
+                                <div class="w-9 h-9 rounded-lg bg-rose-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-900 text-xs">
+                                        <span class="bilingual-bm">Tutorial Video: Sensor Ultrasonik HC-SR04 &amp; Arduino</span>
+                                        <span class="bilingual-en">Video Tutorial: HC-SR04 Ultrasonic Sensor &amp; Arduino</span>
+                                    </h4>
+                                    <p class="text-[11px] text-slate-600 mt-1 leading-relaxed">
+                                        <span class="bilingual-bm">Panduan terperinci prinsip operasi sonar akustik, pendawaian pin Trig/Echo, dan ujian kod Arduino.</span>
+                                        <span class="bilingual-en">Comprehensive guide covering acoustic sonar operation, Trig/Echo pinout wiring, and Arduino code testing.</span>
+                                    </p>
+                                </div>
+                            </div>
+                            <a href="https://www.youtube.com/watch?v=QmyByyhiiwk" target="_blank" rel="noopener noreferrer" class="mt-1 w-full py-2 px-3 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-semibold flex items-center justify-center space-x-1.5 transition shadow-xs">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M10 15l5-3-5-3v6z"/></svg>
+                                <span>
+                                    <span class="bilingual-bm">Tonton Video di YouTube</span>
+                                    <span class="bilingual-en">Watch Video on YouTube</span>
+                                </span>
+                                <svg class="w-3.5 h-3.5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                            </a>
+                        </div>
+
+                        <!-- Card 3: Reference Project Hub Link -->
+                        <div class="bg-teal-50/70 p-4 rounded-xl border border-teal-100 flex flex-col justify-between gap-3 shadow-xs hover:border-teal-300 transition">
+                            <div class="flex items-start space-x-3">
+                                <div class="w-9 h-9 rounded-lg bg-teal-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-900 text-xs">
+                                        <span class="bilingual-bm">Rujukan Projek: Arduino Project Hub</span>
+                                        <span class="bilingual-en">Project Benchmark: Arduino Project Hub</span>
+                                    </h4>
+                                    <p class="text-[11px] text-slate-600 mt-1 leading-relaxed">
+                                        <span class="bilingual-bm">Penanda aras sistem imbangan Ball and Beam PID (Nihal Suri, Arduino Project Hub).</span>
+                                        <span class="bilingual-en">Self-Balancing Ball and Beam using PID Control benchmark (Nihal Suri, Arduino Project Hub).</span>
+                                    </p>
+                                </div>
+                            </div>
+                            <a href="https://projecthub.arduino.cc/nihalsuri/self-balancing-ball-and-beam-using-pid-control-24357c" target="_blank" rel="noopener noreferrer" class="mt-1 w-full py-2 px-3 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold flex items-center justify-center space-x-1.5 transition shadow-xs">
+                                <span>
+                                    <span class="bilingual-bm">Buka Tutorial Project Hub</span>
+                                    <span class="bilingual-en">Open Project Hub Tutorial</span>
+                                </span>
+                                <svg class="w-3.5 h-3.5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 mt-10 py-6 text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="flex items-center space-x-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-teal-600"></span>
+                <span class="font-semibold text-slate-800">BDA37601 Open-Ended Control Laboratory</span>
+                <span>•</span>
+                <span>Sistem Keseimbangan Bebola & Rasuk</span>
+            </div>
+            <div class="text-slate-600 font-medium text-center sm:text-right">
+                <span>Pembangun & Pensyarah: </span>
+                <span class="font-bold text-teal-800">Ts. Dr. Hanani Abd Wahab</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white text-xs px-4 py-2.5 rounded-xl shadow-xl transform translate-y-16 opacity-0 transition-all duration-300 z-50 flex items-center space-x-2 pointer-events-none">
+        <span id="toast-icon">✓</span>
+        <span id="toast-msg">Notifikasi</span>
+    </div>
+
+    <script>
+        // Language switcher state
+        let currentLanguage = 'dwi'; // 'dwi', 'bm', 'en'
+
+        function setLanguage(lang) {
+            currentLanguage = lang;
+            const body = document.body;
+            body.classList.remove('lang-dwi', 'lang-bm', 'lang-en');
+            body.classList.add('lang-' + lang);
+
+            // Update button styles
+            const btnDwi = document.getElementById('btn-lang-dwi');
+            const btnBm = document.getElementById('btn-lang-bm');
+            const btnEn = document.getElementById('btn-lang-en');
+
+            [btnDwi, btnBm, btnEn].forEach(b => {
+                b.className = 'px-2.5 py-1 rounded-md transition text-slate-600 hover:text-slate-900';
+            });
+
+            if (lang === 'dwi') {
+                btnDwi.className = 'px-2.5 py-1 rounded-md transition bg-white text-teal-800 shadow-xs font-bold';
+                showToast("Mod paparan Dwi Bahasa (BM/EN) diaktifkan.");
+            } else if (lang === 'bm') {
+                btnBm.className = 'px-2.5 py-1 rounded-md transition bg-white text-teal-800 shadow-xs font-bold';
+                showToast("Paparan Bahasa Melayu diaktifkan.");
+            } else if (lang === 'en') {
+                btnEn.className = 'px-2.5 py-1 rounded-md transition bg-white text-teal-800 shadow-xs font-bold';
+                showToast("English display mode activated.");
+            }
+        }
+
+        // ==========================================
+        // BALL & BEAM SIMULATION & PID ENGINE
+        // ==========================================
+        const BEAM_LENGTH_CM = 40.0;
+        const BALL_RADIUS_CM = 1.8;
+        const G_ACCEL = 981.0;          // cm/s^2
+        const INERTIA_FACTOR = 5.0 / 7.0; // a = (5/7) * g * sin(theta)
+
+        let ballPos = 12.0;             // distance in cm
+        let ballVel = 0.0;             // cm/s
+        let beamAngleRad = 0.0;
+        let currentSetpoint = 20.0;     // setpoint in cm
+
+        let simKp = 1.80;
+        let simKi = 0.15;
+        let simKd = 2.40;
+        let simIntegral = 0.0;
+        let prevSimError = 0.0;
+        let lastSimTimestamp = performance.now();
+
+        const scopeHistoryMax = 120;
+        const posHistory = [];
+        const setpointHistory = [];
+
+        // Web Audio Synthesizer
+        let audioContext = null;
+        let servoOscillator = null;
+        let servoGain = null;
+        let isAudioEnabled = false;
+
+        function initAudio() {
+            if (!audioContext) {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                audioContext = new AudioCtx();
+            }
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+        }
+
+        function toggleVirtualAudio() {
+            initAudio();
+            isAudioEnabled = !isAudioEnabled;
+            const btn = document.getElementById('btn-audio-toggle');
+            const icon = document.getElementById('audio-icon');
+
+            if (isAudioEnabled) {
+                icon.textContent = '🔊';
+                btn.classList.remove('bg-slate-100', 'text-slate-700');
+                btn.classList.add('bg-teal-600', 'text-white', 'border-teal-600');
+                showToast(currentLanguage === 'en' ? "Servo audio feedback enabled!" : "Maklum balas audio servo diaktifkan!");
+            } else {
+                stopServoAudio();
+                icon.textContent = '🔇';
+                btn.classList.add('bg-slate-100', 'text-slate-700');
+                btn.classList.remove('bg-teal-600', 'text-white', 'border-teal-600');
+                showToast(currentLanguage === 'en' ? "Audio muted." : "Audio dimatikan.");
+            }
+        }
+
+        function playServoTone(pitchFreq, intensity) {
+            if (!isAudioEnabled || !audioContext) return;
+            try {
+                if (!servoOscillator) {
+                    servoOscillator = audioContext.createOscillator();
+                    servoGain = audioContext.createGain();
+                    servoOscillator.type = 'triangle';
+                    servoOscillator.frequency.setValueAtTime(220, audioContext.currentTime);
+                    servoGain.gain.setValueAtTime(0.01, audioContext.currentTime);
+                    servoOscillator.connect(servoGain);
+                    servoGain.connect(audioContext.destination);
+                    servoOscillator.start();
+                }
+                const freq = 160 + Math.abs(pitchFreq) * 15;
+                servoOscillator.frequency.setTargetAtTime(freq, audioContext.currentTime, 0.05);
+                const vol = Math.min(0.08, Math.abs(intensity) * 0.04);
+                servoGain.gain.setTargetAtTime(vol, audioContext.currentTime, 0.05);
+            } catch(e) {}
+        }
+
+        function stopServoAudio() {
+            if (servoOscillator) {
+                try {
+                    servoOscillator.stop();
+                    servoOscillator.disconnect();
+                } catch(e) {}
+                servoOscillator = null;
+                servoGain = null;
+            }
+        }
+
+        function applyImpulse(velocityDelta) {
+            ballVel += velocityDelta;
+            const msg = currentLanguage === 'en' 
+                ? `Disturbance applied! Velocity: ${ballVel.toFixed(1)} cm/s`
+                : `Gangguan dikenakan! Halaju bola: ${ballVel.toFixed(1)} cm/s`;
+            showToast(msg);
+        }
+
+        function updateSetpointFromSlider(val) {
+            currentSetpoint = parseFloat(val);
+            document.getElementById('label-setpoint').textContent = currentSetpoint.toFixed(1) + ' cm';
+        }
+
+        function setTargetPreset(val) {
+            document.getElementById('slider-setpoint').value = val;
+            updateSetpointFromSlider(val);
+        }
+
+        function updateGains() {
+            simKp = parseFloat(document.getElementById('slider-kp').value);
+            simKi = parseFloat(document.getElementById('slider-ki').value);
+            simKd = parseFloat(document.getElementById('slider-kd').value);
+
+            document.getElementById('label-kp').textContent = simKp.toFixed(2);
+            document.getElementById('label-ki').textContent = simKi.toFixed(2);
+            document.getElementById('label-kd').textContent = simKd.toFixed(2);
+        }
+
+        function setTuningPreset(p, i, d) {
+            document.getElementById('slider-kp').value = p;
+            document.getElementById('slider-ki').value = i;
+            document.getElementById('slider-kd').value = d;
+            updateGains();
+            showToast(`Gains: Kp=${p}, Ki=${i}, Kd=${d}`);
+        }
+
+        function resetSimToCenter() {
+            ballPos = 12.0;
+            ballVel = 0.0;
+            beamAngleRad = 0.0;
+            simIntegral = 0.0;
+            prevSimError = 0.0;
+            setTargetPreset(20.0);
+            setTuningPreset(1.80, 0.15, 2.40);
+            showToast(currentLanguage === 'en' ? "Reset to balanced center." : "Sistem diset semula ke tengah.");
+        }
+
+        // Physics Simulation Loop
+        function simPhysicsLoop(timestamp) {
+            const dtSec = Math.min(0.05, (timestamp - lastSimTimestamp) / 1000.0);
+            lastSimTimestamp = timestamp;
+
+            // 1. PID Algorithm Execution
+            const error = currentSetpoint - ballPos;
+
+            simIntegral += error * dtSec;
+            simIntegral = Math.max(-20.0, Math.min(20.0, simIntegral));
+
+            const derivative = (error - prevSimError) / Math.max(0.001, dtSec);
+            prevSimError = error;
+
+            const controlEffortDeg = (simKp * error) + (simKi * simIntegral) + (simKd * derivative);
+            const clampedAngleDeg = Math.max(-18.0, Math.min(18.0, controlEffortDeg));
+
+            // Servo dynamic low-pass filter
+            const targetAngleRad = clampedAngleDeg * (Math.PI / 180.0);
+            beamAngleRad += (targetAngleRad - beamAngleRad) * Math.min(1.0, dtSec * 16.0);
+
+            // 2. Physics Equations of Motion
+            const ballAccel = INERTIA_FACTOR * G_ACCEL * Math.sin(beamAngleRad);
+            ballVel += ballAccel * dtSec;
+            ballVel *= 0.992; // rolling friction
+            ballPos += ballVel * dtSec;
+
+            // Boundary bumpers
+            const MIN_POS = 3.0;
+            const MAX_POS = 37.0;
+
+            if (ballPos <= MIN_POS) {
+                ballPos = MIN_POS;
+                ballVel = -ballVel * 0.3;
+            } else if (ballPos >= MAX_POS) {
+                ballPos = MAX_POS;
+                ballVel = -ballVel * 0.3;
+            }
+
+            playServoTone(clampedAngleDeg, ballVel);
+
+            // 3. Update Telemetry Display
+            const angleDegDisplay = beamAngleRad * (180.0 / Math.PI);
+            document.getElementById('tele-setpoint').textContent = currentSetpoint.toFixed(1) + ' cm';
+            document.getElementById('tele-pos').textContent = ballPos.toFixed(1) + ' cm';
+            document.getElementById('tele-error').textContent = error.toFixed(1) + ' cm';
+            document.getElementById('tele-angle').textContent = angleDegDisplay.toFixed(1) + '°';
+
+            const badge = document.getElementById('stability-badge');
+            if (Math.abs(error) < 0.6 && Math.abs(ballVel) < 1.5) {
+                badge.className = 'px-2.5 py-0.5 rounded-full font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs';
+                badge.textContent = currentLanguage === 'en' ? 'STABLE (Error < 0.6 cm)' : 'STABIL (Ralat < 0.6 cm)';
+            } else if (Math.abs(error) < 3.0) {
+                badge.className = 'px-2.5 py-0.5 rounded-full font-semibold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-xs';
+                badge.textContent = currentLanguage === 'en' ? 'CONVERGING...' : 'MENDEKATI SASARAN...';
+            } else {
+                badge.className = 'px-2.5 py-0.5 rounded-full font-semibold bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs';
+                badge.textContent = currentLanguage === 'en' ? 'TRANSIENT / HIGH ERROR' : 'RALAT TINGGI / TRANSIEN';
+            }
+
+            posHistory.push(ballPos);
+            setpointHistory.push(currentSetpoint);
+            if (posHistory.length > scopeHistoryMax) posHistory.shift();
+            if (setpointHistory.length > scopeHistoryMax) setpointHistory.shift();
+
+            renderSimCanvas();
+            renderScopeCanvas();
+
+            requestAnimationFrame(simPhysicsLoop);
+        }
+
+        // Render 2D Canvas
+        function renderSimCanvas() {
+            const canvas = document.getElementById('simCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Background Grid
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 1;
+            for (let x = 0; x < w; x += 40) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, h);
+                ctx.stroke();
+            }
+            for (let y = 0; y < h; y += 40) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(w, y);
+                ctx.stroke();
+            }
+
+            const pivotX = w / 2;
+            const pivotY = h / 2 + 30;
+            const beamPixelLength = w * 0.78;
+
+            // Fulcrum Base
+            ctx.fillStyle = '#334155';
+            ctx.beginPath();
+            ctx.moveTo(pivotX - 22, pivotY + 45);
+            ctx.lineTo(pivotX + 22, pivotY + 45);
+            ctx.lineTo(pivotX + 10, pivotY);
+            ctx.lineTo(pivotX - 10, pivotY);
+            ctx.closePath();
+            ctx.fill();
+            ctx.strokeStyle = '#64748b';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Servo Motor Housing
+            const servoBaseX = pivotX - beamPixelLength * 0.40;
+            const servoBaseY = pivotY + 45;
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(servoBaseX - 16, servoBaseY - 30, 32, 30);
+            ctx.strokeStyle = '#06b6d4';
+            ctx.strokeRect(servoBaseX - 16, servoBaseY - 30, 32, 30);
+
+            // Beam Transform
+            ctx.save();
+            ctx.translate(pivotX, pivotY);
+            ctx.rotate(beamAngleRad);
+
+            // Beam Track
+            ctx.fillStyle = '#0f172a';
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.roundRect(-beamPixelLength / 2, -6, beamPixelLength, 12, [4]);
+            ctx.fill();
+            ctx.stroke();
+
+            // Right Stopper
+            ctx.fillStyle = '#ef4444';
+            ctx.fillRect(beamPixelLength / 2 - 6, -18, 6, 24);
+
+            // HC-SR04 Housing (Left)
+            const sensorX = -beamPixelLength / 2;
+            ctx.fillStyle = '#0284c7';
+            ctx.fillRect(sensorX - 2, -22, 14, 28);
+            ctx.fillStyle = '#cbd5e1';
+            ctx.beginPath();
+            ctx.arc(sensorX + 5, -14, 5, 0, Math.PI * 2);
+            ctx.arc(sensorX + 5, -2, 5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#0f172a';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            // Sonar Ping Waves
+            const ballPixelDist = (ballPos / BEAM_LENGTH_CM) * beamPixelLength;
+            const ballX = sensorX + ballPixelDist;
+
+            ctx.strokeStyle = 'rgba(6, 182, 212, 0.4)';
+            ctx.lineWidth = 1.5;
+            const waveCount = 3;
+            const timePhase = (performance.now() / 150) % 1;
+            for (let i = 0; i < waveCount; i++) {
+                const waveProg = (timePhase + i / waveCount) % 1;
+                const waveX = sensorX + 10 + waveProg * (ballPixelDist - 22);
+                if (waveX < ballX - 4) {
+                    ctx.beginPath();
+                    ctx.arc(waveX, -8, 8 + waveProg * 12, -Math.PI / 3, Math.PI / 3);
+                    ctx.stroke();
+                }
+            }
+
+            // Target Setpoint Marker
+            const setpointPixelDist = (currentSetpoint / BEAM_LENGTH_CM) * beamPixelLength;
+            const setpointX = sensorX + setpointPixelDist;
+
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(setpointX, -28);
+            ctx.lineTo(setpointX, 16);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.fillStyle = '#10b981';
+            ctx.beginPath();
+            ctx.moveTo(setpointX, -28);
+            ctx.lineTo(setpointX - 5, -36);
+            ctx.lineTo(setpointX + 5, -36);
+            ctx.closePath();
+            ctx.fill();
+
+            // Rolling Ball
+            ctx.save();
+            ctx.translate(ballX, -16);
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+            ctx.beginPath();
+            ctx.ellipse(0, 10, 10, 3, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            const ballGradient = ctx.createRadialGradient(-3, -3, 2, 0, 0, 14);
+            ballGradient.addColorStop(0, '#ffffff');
+            ballGradient.addColorStop(0.4, '#f8fafc');
+            ballGradient.addColorStop(0.8, '#cbd5e1');
+            ballGradient.addColorStop(1, '#94a3b8');
+
+            ctx.fillStyle = ballGradient;
+            ctx.beginPath();
+            ctx.arc(0, 0, 12, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#64748b';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+
+            const ballRotation = (ballPos / (2 * Math.PI * BALL_RADIUS_CM)) * Math.PI * 2;
+            ctx.strokeStyle = '#0284c7';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(Math.cos(ballRotation) * 10, Math.sin(ballRotation) * 10);
+            ctx.stroke();
+            ctx.restore();
+
+            ctx.restore();
+
+            // Pivot Center Pin
+            ctx.fillStyle = '#38bdf8';
+            ctx.beginPath();
+            ctx.arc(pivotX, pivotY, 5, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Render Scope Canvas
+        function renderScopeCanvas() {
+            const canvas = document.getElementById('scopeCanvas');
+            if (!canvas || posHistory.length < 2) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+
+            ctx.clearRect(0, 0, w, h);
+
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(0, h / 2);
+            ctx.lineTo(w, h / 2);
+            ctx.stroke();
+
+            const mapY = (cm) => h - (cm / BEAM_LENGTH_CM) * h;
+
+            // Setpoint Line (Green)
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([3, 3]);
+            ctx.beginPath();
+            for (let i = 0; i < setpointHistory.length; i++) {
+                const x = (i / (scopeHistoryMax - 1)) * w;
+                const y = mapY(setpointHistory[i]);
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Ball Position Line (Cyan)
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let i = 0; i < posHistory.length; i++) {
+                const x = (i / (scopeHistoryMax - 1)) * w;
+                const y = mapY(posHistory[i]);
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+        }
+
+        // Navigation
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            const target = document.getElementById('tab-' + tabId);
+            if (target) target.classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.className = 'nav-btn px-3 py-1.5 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100';
+            });
+            const activeBtn = document.getElementById('btn-tab-' + tabId);
+            if (activeBtn) {
+                activeBtn.className = 'nav-btn px-3 py-1.5 text-xs font-semibold rounded-lg text-teal-800 bg-teal-50 border border-teal-200';
+            }
+
+            if (tabId !== 'simulator') {
+                stopServoAudio();
+            }
+        }
+
+        function toggleMobileNav() {
+            const menu = document.getElementById('mobile-nav');
+            menu.classList.toggle('hidden');
+        }
+
+        function jumpToWeek(weekCode) {
+            const cards = document.querySelectorAll('.week-card');
+            cards.forEach(card => {
+                if (weekCode === 'all' || card.getAttribute('data-week') === weekCode) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+        }
+
+        // Project Blueprints data (Bilingual)
+        const projectBlueprints = {
+            1: {
+                theme_bm: "Tema 1: Penjejakan Trajektori",
+                theme_en: "Theme 1: Trajectory Tracking",
+                title_bm: "Penjejak Trajektori Multi-Setpoint Dinamik",
+                title_en: "Dynamic Multi-Setpoint Trajectory Follower",
+                desc_bm: "Sistem menjejaki koordinat trajektori yang berubah mengikut masa (contohnya berselang-seli antara 12cm, 20cm, dan 30cm setiap 6 saat). Memerlukan peredam terbitan (derivative) yang teguh bagi mengelakkan lonjakan servo semasa pertukaran sasaran langkah.",
+                desc_en: "The system tracks time-varying trajectory coordinates (e.g. alternating between 12cm, 20cm, and 30cm every 6 seconds). Requires robust derivative damping to suppress sudden actuator kick during step changes.",
+                flow_bm: "Mula -> Baca Jarak Ultrasonik -> Tentukan Sasaran r(t) mengikut pemasa millis()\n-> Ralat e = r(t) - y\n-> Algoritma PID -> Kawal Sudut Servo\n-> Ralat < 0.5cm selama 2s? -> Gerak ke sasaran seterusnya\n-> Ulang pada 25 Hz",
+                flow_en: "Start -> Read Ultrasonic Distance -> Determine Setpoint r(t) via millis() schedule\n-> Error e = r(t) - y\n-> PID Algorithm -> Command Servo Horn\n-> Error < 0.5cm for 2s? -> Advance to next waypoint\n-> Loop at 25 Hz",
+                code: `// Dynamic Waypoint Trajectory Code
+const double waypoints[] = {12.0, 28.0, 18.0, 32.0};
+int currentWaypointIdx = 0;
+unsigned long stepTimer = 0;
+
+void updateTrajectory() {
+  if (millis() - stepTimer > 6000) { // change waypoint every 6s
+    currentWaypointIdx = (currentWaypointIdx + 1) % 4;
+    setpoint = waypoints[currentWaypointIdx];
+    stepTimer = millis();
+    Serial.print("Next Waypoint Setpoint: ");
+    Serial.println(setpoint);
+  }
+}`
+            },
+            2: {
+                theme_bm: "Tema 2: Ujian Industri",
+                theme_en: "Theme 2: Industrial Testbed",
+                title_bm: "Rig Penolakan Gangguan Aliran Udara / Angin",
+                title_en: "Aerodynamic Wind Disturbance Rejection Rig",
+                desc_bm: "Kipas DC 5V mengenakan daya tiupan angin terus terhadap bebola. Komponen kamiran (Ki) membina kecondongan pembalas bagi mengekalkan kedudukan bebola, membuktikan peranan Ki dalam menolak ralat keadaan mantap akibat daya luaran yang tidak dimodelkan.",
+                desc_en: "A 5V DC fan applies a continuous air stream to the ball. Integral action (Ki) builds up counter-inclination torque to maintain position, proving the role of Ki in rejecting unmodeled external bias forces.",
+                flow_bm: "Mula -> Kipas diaktifkan (Daya tiupan F_wind)\n-> Bola teranjak -> Ralat membesar\n-> Tindakan P cuba memulihkan -> Tindakan I mengumpul sudut kecondongan pembalas\n-> Kestabilan tercapai dengan rasuk condong sedikit melawan angin\n-> Amaran berbunyi jika bola tersasar melebihi had selamat.",
+                flow_en: "Start -> Fan activated (Wind force F_wind)\n-> Ball displaced -> Error rises\n-> Proportional action counters -> Integral action integrates counter-tilt angle\n-> Steady balance achieved with slight upward tilt into wind\n-> Warning alarm if ball exceeds safety boundaries.",
+                code: `// Wind Disturbance Counter-Bias Monitor
+if (abs(error) > 5.0) {
+  // Excessive wind displacement warning
+  tone(PIN_BUZZER, 1800, 50); // Warning chirp
+}
+// Anti-windup clamp accommodates the persistent tilt angle
+integral = constrain(integral, -30.0, 30.0);`
+            },
+            3: {
+                theme_bm: "Tema 3: Telemetri IoT",
+                theme_en: "Theme 3: IoT Telemetry",
+                title_bm: "Papan Pemuka Telemetri & Kawalan IoT Masa-Nyata",
+                title_en: "IoT Real-Time Control & Telemetry Dashboard",
+                desc_bm: "Menstrim data telemetri berfrekuensi tinggi melalui WebSerial API atau WiFi (ESP32/NodeMCU). Membolehkan pengguna menala gandaan Kp, Ki, Kd secara langsung dari pelayar web tanpa perlu memuat naik semula perisian tegar Arduino.",
+                desc_en: "Streams high-frequency distance and actuator telemetry over WebSerial API or WiFi. Enables engineers to tune Kp, Ki, and Kd live from the web browser without re-flashing Arduino firmware.",
+                flow_bm: "Mula -> Baca Jarak Ultrasonik -> Laksana PID\n-> Format JSON: {\"t\":millis(), \"pos\":dist, \"sp\":setpoint, \"deg\":servoAngle}\n-> Strim ke Serial Monitor (115200 baud)\n-> Terima arahan talaan: 'P=2.1', 'I=0.2', 'D=2.8'\n-> Kemas kini pemboleh ubah secara langsung dalam RAM.",
+                flow_en: "Start -> Read Ultrasonic Distance -> Execute PID\n-> Stream telemetry: {\"t\":millis(), \"pos\":dist, \"sp\":setpoint, \"deg\":servoAngle}\n-> Transmit to Serial (115200 baud)\n-> Parse incoming gain commands: 'P=2.1', 'I=0.2', 'D=2.8'\n-> Update gains on the fly in microcontroller RAM.",
+                code: `// Serial Telemetry & Remote Command Parser
+if (Serial.available() > 0) {
+  char cmd = Serial.read();
+  if (cmd == 'P') Kp = Serial.parseFloat();
+  else if (cmd == 'I') Ki = Serial.parseFloat();
+  else if (cmd == 'D') Kd = Serial.parseFloat();
+  else if (cmd == 'S') setpoint = Serial.parseFloat();
+}
+// Telemetry packet
+Serial.print(millis()); Serial.print(",");
+Serial.print(distance); Serial.print(",");
+Serial.print(setpoint); Serial.print(",");
+Serial.println(servoAngle);`
+            },
+            4: {
+                theme_bm: "Tema 4: Kawalan Adaptif",
+                theme_en: "Theme 4: Adaptive Control",
+                title_bm: "Pengawal Penjadualan Gandaan Adaptif Dwi-Zon",
+                title_en: "Dual-Zone Adaptive Gain-Scheduled Controller",
+                desc_bm: "Di zon tengah rasuk, pengawal menggunakan gandaan seimbang untuk tindak balas pantas. Apabila bebola berada di sempadan hujung (<8cm atau >32cm), pengawal beralih ke mod brek redaman tinggi (Kd tinggi) bagi menghalang bola daripada terlontar keluar.",
+                desc_en: "At beam center, standard balanced gains maintain fast response. When the ball enters boundary zones (<8cm or >32cm), the controller engages heavy derivative braking damping (high Kd) to prevent runaways.",
+                flow_bm: "Mula -> Baca Kedudukan & Halaju Bola\n-> Di Zon Selamat Tengah (12cm - 28cm)?\n   YA -> Gunakan Gandaan Normal (Kp=1.8, Kd=2.4)\n   TIDAK (Hampir Hujung) -> Gunakan Gandaan Brek (Kp=0.9, Kd=5.5)\n-> Laksana PID -> Hantar ke Servo",
+                flow_en: "Start -> Sample Position & Velocity\n-> In Safe Center Zone (12cm - 28cm)?\n   YES -> Apply Nominal Tuning (Kp=1.8, Kd=2.4)\n   NO (Near Rails) -> Apply Edge-Braking Tuning (Kp=0.9, Kd=5.5)\n-> Compute PID -> Actuate Servo",
+                code: `// Gain Scheduling Logic
+double effectiveKp = Kp;
+double effectiveKd = Kd;
+
+// Boundary Protection Zone (<8cm or >32cm)
+if (distance < 8.0 || distance > 32.0) {
+  effectiveKp = Kp * 0.6; // reduce proportional aggressiveness
+  effectiveKd = Kd * 2.2; // heavy derivative braking damping
+}
+
+double output = (effectiveKp * error) + (Ki * integral) + (effectiveKd * derivative);`
+            },
+            5: {
+                theme_bm: "Tema 5: Kawalan Kinetik",
+                theme_en: "Theme 5: Kinetic Control",
+                title_bm: "Sistem Tangkapan Bebola & Penstabilan Pantas",
+                title_en: "Ball Catch, Soft-Landing & Quick-Balance System",
+                desc_bm: "Bebola dijatuhkan dari tanjakan luar. Mesin keadaan (FSM) mengesan impak ketibaan bebola berdasarkan kadar perubahan jarak drastik, mencondongkan rasuk untuk menyerap tenaga kinetik, dan seterusnya menstabilkannya pada titik 20cm dalam masa kurang 2 saat.",
+                desc_en: "A rolling ball enters from an external ramp. A finite state machine (FSM) senses ball entry via high rate-of-change, performs a counter-tilt cushion to absorb kinetic shock, then transitions smoothly into PID balance.",
+                flow_bm: "KEADAAN 0: Menunggu (Rasuk condong ke atas +8 deg)\n-> Lonjakan jarak dikesan (Bola memasuki trek)?\n-> KEADAAN 1: Serapan impak (condong balas -12 deg selama 250ms)\n-> KEADAAN 2: Beralih ke gelung tertutup PID penuh\n-> Ralat < 0.5cm selama 1.5s? -> KEADAAN 3: Kunci Stabil",
+                flow_en: "STATE 0: Idle Entry Gate (Tilt +8 deg upward)\n-> Distance delta detected (Ball enters track)?\n-> STATE 1: Shock absorption (Reverse tilt -12 deg for 250ms)\n-> STATE 2: Handover to closed-loop PID\n-> Error < 0.5cm for 1.5s? -> STATE 3: Locked in balance",
+                code: `// Catch & Soft-Landing Finite State Machine
+static int catchState = 0;
+
+if (catchState == 0 && distance < 35.0) {
+  // Ball entry detected
+  catchState = 1;
+  beamServo.write(SERVO_HORIZONTAL - 15); // counter-tilt to absorb impact
+  delay(200);
+} else if (catchState == 1) {
+  // Handover to PID loop
+  catchState = 2;
+}`
+            }
+        };
+
+        function openProjectDetails(id) {
+            const data = projectBlueprints[id];
+            if (!data) return;
+            const isEn = currentLanguage === 'en';
+            document.getElementById('modal-theme-id').textContent = isEn ? data.theme_en : data.theme_bm;
+            document.getElementById('modal-title').textContent = isEn ? data.title_en : data.title_bm;
+            document.getElementById('modal-description').textContent = isEn ? data.desc_en : data.desc_bm;
+            document.getElementById('modal-flowchart').textContent = isEn ? data.flow_en : data.flow_bm;
+            document.getElementById('modal-code').textContent = data.code;
+            document.getElementById('project-detail-modal').classList.remove('hidden');
+        }
+
+        function closeProjectDetails() {
+            document.getElementById('project-detail-modal').classList.add('hidden');
+        }
+
+        // Rubric Calculation
+        function calculateRubricScores() {
+            const c1_1 = parseFloat(document.getElementById('score-c1-1').value);
+            const c1_2 = parseFloat(document.getElementById('score-c1-2').value);
+            const c1_3 = parseFloat(document.getElementById('score-c1-3').value);
+            const sumCat1 = c1_1 + c1_2 + c1_3;
+            const weightedCat1 = (sumCat1 / 15.0) * 35.0;
+            document.getElementById('subtotal-cat1').textContent = weightedCat1.toFixed(1) + ' / 35.0%';
+
+            const c2_1 = parseFloat(document.getElementById('score-c2-1').value);
+            const c2_2 = parseFloat(document.getElementById('score-c2-2').value);
+            const c2_3 = parseFloat(document.getElementById('score-c2-3').value);
+            const c2_4 = parseFloat(document.getElementById('score-c2-4').value);
+            const sumCat2 = c2_1 + c2_2 + c2_3 + c2_4;
+            const weightedCat2 = (sumCat2 / 20.0) * 35.0;
+            document.getElementById('subtotal-cat2').textContent = weightedCat2.toFixed(1) + ' / 35.0%';
+
+            const c3_1 = parseFloat(document.getElementById('score-c3-1').value);
+            const c3_2 = parseFloat(document.getElementById('score-c3-2').value);
+            const c3_3 = parseFloat(document.getElementById('score-c3-3').value);
+            const sumCat3 = c3_1 + c3_2 + c3_3;
+            const weightedCat3 = (sumCat3 / 15.0) * 30.0;
+            document.getElementById('subtotal-cat3').textContent = weightedCat3.toFixed(1) + ' / 30.0%';
+
+            const grandTotal = weightedCat1 + weightedCat2 + weightedCat3;
+            document.getElementById('rubric-grand-total').textContent = grandTotal.toFixed(1) + '%';
+
+            const gradeLetter = document.getElementById('rubric-grade-letter');
+            if (grandTotal >= 80) {
+                gradeLetter.textContent = currentLanguage === 'en' ? 'A (Distinction)' : 'A (Cemerlang)';
+                gradeLetter.className = 'text-xl font-bold text-emerald-400';
+            } else if (grandTotal >= 75) {
+                gradeLetter.textContent = currentLanguage === 'en' ? 'A- (Very Good)' : 'A- (Sangat Baik)';
+                gradeLetter.className = 'text-xl font-bold text-emerald-300';
+            } else if (grandTotal >= 70) {
+                gradeLetter.textContent = currentLanguage === 'en' ? 'B+ (Good)' : 'B+ (Kepujian)';
+                gradeLetter.className = 'text-xl font-bold text-cyan-300';
+            } else if (grandTotal >= 65) {
+                gradeLetter.textContent = currentLanguage === 'en' ? 'B (Satisfactory)' : 'B (Memuaskan)';
+                gradeLetter.className = 'text-xl font-bold text-amber-300';
+            } else if (grandTotal >= 50) {
+                gradeLetter.textContent = currentLanguage === 'en' ? 'C (Pass)' : 'C (Lulus)';
+                gradeLetter.className = 'text-xl font-bold text-amber-500';
+            } else {
+                gradeLetter.textContent = currentLanguage === 'en' ? 'F (Fail)' : 'F (Gagal)';
+                gradeLetter.className = 'text-xl font-bold text-rose-400';
+            }
+        }
+
+        function printEvaluationSummary() {
+            window.print();
+        }
+
+        function copyCodeSnippet() {
+            const code = document.getElementById('modal-code').innerText;
+            copyTextToClipboard(code, currentLanguage === 'en' ? "Starter code copied!" : "Kod pemula disalin!");
+        }
+
+        function copyMasterPIDCode() {
+            const code = document.getElementById('master-pid-code-block').innerText;
+            copyTextToClipboard(code, currentLanguage === 'en' ? "Master Arduino PID code copied!" : "Kod induk PID Arduino disalin!");
+        }
+
+        function copyTextToClipboard(text, successMsg) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.opacity = "0";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showToast(successMsg);
+            } catch (err) {
+                console.error("Copy failed", err);
+            }
+            document.body.removeChild(textArea);
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').textContent = msg;
+            toast.classList.remove('translate-y-16', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-16', 'opacity-0');
+            }, 2500);
+        }
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', () => {
+            calculateRubricScores();
+            setLanguage('dwi'); // Default to bilingual BM/EN mode
+
+            const canvas = document.getElementById('simCanvas');
+            if (canvas) {
+                canvas.addEventListener('click', (e) => {
+                    const rect = canvas.getBoundingClientRect();
+                    const clickX = e.clientX - rect.left;
+                    const w = rect.width;
+                    const normalizedX = (clickX / w);
+                    const newPos = 5.0 + normalizedX * 30.0;
+                    ballPos = Math.max(4.0, Math.min(36.0, newPos));
+                    ballVel = 0.0;
+                    showToast(currentLanguage === 'en' ? `Ball nudged to ${ballPos.toFixed(1)} cm` : `Bebola dialih ke ${ballPos.toFixed(1)} cm`);
+                });
+            }
+
+            requestAnimationFrame(simPhysicsLoop);
+        });
+    </script>
+</body>
+</html>
