@@ -1,0 +1,2230 @@
+<!DOCTYPE html>
+<html lang="ms" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BDA37601 Open-Ended Lab Portal (7 Minggu / 7 Weeks)</title>
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar {
+            width: 7px;
+            height: 7px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .preserve-3d {
+            transform-style: preserve-3d;
+        }
+        .transition-transform-smooth {
+            transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .glow-green {
+            box-shadow: 0 0 18px rgba(34, 197, 94, 0.7);
+        }
+        .glow-red {
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.8);
+        }
+        .glow-yellow {
+            box-shadow: 0 0 18px rgba(234, 179, 8, 0.7);
+        }
+        @media print {
+            header, nav, #btn-audio-toggle, #week-selector-container, .no-print {
+                display: none !important;
+            }
+            body {
+                background: white !important;
+                color: black !important;
+            }
+            .tab-content {
+                display: block !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Branding -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-700 to-violet-600 flex items-center justify-center text-white shadow-md shadow-indigo-200 shrink-0">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="font-extrabold text-lg text-slate-900 leading-tight">BDA37601 OpenLab</span>
+                            <span class="text-[11px] bg-indigo-100 text-indigo-700 font-bold px-2 py-0.5 rounded-full border border-indigo-200 hidden xs:inline-block">7 MINGGU / 7 WEEKS</span>
+                        </div>
+                        <p class="text-xs text-slate-500 hidden sm:block">
+                            <span data-i18n="header-subtitle">Sistem Terbuka MPU6050 & Kawalan Penggerak</span> • <span class="font-semibold text-indigo-700">Ts. Dr. Hanani Abd Wahab</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Nav Tabs Desktop -->
+                <nav class="hidden lg:flex space-x-1">
+                    <button onclick="switchTab('schedule')" id="btn-tab-schedule" class="nav-btn px-3 py-2 text-xs font-semibold rounded-lg text-indigo-600 bg-indigo-50 border border-indigo-200 transition">
+                        <span data-i18n="nav-schedule">Jadual Kerja (7M)</span>
+                    </button>
+                    <button onclick="switchTab('simulator')" id="btn-tab-simulator" class="nav-btn px-3 py-2 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">
+                        <span data-i18n="nav-simulator">Simulator 3D</span>
+                    </button>
+                    <button onclick="switchTab('projects')" id="btn-tab-projects" class="nav-btn px-3 py-2 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">
+                        <span data-i18n="nav-themes">5 Tema Projek</span>
+                    </button>
+                    <button onclick="switchTab('rubric')" id="btn-tab-rubric" class="nav-btn px-3 py-2 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">
+                        <span data-i18n="nav-rubric">Rubrik Pemarkahan (100%)</span>
+                    </button>
+                    <button onclick="switchTab('resources')" id="btn-tab-resources" class="nav-btn px-3 py-2 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">
+                        <span data-i18n="nav-wiring">Litar & Rujukan Kod</span>
+                    </button>
+                </nav>
+
+                <!-- Language Toggle & Mobile Hamburger -->
+                <div class="flex items-center space-x-2">
+                    <!-- Bilingual Switcher Toggle -->
+                    <div class="inline-flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-bold">
+                        <button id="lang-btn-bm" onclick="setLanguage('bm')" class="px-2.5 py-1 rounded-lg transition bg-white text-indigo-700 shadow-xs">
+                            🇲🇾 BM
+                        </button>
+                        <button id="lang-btn-en" onclick="setLanguage('en')" class="px-2.5 py-1 rounded-lg transition text-slate-500 hover:text-slate-900">
+                            🇬🇧 EN
+                        </button>
+                    </div>
+
+                    <!-- Mobile Menu Button -->
+                    <div class="flex lg:hidden">
+                        <button onclick="toggleMobileNav()" aria-label="Menu" class="p-2 rounded-lg text-slate-600 hover:bg-slate-100 focus:outline-none">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Menu -->
+        <div id="mobile-nav" class="hidden lg:hidden border-t border-slate-200 bg-white px-4 pt-2 pb-3 space-y-1">
+            <button onclick="switchTab('schedule'); toggleMobileNav();" class="block w-full text-left px-3 py-2 text-sm font-medium rounded-md text-slate-700 hover:bg-indigo-50 hover:text-indigo-600">
+                📅 <span data-i18n="nav-schedule">Jadual Kerja (7 Minggu)</span>
+            </button>
+            <button onclick="switchTab('simulator'); toggleMobileNav();" class="block w-full text-left px-3 py-2 text-sm font-medium rounded-md text-slate-700 hover:bg-indigo-50 hover:text-indigo-600">
+                🎮 <span data-i18n="nav-simulator">Simulator 3D & Ujian Penggerak</span>
+            </button>
+            <button onclick="switchTab('projects'); toggleMobileNav();" class="block w-full text-left px-3 py-2 text-sm font-medium rounded-md text-slate-700 hover:bg-indigo-50 hover:text-indigo-600">
+                💡 <span data-i18n="nav-themes">5 Tema Aplikasi Terbuka</span>
+            </button>
+            <button onclick="switchTab('rubric'); toggleMobileNav();" class="block w-full text-left px-3 py-2 text-sm font-medium rounded-md text-slate-700 hover:bg-indigo-50 hover:text-indigo-600">
+                📊 <span data-i18n="nav-rubric">Rubrik Penilaian (100%)</span>
+            </button>
+            <button onclick="switchTab('resources'); toggleMobileNav();" class="block w-full text-left px-3 py-2 text-sm font-medium rounded-md text-slate-700 hover:bg-indigo-50 hover:text-indigo-600">
+                🔌 <span data-i18n="nav-wiring">Sambungan Wayar & Rujukan Kod</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- TAB 1: 7-WEEK SCHEDULE SECTION -->
+        <section id="tab-schedule" class="tab-content space-y-6">
+            <!-- Hero Banner -->
+            <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-2xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+                <div class="absolute -right-10 -bottom-10 w-72 h-72 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="max-w-3xl relative z-10">
+                    <div class="inline-flex items-center space-x-2 bg-indigo-500/30 backdrop-blur px-3 py-1 rounded-full text-xs font-semibold text-indigo-200 mb-3 border border-indigo-400/30">
+                        <span data-i18n="hero-tag-1">Manual Kursus & Jadual 7 Minggu</span>
+                        <span>•</span>
+                        <span data-i18n="hero-tag-2">Pembelajaran Berasaskan Masalah (PBL)</span>
+                    </div>
+                    <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight" data-i18n="hero-title">Makmal Terbuka Sistem Kawalan BDA37601</h1>
+                    <p class="mt-2 text-slate-300 text-xs sm:text-sm leading-relaxed" data-i18n="hero-desc">
+                        Topik: <span class="text-indigo-300 font-semibold">Integrasi Penderia 6-DOF MPU6050 dengan Kawalan Penggerak (LED & Pembaz)</span>.
+                        Dirangka khas untuk membimbing pasukan 5 orang pelajar daripada latihan berpandu asas kepada reka bentuk kejuruteraan berautonomi sepenuhnya dalam 7 minggu.
+                    </p>
+
+                    <!-- Lecturer / Developer Card Badge -->
+                    <div class="mt-4 flex items-center space-x-3 bg-slate-800/80 backdrop-blur border border-indigo-500/30 rounded-xl p-2.5 sm:px-4 sm:py-2.5 w-fit shadow-md">
+                        <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-500 to-violet-500 flex items-center justify-center text-white font-bold text-sm shadow-inner shrink-0">
+                            🎓
+                        </div>
+                        <div>
+                            <span class="text-[10px] uppercase font-bold text-indigo-300 tracking-wider block" data-i18n="hero-lecturer-badge">Pembangun Modul & Pensyarah</span>
+                            <span class="text-xs sm:text-sm font-extrabold text-white tracking-tight">Ts. Dr. Hanani Abd Wahab</span>
+                        </div>
+                    </div>
+
+                    <!-- Meta Tags -->
+                    <div class="mt-4 flex flex-wrap gap-3 sm:gap-4 text-xs">
+                        <div class="flex items-center space-x-2 bg-slate-800/80 px-3 py-2 rounded-lg border border-slate-700">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                            <span data-i18n="hero-stat-1">Tempoh: <strong>7 Minggu Sahaja</strong></span>
+                        </div>
+                        <div class="flex items-center space-x-2 bg-slate-800/80 px-3 py-2 rounded-lg border border-slate-700">
+                            <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                            <span data-i18n="hero-stat-2">Saiz Kumpulan: <strong>5 Orang Pelajar</strong></span>
+                        </div>
+                        <div class="flex items-center space-x-2 bg-slate-800/80 px-3 py-2 rounded-lg border border-slate-700">
+                            <span class="w-2.5 h-2.5 rounded-full bg-indigo-400"></span>
+                            <span data-i18n="hero-stat-3">Fasa Rekaan Terbuka: <strong>Minggu 4 - 7</strong></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Schedule Card Container -->
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900" data-i18n="schedule-heading">Jadual Kerja Lengkap & Pencapaian Penting (7 Minggu)</h2>
+                        <p class="text-xs text-slate-500" data-i18n="schedule-subheading">Pantau tugasan, hasil serahan mingguan, dan pencapaian setiap sesi makmal.</p>
+                    </div>
+                    <div class="flex items-center space-x-2" id="week-selector-container">
+                        <span class="text-xs text-slate-600 font-medium" data-i18n="filter-label">Tapis Minggu:</span>
+                        <select id="week-selector" onchange="jumpToWeek(this.value)" class="text-xs font-semibold bg-slate-100 text-slate-800 border border-slate-200 rounded-lg px-2.5 py-1.5 focus:ring-2 focus:ring-indigo-500">
+                            <option value="all" data-i18n="opt-all">Papar Semua (M1 - M7)</option>
+                            <option value="w1" data-i18n="opt-w1">Minggu 1: Taklimat & Kumpulan</option>
+                            <option value="w2" data-i18n="opt-w2">Minggu 2: Perkakasan & Penderiaan</option>
+                            <option value="w3" data-i18n="opt-w3">Minggu 3: Penggerak & Logik Ambang</option>
+                            <option value="w4" data-i18n="opt-w4">Minggu 4: Cadangan Reka Bentuk</option>
+                            <option value="w5" data-i18n="opt-w5">Minggu 5: Pembangunan Sistem (70%)</option>
+                            <option value="w6" data-i18n="opt-w6">Minggu 6: Pengesahan & Draf (100%)</option>
+                            <option value="w7" data-i18n="opt-w7">Minggu 7: Pembentangan Akhir Makmal</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 7-Week Timeline Cards List -->
+                <div class="mt-6 space-y-4" id="timeline-container">
+                    
+                    <!-- Week 1 / Minggu 1 -->
+                    <div class="week-card border border-slate-200 rounded-xl p-5 hover:border-indigo-300 transition bg-slate-50/50" data-week="w1">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-3">
+                            <div class="flex items-start space-x-3.5">
+                                <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm">M1</div>
+                                <div>
+                                    <div class="flex items-center space-x-2">
+                                        <h3 class="font-bold text-slate-900 text-sm sm:text-base" data-i18n="w1-title">Taklimat Makmal, Pembentukan Kumpulan & Agihan Kit</h3>
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-200 text-slate-700" data-i18n="w1-tag">Mula / Kickoff</span>
+                                    </div>
+                                    <p class="text-xs text-slate-500 mt-0.5" data-i18n="w1-obj">Objektif: Memahami struktur makmal terbuka, keselamatan, dan organisasi kumpulan.</p>
+                                    <ul class="mt-3 space-y-1.5 text-xs text-slate-600">
+                                        <li class="flex items-start space-x-2">
+                                            <span class="text-indigo-600 font-bold">•</span>
+                                            <span data-i18n="w1-p1"><strong>Taklimat Kursus:</strong> Penerangan keperluan Outcome-Based Education (OBE) oleh Ts. Dr. Hanani Abd Wahab, rubrik 100%, dan amalan keselamatan elektrikal makmal.</span>
+                                        </li>
+                                        <li class="flex items-start space-x-2">
+                                            <span class="text-indigo-600 font-bold">•</span>
+                                            <span data-i18n="w1-p2"><strong>Pembentukan Pasukan:</strong> Melantik ketua kumpulan, membentuk pasukan 5 ahli, dan agihan kit komponen (Arduino, MPU6050, LED, pembaz).</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="shrink-0 md:text-right flex md:flex-col items-center md:items-end justify-between border-t md:border-t-0 pt-2 md:pt-0 border-slate-200">
+                                <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider" data-i18n="deliverable-badge">Hasil Serahan</span>
+                                <span class="text-xs font-bold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-md border border-indigo-100 mt-0.5" data-i18n="w1-deliv">Daftar Kumpulan & Pengesahan Kit</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Week 2 / Minggu 2 -->
+                    <div class="week-card border border-slate-200 rounded-xl p-5 hover:border-indigo-300 transition bg-white" data-week="w2">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-3">
+                            <div class="flex items-start space-x-3.5">
+                                <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm">M2</div>
+                                <div>
+                                    <div class="flex items-center space-x-2">
+                                        <h3 class="font-bold text-slate-900 text-sm sm:text-base" data-i18n="w2-title">Persediaan Perisian, Orientasi Perkakasan & Penderiaan Asas</h3>
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-700">I2C Setup</span>
+                                    </div>
+                                    <p class="text-xs text-slate-500 mt-0.5" data-i18n="w2-obj">Objektif: Pemasangan pemacu, konfigurasi IDE, dan pemantauan telemetri MPU6050 secara langsung.</p>
+                                    <ul class="mt-3 space-y-1.5 text-xs text-slate-600">
+                                        <li class="flex items-start space-x-2">
+                                            <span class="text-indigo-600 font-bold">•</span>
+                                            <span data-i18n="w2-p1"><strong>Susun Atur Pinout:</strong> Kenal pasti pin mikropengawal (5V, 3.3V, GND, pin I2C A4/SDA, A5/SCL) serta kekutuban LED.</span>
+                                        </li>
+                                        <li class="flex items-start space-x-2">
+                                            <span class="text-indigo-600 font-bold">•</span>
+                                            <span data-i18n="w2-p2"><strong>Pemasangan Pustaka:</strong> Pasang pustaka <code class="bg-slate-100 px-1 py-0.5 rounded text-indigo-600 font-mono">Adafruit_MPU6050</code> & periksa alamat I2C 0x68.</span>
+                                        </li>
+                                        <li class="flex items-start space-x-2">
+                                            <span class="text-indigo-600 font-bold">•</span>
+                                            <span data-i18n="w2-p3"><strong>Telemetri Masa Nyata:</strong> Papar bacaan pecutan 3-paksi (m/s²) dan giroskop (°/s) pada Serial Monitor dan Serial Plotter.</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="shrink-0 md:text-right flex md:flex-col items-center md:items-end justify-between border-t md:border-t-0 pt-2 md:pt-0 border-slate-200">
+                                <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider" data-i18n="deliverable-badge">Hasil Serahan</span>
+                                <span class="text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100 mt-0.5" data-i18n="w2-deliv">Paparan Data Bersiri MPU6050</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Week 3 / Minggu 3 -->
+                    <div class="week-card border border-slate-200 rounded-xl p-5 hover:border-indigo-300 transition bg-white" data-week="w3">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-3">
+                            <div class="flex items-start space-x-3.5">
+                                <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm">M3</div>
+                                <div>
+                                    <div class="flex items-center space-x-2">
+                                        <h3 class="font-bold text-slate-900 text-sm sm:text-base" data-i18n="w3-title">Integrasi Penggerak & Kawalan Logik Ambang (Threshold)</h3>
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700">Math & Actuation</span>
+                                    </div>
+                                    <p class="text-xs text-slate-500 mt-0.5" data-i18n="w3-obj">Objektif: Mengira sudut condong trigonometri dan memacu LED serta pembaz berdasarkan syarat logik.</p>
+                                    <ul class="mt-3 space-y-1.5 text-xs text-slate-600">
+                                        <li class="flex items-start space-x-2">
+                                            <span class="text-indigo-600 font-bold">•</span>
+                                            <span data-i18n="w3-p1"><strong>Pendawaian Penggerak:</strong> Sambung LED Hijau (Pin 2), LED Merah (Pin 3) dengan perintang 220Ω serta Pembaz Piezo (Pin 8).</span>
+                                        </li>
+                                        <li class="flex items-start space-x-2">
+                                            <span class="text-indigo-600 font-bold">•</span>
+                                            <span data-i18n="w3-p2"><strong>Formula Matematik:</strong> Kira Pitch dan Roll menggunakan fungsi <code class="bg-slate-100 px-1 py-0.5 rounded font-mono text-slate-800">atan2()</code> dalam darjah.</span>
+                                        </li>
+                                        <li class="flex items-start space-x-2">
+                                            <span class="text-indigo-600 font-bold">•</span>
+                                            <span data-i18n="w3-p3"><strong>Kawalan Ambang 30°:</strong> Keadaan Normal (&lt;30° &rarr; LED Hijau HIDUP), Keadaan Pemicu (&ge;30° &rarr; LED Merah HIDUP + Pembaz Berbunyi).</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="shrink-0 md:text-right flex md:flex-col items-center md:items-end justify-between border-t md:border-t-0 pt-2 md:pt-0 border-slate-200">
+                                <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider" data-i18n="deliverable-badge">Hasil Serahan</span>
+                                <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-100 mt-0.5" data-i18n="w3-deliv">Prototaip Ujian Ambang Berfungsi</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Week 4 / Minggu 4 -->
+                    <div class="week-card border border-slate-200 rounded-xl p-5 hover:border-indigo-300 transition bg-white" data-week="w4">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-3">
+                            <div class="flex items-start space-x-3.5">
+                                <div class="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm">M4</div>
+                                <div>
+                                    <div class="flex items-center space-x-2">
+                                        <h3 class="font-bold text-slate-900 text-sm sm:text-base" data-i18n="w4-title">Reka Bentuk Aplikasi Terbuka & Penghantaran Cadangan</h3>
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-700">Proposal Stage</span>
+                                    </div>
+                                    <p class="text-xs text-slate-500 mt-0.5" data-i18n="w4-obj">Objektif: Memilih tema kejuruteraan terbuka, melukis carta alir sistem dan skematik litar.</p>
+                                    <ul class="mt-3 space-y-1.5 text-xs text-slate-600">
+                                        <li class="flex items-start space-x-2">
+                                            <span class="text-purple-600 font-bold">•</span>
+                                            <span data-i18n="w4-p1"><strong>Pemilihan Tema:</strong> Pilih 1 daripada 5 trek aplikasi (Postur, Topi Keledar Anti-Tidur, Seismos Gegegaran, Pengesan Jatuh, Kunci Pintar).</span>
+                                        </li>
+                                        <li class="flex items-start space-x-2">
+                                            <span class="text-purple-600 font-bold">•</span>
+                                            <span data-i18n="w4-p2"><strong>Reka Bentuk Algoritma:</strong> Bangunkan carta alir piawai ISO dan senibina Finite State Machine (FSM).</span>
+                                        </li>
+                                        <li class="flex items-start space-x-2">
+                                            <span class="text-purple-600 font-bold">•</span>
+                                            <span data-i18n="w4-p3"><strong>Kelulusan Pensyarah:</strong> Pembentangan ringkas kertas cadangan kepada Ts. Dr. Hanani Abd Wahab untuk semakan dan kelulusan.</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="shrink-0 md:text-right flex md:flex-col items-center md:items-end justify-between border-t md:border-t-0 pt-2 md:pt-0 border-slate-200">
+                                <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider" data-i18n="deliverable-badge">Hasil Serahan</span>
+                                <span class="text-xs font-bold text-purple-700 bg-purple-50 px-2.5 py-1 rounded-md border border-purple-100 mt-0.5" data-i18n="w4-deliv">Kertas Cadangan & Carta Alir</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Week 5 / Minggu 5 -->
+                    <div class="week-card border border-slate-200 rounded-xl p-5 hover:border-indigo-300 transition bg-white" data-week="w5">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-3">
+                            <div class="flex items-start space-x-3.5">
+                                <div class="w-10 h-10 rounded-xl bg-amber-600 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm">M5</div>
+                                <div>
+                                    <div class="flex items-center space-x-2">
+                                        <h3 class="font-bold text-slate-900 text-sm sm:text-base" data-i18n="w5-title">Pembangunan Sistem & Integrasi Perkakasan-Perisian (Prototaip 70%)</h3>
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-700">70% Milestone</span>
+                                    </div>
+                                    <p class="text-xs text-slate-500 mt-0.5" data-i18n="w5-obj">Objektif: Membina prototaip fizikal, pengekodan penapis isyarat, dan penyahpepijatan litar.</p>
+                                    <ul class="mt-3 space-y-1.5 text-xs text-slate-600">
+                                        <li class="flex items-start space-x-2">
+                                            <span class="text-amber-600 font-bold">•</span>
+                                            <span data-i18n="w5-p1"><strong>Algoritma Khusus:</strong> Melaksanakan purata bergerak (moving average), pengesanan puncak, atau pemasa penggera berperingkat.</span>
+                                        </li>
+                                        <li class="flex items-start space-x-2">
+                                            <span class="text-amber-600 font-bold">•</span>
+                                            <span data-i18n="w5-p2"><strong>Pemasangan Kemas:</strong> Pengurusan wayar pelompat, sambungan bekalan kuasa stabil, dan binaan tapak ujian.</span>
+                                        </li>
+                                        <li class="flex items-start space-x-2">
+                                            <span class="text-amber-600 font-bold">•</span>
+                                            <span data-i18n="w5-p3"><strong>Penentukuran Ralat:</strong> Mengurangkan ralat bacaan hingar penderia dan mengelakkan amaran palsu (false triggers).</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="shrink-0 md:text-right flex md:flex-col items-center md:items-end justify-between border-t md:border-t-0 pt-2 md:pt-0 border-slate-200">
+                                <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider" data-i18n="deliverable-badge">Hasil Serahan</span>
+                                <span class="text-xs font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-100 mt-0.5" data-i18n="w5-deliv">&ge; 70% Prototaip Berfungsi</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Week 6 / Minggu 6 -->
+                    <div class="week-card border border-slate-200 rounded-xl p-5 hover:border-indigo-300 transition bg-white" data-week="w6">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-3">
+                            <div class="flex items-start space-x-3.5">
+                                <div class="w-10 h-10 rounded-xl bg-cyan-600 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm">M6</div>
+                                <div>
+                                    <div class="flex items-center space-x-2">
+                                        <h3 class="font-bold text-slate-900 text-sm sm:text-base" data-i18n="w6-title">Pengesahan Sistem, Ujian Ketahanan & Draf Laporan (100%)</h3>
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-100 text-cyan-700">100% Prototype & Draft</span>
+                                    </div>
+                                    <p class="text-xs text-slate-500 mt-0.5" data-i18n="w6-obj">Objektif: Pengujian prestasi menyeluruh, perumah prototaip, dan penyediaan draf laporan akhir.</p>
+                                    <ul class="mt-3 space-y-1.5 text-xs text-slate-600">
+                                        <li class="flex items-start space-x-2">
+                                            <span class="text-cyan-600 font-bold">•</span>
+                                            <span data-i18n="w6-p1"><strong>Ujian Ketepatan (20+ Ujian):</strong> Menguji kadar tindak balas dan kebolehulangan sistem secara berterusan.</span>
+                                        </li>
+                                        <li class="flex items-start space-x-2">
+                                            <span class="text-cyan-600 font-bold">•</span>
+                                            <span data-i18n="w6-p2"><strong>Perumah & Pakej Prototaip:</strong> Memastikan mikropengawal dan MPU6050 dipasang teguh dalam selongsong/perumah pelindung.</span>
+                                        </li>
+                                        <li class="flex items-start space-x-2">
+                                            <span class="text-cyan-600 font-bold">•</span>
+                                            <span data-i18n="w6-p3"><strong>Penyusunan Draf Laporan:</strong> Menjana graf eksperimen, jadual kebenaran, rajah skematik EDA, dan analisis ralat.</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="shrink-0 md:text-right flex md:flex-col items-center md:items-end justify-between border-t md:border-t-0 pt-2 md:pt-0 border-slate-200">
+                                <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider" data-i18n="deliverable-badge">Hasil Serahan</span>
+                                <span class="text-xs font-bold text-cyan-700 bg-cyan-50 px-2.5 py-1 rounded-md border border-cyan-100 mt-0.5" data-i18n="w6-deliv">Prototaip 100% & Draf Laporan</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Week 7 / Minggu 7 -->
+                    <div class="week-card border-2 border-indigo-500 bg-gradient-to-r from-indigo-50/80 to-purple-50/80 rounded-xl p-5 shadow-sm" data-week="w7">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-3">
+                            <div class="flex items-start space-x-3.5">
+                                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-md">M7</div>
+                                <div>
+                                    <div class="flex items-center space-x-2">
+                                        <h3 class="font-bold text-slate-900 text-sm sm:text-base" data-i18n="w7-title">Pembentangan Akhir Makmal, Demonstrasi Langsung & Penilaian (100%)</h3>
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-700">Penilaian Penuh 100%</span>
+                                    </div>
+                                    <p class="text-xs text-slate-600 mt-0.5" data-i18n="w7-obj">Objektif: Demonstrasi fungsi masa nyata, pembentangan teknikal kumpulan, sesi soal jawab bersama Ts. Dr. Hanani Abd Wahab, dan serahan laporan lengkap.</p>
+                                    <ul class="mt-3 space-y-1.5 text-xs text-slate-600">
+                                        <li class="flex items-start space-x-2">
+                                            <span class="text-rose-600 font-bold">•</span>
+                                            <span data-i18n="w7-p1"><strong>Fungsi Perkakasan (35%):</strong> Kekemasan litar, kestabilan penderiaan MPU6050, kecekapan kod dan kreativiti sistem.</span>
+                                        </li>
+                                        <li class="flex items-start space-x-2">
+                                            <span class="text-rose-600 font-bold">•</span>
+                                            <span data-i18n="w7-p2"><strong>Pembentangan & Q&A (35%):</strong> Pembentangan 10-15 minit, penglibatan aktif kelima-lima ahli pasukan, dan penguasaan teori kawalan.</span>
+                                        </li>
+                                        <li class="flex items-start space-x-2">
+                                            <span class="text-rose-600 font-bold">•</span>
+                                            <span data-i18n="w7-p3"><strong>Laporan Makmal Akhir (30%):</strong> Penyerahan laporan komprehensif mengikut format rasmi Fakulti Kejuruteraan Mekanikal.</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="shrink-0 md:text-right flex md:flex-col items-center md:items-end justify-between border-t md:border-t-0 pt-2 md:pt-0 border-indigo-200">
+                                <span class="text-[10px] font-bold text-rose-600 uppercase tracking-wider" data-i18n="final-eval-badge">Penilaian Akhir</span>
+                                <span class="text-xs font-extrabold text-white bg-indigo-600 px-3 py-1.5 rounded-lg shadow-sm mt-0.5" data-i18n="w7-deliv">Demo Langsung + Laporan Penuh</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: INTERACTIVE 3D SIMULATOR -->
+        <section id="tab-simulator" class="tab-content hidden space-y-6">
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                <div class="flex flex-col md:flex-row md:items-center justify-between pb-4 border-b border-slate-100 gap-4">
+                    <div>
+                        <div class="inline-flex items-center space-x-2 bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-full text-xs font-semibold mb-1">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span data-i18n="sim-tag">Enjin Fizik 3D & Sintesis Audio Masa Nyata</span>
+                        </div>
+                        <h2 class="text-xl font-bold text-slate-900" data-i18n="sim-title">Bangku Ujian Maya MPU6050 & Kawalan Penggerak</h2>
+                        <p class="text-xs text-slate-500" data-i18n="sim-sub">Uji formula kecondongan matematik, logik ambang (&ge;30°), dan tindak balas audio-visual LED serta pembaz secara interaktif.</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button id="btn-audio-toggle" onclick="toggleVirtualBuzzerAudio()" class="text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-lg border border-slate-300 flex items-center space-x-1.5 transition">
+                            <span id="audio-icon">🔇</span>
+                            <span id="audio-status-text" data-i18n="btn-audio-enable">Aktifkan Audio Pembaz</span>
+                        </button>
+                        <button onclick="resetSensorValues()" class="text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-lg border border-slate-300 transition" data-i18n="btn-reset-offset">
+                            Tetap Semula Offset (0°)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Simulation Grid -->
+                <div class="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <!-- 3D Board and Visualizer -->
+                    <div class="lg:col-span-6 bg-slate-900 rounded-2xl p-6 flex flex-col justify-between items-center text-white relative min-h-[390px] overflow-hidden shadow-inner">
+                        <div class="w-full flex justify-between items-center z-10 text-xs text-slate-400">
+                            <span data-i18n="sim-board-title">Visualisasi Orientasi MPU6050</span>
+                            <span id="trigger-badge" class="px-2.5 py-0.5 rounded-full font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                                NORMAL (&lt; 30°)
+                            </span>
+                        </div>
+
+                        <!-- 3D Sensor Visual Board -->
+                        <div class="relative w-64 h-56 perspective-1000 flex items-center justify-center my-4">
+                            <div id="sensor-3d-board" class="w-48 h-32 bg-blue-600/90 border-2 border-cyan-400 rounded-xl shadow-2xl preserve-3d transition-transform-smooth flex flex-col items-center justify-between p-3 relative">
+                                <div class="absolute -top-2 left-2 text-[10px] font-mono text-cyan-200 tracking-wider">MPU-6050</div>
+                                <div class="w-9 h-9 bg-slate-800 rounded-lg border border-slate-600 flex flex-col items-center justify-center text-[9px] font-mono text-cyan-300 mt-2 shadow-inner">
+                                    <span>MEMS</span>
+                                    <span class="text-[7px] text-slate-400">6-DOF</span>
+                                </div>
+                                <!-- Pin markings -->
+                                <div class="w-full flex justify-between text-[8px] font-mono text-cyan-100 px-1 pt-2 border-t border-blue-400/40">
+                                    <span>VCC</span>
+                                    <span>GND</span>
+                                    <span>SCL</span>
+                                    <span>SDA</span>
+                                    <span>INT</span>
+                                </div>
+                                <!-- Axis lines overlay -->
+                                <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-40">
+                                    <div class="w-28 h-0.5 bg-rose-400 transform -rotate-45"></div>
+                                    <div class="h-24 w-0.5 bg-emerald-400"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mathematical Live Readouts -->
+                        <div class="w-full grid grid-cols-3 gap-2 z-10 text-center font-mono text-xs">
+                            <div class="bg-slate-800/80 p-2 rounded-lg border border-slate-700">
+                                <span class="text-slate-400 block text-[10px]">PITCH (&theta;)</span>
+                                <span id="val-pitch" class="text-sm sm:text-base font-bold text-cyan-300">0.0&deg;</span>
+                            </div>
+                            <div class="bg-slate-800/80 p-2 rounded-lg border border-slate-700">
+                                <span class="text-slate-400 block text-[10px]">ROLL (&phi;)</span>
+                                <span id="val-roll" class="text-sm sm:text-base font-bold text-purple-300">0.0&deg;</span>
+                            </div>
+                            <div class="bg-slate-800/80 p-2 rounded-lg border border-slate-700">
+                                <span class="text-slate-400 block text-[10px]" data-i18n="sim-net-tilt">KEPADATAN TILT</span>
+                                <span id="val-tilt-mag" class="text-sm sm:text-base font-bold text-emerald-400">0.0&deg;</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sensor Controls & Actuator State Panel -->
+                    <div class="lg:col-span-6 space-y-4 flex flex-col justify-between">
+                        <!-- Sensor Input Sliders -->
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3.5">
+                            <div class="flex items-center justify-between">
+                                <h3 class="font-bold text-slate-800 text-xs sm:text-sm" data-i18n="sim-slider-heading">Kawalan Kecondongan Sudut Penderia</h3>
+                                <span class="text-[10px] text-indigo-700 bg-indigo-50 font-bold px-2 py-0.5 rounded border border-indigo-200" data-i18n="sim-threshold-label">Ambang M3: 30&deg;</span>
+                            </div>
+
+                            <!-- Pitch Slider -->
+                            <div>
+                                <div class="flex justify-between text-xs font-semibold text-slate-600 mb-1">
+                                    <span data-i18n="sim-pitch-label">Paksi Pitch (Kecondongan Paksi Y/Z)</span>
+                                    <span id="label-slider-pitch" class="font-mono text-indigo-600 font-bold">0&deg;</span>
+                                </div>
+                                <input id="slider-pitch" type="range" min="-90" max="90" value="0" oninput="updatePhysicsFromSliders()" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                            </div>
+
+                            <!-- Roll Slider -->
+                            <div>
+                                <div class="flex justify-between text-xs font-semibold text-slate-600 mb-1">
+                                    <span data-i18n="sim-roll-label">Paksi Roll (Kecondongan Paksi X/Z)</span>
+                                    <span id="label-slider-roll" class="font-mono text-purple-600 font-bold">0&deg;</span>
+                                </div>
+                                <input id="slider-roll" type="range" min="-90" max="90" value="0" oninput="updatePhysicsFromSliders()" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-purple-600">
+                            </div>
+
+                            <!-- Preset Angles Buttons -->
+                            <div class="pt-1 flex flex-wrap gap-1.5 text-xs">
+                                <button onclick="setPresetAngles(0, 0)" class="px-2.5 py-1 bg-white border border-slate-200 rounded-md font-medium text-slate-700 hover:bg-slate-100" data-i18n="btn-preset-flat">Rata (0&deg;)</button>
+                                <button onclick="setPresetAngles(15, 10)" class="px-2.5 py-1 bg-white border border-slate-200 rounded-md font-medium text-slate-700 hover:bg-slate-100" data-i18n="btn-preset-safe">Selamat (18&deg;)</button>
+                                <button onclick="setPresetAngles(35, 0)" class="px-2.5 py-1 bg-rose-50 border border-rose-200 rounded-md font-bold text-rose-700 hover:bg-rose-100" data-i18n="btn-preset-threshold">Ambang Trigger (35&deg;)</button>
+                                <button onclick="setPresetAngles(75, 45)" class="px-2.5 py-1 bg-rose-50 border border-rose-200 rounded-md font-bold text-rose-700 hover:bg-rose-100" data-i18n="btn-preset-extreme">Ekstrem (87&deg;)</button>
+                            </div>
+                        </div>
+
+                        <!-- Actuator Output Hardware Status -->
+                        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 text-white">
+                            <h4 class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-3" data-i18n="sim-actuator-status">Status Semasa Penggerak Fizikal (LED & Pembaz)</h4>
+                            <div class="grid grid-cols-3 gap-3">
+                                <!-- Green LED -->
+                                <div class="bg-slate-800/80 p-3 rounded-lg border border-slate-700 text-center flex flex-col items-center">
+                                    <div id="led-green" class="w-8 h-8 rounded-full bg-emerald-500 glow-green mb-2 transition-all duration-200"></div>
+                                    <span class="text-xs font-bold text-emerald-400" data-i18n="sim-led-green">LED Hijau</span>
+                                    <span id="text-green-state" class="text-[10px] text-slate-300 font-mono mt-0.5">HIDUP / ON</span>
+                                </div>
+
+                                <!-- Red LED -->
+                                <div class="bg-slate-800/80 p-3 rounded-lg border border-slate-700 text-center flex flex-col items-center">
+                                    <div id="led-red" class="w-8 h-8 rounded-full bg-rose-950 border border-rose-900 mb-2 transition-all duration-200"></div>
+                                    <span class="text-xs font-bold text-rose-400" data-i18n="sim-led-red">LED Merah</span>
+                                    <span id="text-red-state" class="text-[10px] text-slate-500 font-mono mt-0.5">PADAM / OFF</span>
+                                </div>
+
+                                <!-- Buzzer -->
+                                <div class="bg-slate-800/80 p-3 rounded-lg border border-slate-700 text-center flex flex-col items-center">
+                                    <div id="buzzer-icon" class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs mb-2 transition-all">
+                                        🔕
+                                    </div>
+                                    <span class="text-xs font-bold text-amber-400" data-i18n="sim-buzzer">Pembaz</span>
+                                    <span id="text-buzzer-state" class="text-[10px] text-slate-500 font-mono mt-0.5">SENYAP / QUIET</span>
+                                </div>
+                            </div>
+
+                            <!-- Live code logic box -->
+                            <div class="mt-3.5 p-2.5 bg-slate-950 rounded-lg border border-slate-800 font-mono text-[11px] text-slate-300">
+                                <span class="text-slate-500">// Penilaian Logik Bersyarat Minggu 3 (Threshold):</span>
+                                <div id="logic-explanation" class="text-emerald-400 font-semibold mt-0.5 break-all">
+                                    if (tilt &lt; 30.0) { digitalWrite(LED_GREEN, HIGH); digitalWrite(LED_RED, LOW); noTone(BUZZER); }
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Formulas Guide -->
+                        <div class="p-3 bg-indigo-50/80 rounded-xl border border-indigo-100 text-xs text-indigo-950 space-y-1">
+                            <span class="font-bold text-indigo-900" data-i18n="sim-math-title">Formula Kecondongan Trigonometri MPU6050:</span>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 font-mono text-[11px]">
+                                <div class="bg-white p-1.5 rounded border border-indigo-100">Pitch = atan2(Ay, &radic;(Ax&sup2; + Az&sup2;)) &times; 180/&pi;</div>
+                                <div class="bg-white p-1.5 rounded border border-indigo-100">Roll = atan2(-Ax, Az) &times; 180/&pi;</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: PROJECT THEMES -->
+        <section id="tab-projects" class="tab-content hidden space-y-6">
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-2">
+                    <div>
+                        <div class="inline-flex items-center space-x-2 bg-indigo-50 text-indigo-700 px-2.5 py-0.5 rounded-full text-xs font-semibold mb-1">
+                            <span data-i18n="themes-badge">Seksyen 3 Manual Makmal Terbuka</span>
+                        </div>
+                        <h2 class="text-xl font-bold text-slate-900" data-i18n="themes-heading">5 Tema Aplikasi Kejuruteraan Terbuka</h2>
+                        <p class="text-xs text-slate-500" data-i18n="themes-subheading">Pilih atau sesuaikan satu daripada 5 tema ini untuk cadangan Minggu 4 & demonstrasi Minggu 7.</p>
+                    </div>
+                </div>
+
+                <!-- 5 Projects Card Grid -->
+                <div class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+
+                    <!-- Theme 1 -->
+                    <div class="bg-white rounded-xl border border-slate-200 hover:border-indigo-400 hover:shadow-md transition-all p-5 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs">01</span>
+                                <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full" data-i18n="t1-badge">Ergonomik Kesihatan</span>
+                            </div>
+                            <h3 class="font-bold text-slate-900 text-base" data-i18n="t1-title">Sistem Pemantau Postur Boleh Pakai</h3>
+                            <p class="text-xs text-slate-600 mt-2 leading-relaxed" data-i18n="t1-desc">
+                                Peranti boleh pakai pada tulang toraks atas bagi memantau kecondongan tulang belakang ketika bekerja di meja untuk mengelakkan kecederaan servikal.
+                            </p>
+                            <div class="mt-4 space-y-2 border-t border-slate-100 pt-3 text-xs">
+                                <div>
+                                    <span class="font-semibold text-slate-800" data-i18n="label-sensor-role">Fungsi MPU6050:</span>
+                                    <p class="text-slate-500 text-[11px]" data-i18n="t1-sensor">Mengukur sudut pitch bahagian atas tulang belakang relatif kepada paksi menegak asal.</p>
+                                </div>
+                                <div>
+                                    <span class="font-semibold text-slate-800" data-i18n="label-act-role">Kawalan Penggerak:</span>
+                                    <p class="text-slate-500 text-[11px]" data-i18n="t1-act">LED Hijau (postur baik); LED Merah berkedip + bip pembaz sekiranya membongkok &gt; 15&deg; melebihi 5 saat.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="openProjectDetails(1)" class="mt-4 w-full py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-xs rounded-lg transition border border-indigo-200">
+                            <span data-i18n="btn-view-blueprint">Lihat Pelan & Contoh Kod &rarr;</span>
+                        </button>
+                    </div>
+
+                    <!-- Theme 2 -->
+                    <div class="bg-white rounded-xl border border-slate-200 hover:border-indigo-400 hover:shadow-md transition-all p-5 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="w-8 h-8 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-xs">02</span>
+                                <span class="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full" data-i18n="t2-badge">Keselamatan Automotif</span>
+                            </div>
+                            <h3 class="font-bold text-slate-900 text-base" data-i18n="t2-title">Topi Keledar Pengesan Mengantuk Pemandu</h3>
+                            <p class="text-xs text-slate-600 mt-2 leading-relaxed" data-i18n="t2-desc">
+                                Topi atau topi keledar keselamatan yang mengesan lena mikro (micro-sleep), kepala tersengguk pantas, dan kehilangan tumpuan pemandu.
+                            </p>
+                            <div class="mt-4 space-y-2 border-t border-slate-100 pt-3 text-xs">
+                                <div>
+                                    <span class="font-semibold text-slate-800" data-i18n="label-sensor-role">Fungsi MPU6050:</span>
+                                    <p class="text-slate-500 text-[11px]" data-i18n="t2-sensor">Mengesan halaju sudut senggukan pantas (giroskop) atau kecondongan kepala ke bawah melebihi 25&deg;.</p>
+                                </div>
+                                <div>
+                                    <span class="font-semibold text-slate-800" data-i18n="label-act-role">Kawalan Penggerak:</span>
+                                    <p class="text-slate-500 text-[11px]" data-i18n="t2-act">LED Hijau status aktif; siren pembaz frekuensi tinggi + LED Merah berkelip pantas untuk mengejutkan pemandu.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="openProjectDetails(2)" class="mt-4 w-full py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-xs rounded-lg transition border border-indigo-200">
+                            <span data-i18n="btn-view-blueprint">Lihat Pelan & Contoh Kod &rarr;</span>
+                        </button>
+                    </div>
+
+                    <!-- Theme 3 -->
+                    <div class="bg-white rounded-xl border border-slate-200 hover:border-indigo-400 hover:shadow-md transition-all p-5 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs">03</span>
+                                <span class="text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full" data-i18n="t3-badge">Kejuruteraan Awam</span>
+                            </div>
+                            <h3 class="font-bold text-slate-900 text-base" data-i18n="t3-title">Pemantau Gegaran & Seismik Struktur Bangunan</h3>
+                            <p class="text-xs text-slate-600 mt-2 leading-relaxed" data-i18n="t3-desc">
+                                Alat pemantau integriti struktur yang dipasang pada jambatan atau tiang bangunan bagi mengesan anomali getaran mekanikal dan gempa.
+                            </p>
+                            <div class="mt-4 space-y-2 border-t border-slate-100 pt-3 text-xs">
+                                <div>
+                                    <span class="font-semibold text-slate-800" data-i18n="label-sensor-role">Fungsi MPU6050:</span>
+                                    <p class="text-slate-500 text-[11px]" data-i18n="t3-sensor">Pensampelan vektor magnitud pecutan dinamik bersih (&radic;(Ax&sup2;+Ay&sup2;+Az&sup2;)) menolak komponen 1g graviti.</p>
+                                </div>
+                                <div>
+                                    <span class="font-semibold text-slate-800" data-i18n="label-act-role">Kawalan Penggerak:</span>
+                                    <p class="text-slate-500 text-[11px]" data-i18n="t3-act">Hijau (Stabil), Amaran LED Merah berkelip perlahan jika gegaran &gt;1.3g, siren penuh jika gegaran kritikal &gt;2.0g.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="openProjectDetails(3)" class="mt-4 w-full py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-xs rounded-lg transition border border-indigo-200">
+                            <span data-i18n="btn-view-blueprint">Lihat Pelan & Contoh Kod &rarr;</span>
+                        </button>
+                    </div>
+
+                    <!-- Theme 4 -->
+                    <div class="bg-white rounded-xl border border-slate-200 hover:border-indigo-400 hover:shadow-md transition-all p-5 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="w-8 h-8 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center font-bold text-xs">04</span>
+                                <span class="text-[10px] font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full" data-i18n="t4-badge">Keselamatan Biomedikal</span>
+                            </div>
+                            <h3 class="font-bold text-slate-900 text-base" data-i18n="t4-title">Sistem Keselamatan Pengesan Jatuh Warga Emas</h3>
+                            <p class="text-xs text-slate-600 mt-2 leading-relaxed" data-i18n="t4-desc">
+                                Peranti tali pinggang pintar untuk pesakit geriatrik atau pekerja altitud tinggi bagi mengesan impak insiden rebah dan jatuh.
+                            </p>
+                            <div class="mt-4 space-y-2 border-t border-slate-100 pt-3 text-xs">
+                                <div>
+                                    <span class="font-semibold text-slate-800" data-i18n="label-sensor-role">Fungsi MPU6050:</span>
+                                    <p class="text-slate-500 text-[11px]" data-i18n="t4-sensor">Algoritma 3 fasa: Jatuh bebas (&approx;0g) &rarr; Impak lantai tajam (&gt;2.8g) &rarr; Tidak bergerak berbaring.</p>
+                                </div>
+                                <div>
+                                    <span class="font-semibold text-slate-800" data-i18n="label-act-role">Kawalan Penggerak:</span>
+                                    <p class="text-slate-500 text-[11px]" data-i18n="t4-act">Strob LED Merah kecemasan + corak bunyi SOS pembaz (3 pendek, 3 panjang, 3 pendek).</p>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="openProjectDetails(4)" class="mt-4 w-full py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-xs rounded-lg transition border border-indigo-200">
+                            <span data-i18n="btn-view-blueprint">Lihat Pelan & Contoh Kod &rarr;</span>
+                        </button>
+                    </div>
+
+                    <!-- Theme 5 -->
+                    <div class="bg-white rounded-xl border border-slate-200 hover:border-indigo-400 hover:shadow-md transition-all p-5 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="w-8 h-8 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-xs">05</span>
+                                <span class="text-[10px] font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full" data-i18n="t5-badge">Keselamatan & IoT</span>
+                            </div>
+                            <h3 class="font-bold text-slate-900 text-base" data-i18n="t5-title">Kunci Keselamatan Pintar Corak Gerakan</h3>
+                            <p class="text-xs text-slate-600 mt-2 leading-relaxed" data-i18n="t5-desc">
+                                Mekanisme verifikasi keselamatan tanpa kunci berasaskan jujukan orientasi spatial rahsia (cth. Condong Atas &rarr; Bawah &rarr; Guling Kanan).
+                            </p>
+                            <div class="mt-4 space-y-2 border-t border-slate-100 pt-3 text-xs">
+                                <div>
+                                    <span class="font-semibold text-slate-800" data-i18n="label-sensor-role">Fungsi MPU6050:</span>
+                                    <p class="text-slate-500 text-[11px]" data-i18n="t5-sensor">Mesin Keadaan Terhingga (FSM) mengesan peralihan orientasi dalam tetingkap masa yang ditetapkan.</p>
+                                </div>
+                                <div>
+                                    <span class="font-semibold text-slate-800" data-i18n="label-act-role">Kawalan Penggerak:</span>
+                                    <p class="text-slate-500 text-[11px]" data-i18n="t5-act">LED Hijau + Nada Berkembar riang (Akses Dibenarkan); LED Merah + Siren Kunci Sekatan jika salah.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="openProjectDetails(5)" class="mt-4 w-full py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-xs rounded-lg transition border border-indigo-200">
+                            <span data-i18n="btn-view-blueprint">Lihat Pelan & Contoh Kod &rarr;</span>
+                        </button>
+                    </div>
+
+                    <!-- Custom Proposal Idea Card -->
+                    <div class="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-xl p-5 text-white flex flex-col justify-between border border-slate-800">
+                        <div>
+                            <span class="text-[10px] font-bold text-indigo-300 uppercase tracking-wide" data-i18n="custom-badge">Rekaan Autonomi</span>
+                            <h3 class="font-bold text-white text-base mt-1" data-i18n="custom-title">Cadang Inovasi Kumpulan Sendiri</h3>
+                            <p class="text-xs text-slate-300 mt-2 leading-relaxed" data-i18n="custom-desc">
+                                Kumpulan pelajar dialu-alukan mengemukakan aplikasi kustom baharu (seperti pengimbang dron, kawalan lengan robotik, penjejak biomekanik sukan).
+                            </p>
+                            <div class="mt-4 p-3 bg-white/10 rounded-lg text-[11px] text-slate-200 space-y-1">
+                                <div data-i18n="custom-c1">✓ Menggunakan bacaan data I2C MPU6050</div>
+                                <div data-i18n="custom-c2">✓ Memandu LED dan Pembaz secara logik</div>
+                                <div data-i18n="custom-c3">✓ Kelulusan pensyarah (Ts. Dr. Hanani) pada M4</div>
+                            </div>
+                        </div>
+                        <button onclick="switchTab('rubric')" class="mt-4 w-full py-2 bg-white text-slate-900 hover:bg-slate-100 font-bold text-xs rounded-lg transition" data-i18n="btn-check-rubric">
+                            Semak Rubrik Penilaian Kursus &rarr;
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal for Theme Details -->
+            <div id="project-detail-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+                <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 shadow-2xl border border-slate-200">
+                    <div class="flex justify-between items-start pb-3 border-b border-slate-100">
+                        <div>
+                            <span id="modal-theme-id" class="text-xs font-semibold px-2 py-0.5 rounded bg-indigo-100 text-indigo-700">Tema</span>
+                            <h3 id="modal-title" class="text-lg font-bold text-slate-900 mt-1">Tajuk Projek</h3>
+                        </div>
+                        <button onclick="closeProjectDetails()" aria-label="Tutup" class="text-slate-400 hover:text-slate-600 text-xl font-bold p-1">&times;</button>
+                    </div>
+
+                    <div class="mt-4 space-y-4 text-xs text-slate-700">
+                        <div>
+                            <h4 class="font-bold text-slate-900 text-sm" data-i18n="modal-h-desc">Huraian Sistem & Prinsip Kejuruteraan</h4>
+                            <p id="modal-description" class="mt-1 text-slate-600 leading-relaxed"></p>
+                        </div>
+
+                        <div>
+                            <h4 class="font-bold text-slate-900 text-sm" data-i18n="modal-h-flow">Senibina Carta Alir Logik (Flowchart)</h4>
+                            <div id="modal-flowchart" class="p-3 bg-slate-50 rounded-lg border border-slate-200 font-mono text-[11px] text-indigo-900 whitespace-pre-wrap"></div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <h4 class="font-bold text-slate-900 text-sm" data-i18n="modal-h-code">Coretan Algoritma Kawalan Arduino C++</h4>
+                                <button onclick="copyCodeSnippet()" class="text-[11px] text-indigo-600 hover:text-indigo-800 font-semibold flex items-center space-x-1">
+                                    <span data-i18n="btn-copy-code">Salin Kod</span>
+                                </button>
+                            </div>
+                            <pre id="modal-code" class="p-3 bg-slate-900 text-slate-200 rounded-lg overflow-x-auto font-mono text-[11px]"></pre>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 pt-3 border-t border-slate-100 flex justify-end">
+                        <button onclick="closeProjectDetails()" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-semibold" data-i18n="btn-close-modal">Tutup Pelan</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: RUBRIC EVALUATOR (100%) -->
+        <section id="tab-rubric" class="tab-content hidden space-y-6">
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                <!-- Header and Live Score Summary -->
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between pb-5 border-b border-slate-100 gap-4">
+                    <div>
+                        <div class="inline-flex items-center space-x-2 bg-rose-50 text-rose-700 px-2.5 py-0.5 rounded-full text-xs font-semibold mb-1">
+                            <span data-i18n="rubric-badge">Skim Penilaian Rasmi OBE (100%)</span>
+                        </div>
+                        <h2 class="text-xl font-bold text-slate-900" data-i18n="rubric-heading">Kalkulator Rubrik Penilaian Interaktif</h2>
+                        <p class="text-xs text-slate-500" data-i18n="rubric-subheading">Kira anggaran gred markah merangkumi ketiga-tiga komponen modul penilaian makmal.</p>
+                    </div>
+
+                    <!-- Total Score Display Card -->
+                    <div class="bg-gradient-to-r from-slate-900 to-indigo-950 text-white px-5 py-3 rounded-xl flex items-center space-x-5 shadow-sm">
+                        <div>
+                            <span class="text-[10px] text-indigo-300 font-semibold uppercase tracking-wider block" data-i18n="rubric-total-label">Jumlah Markah</span>
+                            <span id="rubric-grand-total" class="text-2xl font-black tracking-tight text-white">85.0%</span>
+                        </div>
+                        <div class="h-8 w-px bg-slate-700"></div>
+                        <div>
+                            <span class="text-[10px] text-indigo-300 font-semibold uppercase tracking-wider block" data-i18n="rubric-grade-label">Gred Prestasi</span>
+                            <span id="rubric-grade-letter" class="text-xl font-bold text-emerald-400">A (Cemerlang)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rubric 3 Sections -->
+                <div class="mt-6 space-y-6">
+                    
+                    <!-- Component 1: Prototype & Hardware Functionality (35%) -->
+                    <div class="border border-slate-200 rounded-xl overflow-hidden">
+                        <div class="bg-slate-100/80 px-4 py-3 border-b border-slate-200 flex justify-between items-center">
+                            <div>
+                                <h3 class="font-bold text-slate-900 text-xs sm:text-sm" data-i18n="r1-title">1. Fungsi Prototaip & Perkakasan (35%)</h3>
+                                <p class="text-[11px] text-slate-500" data-i18n="r1-sub">Wajaran: 35% (3 Kriteria &times; 5 Markah Maksimum)</p>
+                            </div>
+                            <span id="subtotal-cat1" class="text-xs font-bold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded border border-indigo-200">
+                                29.2 / 35.0%
+                            </span>
+                        </div>
+
+                        <div class="p-4 space-y-4 divide-y divide-slate-100">
+                            <!-- Criterion 1.1 -->
+                            <div class="pt-3 first:pt-0">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                    <div>
+                                        <h4 class="font-semibold text-slate-800 text-xs" data-i18n="r1-c1-t">Integrasi Perkakasan (MPU6050, LED & Pembaz)</h4>
+                                        <p class="text-[11px] text-slate-500" data-i18n="r1-c1-d">Kekemasan litar, talian I2C stabil, perintang pembatas arus, tiada litar pintas.</p>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                        <select id="score-c1-1" onchange="calculateRubricScores()" class="text-xs font-semibold bg-slate-50 border border-slate-300 rounded px-2 py-1 text-slate-800">
+                                            <option value="5" selected>5 - Cemerlang / Excellent</option>
+                                            <option value="4">4 - Baik / Good</option>
+                                            <option value="3">3 - Memuaskan / Satisfactory</option>
+                                            <option value="2">2 - Sederhana / Fair</option>
+                                            <option value="1">1 - Lemah / Poor</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Criterion 1.2 -->
+                            <div class="pt-3">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                    <div>
+                                        <h4 class="font-semibold text-slate-800 text-xs" data-i18n="r1-c2-t">Algoritma & Kawalan Logik</h4>
+                                        <p class="text-[11px] text-slate-500" data-i18n="r1-c2-d">Struktur kod, ketepatan formula ambang matematik, kependaman tindak balas penggerak.</p>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                        <select id="score-c1-2" onchange="calculateRubricScores()" class="text-xs font-semibold bg-slate-50 border border-slate-300 rounded px-2 py-1 text-slate-800">
+                                            <option value="5">5 - Cemerlang / Excellent</option>
+                                            <option value="4" selected>4 - Baik / Good</option>
+                                            <option value="3">3 - Memuaskan / Satisfactory</option>
+                                            <option value="2">2 - Sederhana / Fair</option>
+                                            <option value="1">1 - Lemah / Poor</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Criterion 1.3 -->
+                            <div class="pt-3">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                    <div>
+                                        <h4 class="font-semibold text-slate-800 text-xs" data-i18n="r1-c3-t">Kreativiti & Relevansi Aplikasi Kejuruteraan</h4>
+                                        <p class="text-[11px] text-slate-500" data-i18n="r1-c3-d">Inovasi reka bentuk terbuka, penyelesaian masalah praktikal, nilai guna sebenar.</p>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                        <select id="score-c1-3" onchange="calculateRubricScores()" class="text-xs font-semibold bg-slate-50 border border-slate-300 rounded px-2 py-1 text-slate-800">
+                                            <option value="5">5 - Cemerlang / Excellent</option>
+                                            <option value="4">4 - Baik / Good</option>
+                                            <option value="3" selected>3 - Memuaskan / Satisfactory</option>
+                                            <option value="2">2 - Sederhana / Fair</option>
+                                            <option value="1">1 - Lemah / Poor</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Component 2: Presentation, Demonstration & Soft Skills (35%) -->
+                    <div class="border border-slate-200 rounded-xl overflow-hidden">
+                        <div class="bg-slate-100/80 px-4 py-3 border-b border-slate-200 flex justify-between items-center">
+                            <div>
+                                <h3 class="font-bold text-slate-900 text-xs sm:text-sm" data-i18n="r2-title">2. Pembentangan, Demonstrasi Langsung & Kemahiran Insaniah (35%)</h3>
+                                <p class="text-[11px] text-slate-500" data-i18n="r2-sub">Wajaran: 35% (4 Kriteria &times; 5 Markah Maksimum)</p>
+                            </div>
+                            <span id="subtotal-cat2" class="text-xs font-bold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded border border-indigo-200">
+                                29.8 / 35.0%
+                            </span>
+                        </div>
+
+                        <div class="p-4 space-y-4 divide-y divide-slate-100">
+                            <!-- Criterion 2.1 -->
+                            <div class="pt-3 first:pt-0">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                    <div>
+                                        <h4 class="font-semibold text-slate-800 text-xs" data-i18n="r2-c1-t">Demonstrasi Langsung Prototaip</h4>
+                                        <p class="text-[11px] text-slate-500" data-i18n="r2-c1-d">Kestabilan dan kelancaran operasi prototaip semasa ujian dinilai secara bersemuka.</p>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                        <select id="score-c2-1" onchange="calculateRubricScores()" class="text-xs font-semibold bg-slate-50 border border-slate-300 rounded px-2 py-1 text-slate-800">
+                                            <option value="5" selected>5 - Cemerlang / Excellent</option>
+                                            <option value="4">4 - Baik / Good</option>
+                                            <option value="3">3 - Memuaskan / Satisfactory</option>
+                                            <option value="2">2 - Sederhana / Fair</option>
+                                            <option value="1">1 - Lemah / Poor</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Criterion 2.2 -->
+                            <div class="pt-3">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                    <div>
+                                        <h4 class="font-semibold text-slate-800 text-xs" data-i18n="r2-c2-t">Kemahiran Komunikasi & Penyampaian</h4>
+                                        <p class="text-[11px] text-slate-500" data-i18n="r2-c2-d">Kelancaran bahasa, kualiti slaid pembentangan, dan pengurusan masa (10–15 minit).</p>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                        <select id="score-c2-2" onchange="calculateRubricScores()" class="text-xs font-semibold bg-slate-50 border border-slate-300 rounded px-2 py-1 text-slate-800">
+                                            <option value="5">5 - Cemerlang / Excellent</option>
+                                            <option value="4" selected>4 - Baik / Good</option>
+                                            <option value="3">3 - Memuaskan / Satisfactory</option>
+                                            <option value="2">2 - Sederhana / Fair</option>
+                                            <option value="1">1 - Lemah / Poor</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Criterion 2.3 -->
+                            <div class="pt-3">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                    <div>
+                                        <h4 class="font-semibold text-slate-800 text-xs" data-i18n="r2-c3-t">Kerjasama Pasukan (Teamwork)</h4>
+                                        <p class="text-[11px] text-slate-500" data-i18n="r2-c3-d">Penglibatan seimbang dan saksama antara kelima-lima ahli pasukan semasa pembentangan.</p>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                        <select id="score-c2-3" onchange="calculateRubricScores()" class="text-xs font-semibold bg-slate-50 border border-slate-300 rounded px-2 py-1 text-slate-800">
+                                            <option value="5">5 - Cemerlang / Excellent</option>
+                                            <option value="4" selected>4 - Baik / Good</option>
+                                            <option value="3">3 - Memuaskan / Satisfactory</option>
+                                            <option value="2">2 - Sederhana / Fair</option>
+                                            <option value="1">1 - Lemah / Poor</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Criterion 2.4 -->
+                            <div class="pt-3">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                    <div>
+                                        <h4 class="font-semibold text-slate-800 text-xs" data-i18n="r2-c4-t">Pengetahuan Teknikal & Soal Jawab (Q&A)</h4>
+                                        <p class="text-[11px] text-slate-500" data-i18n="r2-c4-d">Penguasaan fizik MPU6050, protokol I2C, penapisan isyarat, dan penerangan baris kod.</p>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                        <select id="score-c2-4" onchange="calculateRubricScores()" class="text-xs font-semibold bg-slate-50 border border-slate-300 rounded px-2 py-1 text-slate-800">
+                                            <option value="5">5 - Cemerlang / Excellent</option>
+                                            <option value="4" selected>4 - Baik / Good</option>
+                                            <option value="3">3 - Memuaskan / Satisfactory</option>
+                                            <option value="2">2 - Sederhana / Fair</option>
+                                            <option value="1">1 - Lemah / Poor</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Component 3: Final Lab Report (30%) -->
+                    <div class="border border-slate-200 rounded-xl overflow-hidden">
+                        <div class="bg-slate-100/80 px-4 py-3 border-b border-slate-200 flex justify-between items-center">
+                            <div>
+                                <h3 class="font-bold text-slate-900 text-xs sm:text-sm" data-i18n="r3-title">3. Laporan Akhir Makmal (30%)</h3>
+                                <p class="text-[11px] text-slate-500" data-i18n="r3-sub">Wajaran: 30% (3 Kriteria &times; 5 Markah Maksimum)</p>
+                            </div>
+                            <span id="subtotal-cat3" class="text-xs font-bold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded border border-indigo-200">
+                                26.0 / 30.0%
+                            </span>
+                        </div>
+
+                        <div class="p-4 space-y-4 divide-y divide-slate-100">
+                            <!-- Criterion 3.1 -->
+                            <div class="pt-3 first:pt-0">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                    <div>
+                                        <h4 class="font-semibold text-slate-800 text-xs" data-i18n="r3-c1-t">Pernyataan Masalah & Metodologi</h4>
+                                        <p class="text-[11px] text-slate-500" data-i18n="r3-c1-d">Kejelasan objektif, pemilihan trek aplikasi, dan ketepatan carta alir kejuruteraan.</p>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                        <select id="score-c3-1" onchange="calculateRubricScores()" class="text-xs font-semibold bg-slate-50 border border-slate-300 rounded px-2 py-1 text-slate-800">
+                                            <option value="5">5 - Cemerlang / Excellent</option>
+                                            <option value="4" selected>4 - Baik / Good</option>
+                                            <option value="3">3 - Memuaskan / Satisfactory</option>
+                                            <option value="2">2 - Sederhana / Fair</option>
+                                            <option value="1">1 - Lemah / Poor</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Criterion 3.2 -->
+                            <div class="pt-3">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                    <div>
+                                        <h4 class="font-semibold text-slate-800 text-xs" data-i18n="r3-c2-t">Rajah Skematik Litar & Analisis Kod</h4>
+                                        <p class="text-[11px] text-slate-500" data-i18n="r3-c2-d">Skematik perisian CAD (Fritzing/Proteus) dan huraian fungsi baris kod Arduino yang lengkap.</p>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                        <select id="score-c3-2" onchange="calculateRubricScores()" class="text-xs font-semibold bg-slate-50 border border-slate-300 rounded px-2 py-1 text-slate-800">
+                                            <option value="5">5 - Cemerlang / Excellent</option>
+                                            <option value="4" selected>4 - Baik / Good</option>
+                                            <option value="3">3 - Memuaskan / Satisfactory</option>
+                                            <option value="2">2 - Sederhana / Fair</option>
+                                            <option value="1">1 - Lemah / Poor</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Criterion 3.3 -->
+                            <div class="pt-3">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                    <div>
+                                        <h4 class="font-semibold text-slate-800 text-xs" data-i18n="r3-c3-t">Keputusan Eksperimen & Perbincangan Teknikal</h4>
+                                        <p class="text-[11px] text-slate-500" data-i18n="r3-c3-d">Graf data ujian, analisis ralat penderia, cadangan penambahbaikan, dan kesimpulan.</p>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                        <select id="score-c3-3" onchange="calculateRubricScores()" class="text-xs font-semibold bg-slate-50 border border-slate-300 rounded px-2 py-1 text-slate-800">
+                                            <option value="5">5 - Cemerlang / Excellent</option>
+                                            <option value="4">4 - Baik / Good</option>
+                                            <option value="3" selected>3 - Memuaskan / Satisfactory</option>
+                                            <option value="2">2 - Sederhana / Fair</option>
+                                            <option value="1">1 - Lemah / Poor</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Print Sheet Button -->
+                <div class="mt-6 flex flex-wrap justify-between items-center pt-4 border-t border-slate-200 gap-3">
+                    <span class="text-xs text-slate-500" data-i18n="rubric-calc-note">Kiraan rasmi berdasarkan pematuhan kriteria OBE BDA37601 (Ts. Dr. Hanani Abd Wahab).</span>
+                    <button onclick="printEvaluationSummary()" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold flex items-center space-x-2 transition shadow-xs">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                        <span data-i18n="btn-print-eval">Cetak Ringkasan Penilaian</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 5: WIRING & RESOURCES -->
+        <section id="tab-resources" class="tab-content hidden space-y-6">
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-6">
+                <div>
+                    <div class="inline-flex items-center space-x-2 bg-slate-100 text-slate-700 px-2.5 py-0.5 rounded-full text-xs font-semibold mb-1">
+                        <span data-i18n="wiring-badge">Panduan Sambungan Litar & Integrasi</span>
+                    </div>
+                    <h2 class="text-xl font-bold text-slate-900" data-i18n="wiring-heading">Jadual Antaramuka Pin & Litar Skematik</h2>
+                    <p class="text-xs text-slate-500" data-i18n="wiring-subheading">Konfigurasi sambungan perkakasan standard bagi mikropengawal Arduino Uno/Nano + penderia MPU6050 + LED + Pembaz.</p>
+                </div>
+
+                <!-- Pinout Table -->
+                <div class="overflow-x-auto rounded-xl border border-slate-200">
+                    <table class="w-full text-left text-xs text-slate-700">
+                        <thead class="bg-slate-100 text-slate-900 uppercase font-semibold text-[11px] border-b border-slate-200">
+                            <tr>
+                                <th class="p-3" data-i18n="th-comp">Komponen</th>
+                                <th class="p-3" data-i18n="th-pin">Pin Komponen</th>
+                                <th class="p-3" data-i18n="th-mcu">Pin Arduino (Uno / Nano)</th>
+                                <th class="p-3" data-i18n="th-notes">Catatan & Langkah Keselamatan</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 font-mono text-[11px]">
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-bold text-indigo-700 font-sans">MPU6050</td>
+                                <td class="p-3">VCC</td>
+                                <td class="p-3 font-semibold text-emerald-600">5V / 3.3V</td>
+                                <td class="p-3 font-sans text-slate-500" data-i18n="td-vcc">Modul mempunyai IC pengatur voltan 3.3V terbina dalam. Sambung ke rel 5V stabil.</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-bold text-indigo-700 font-sans">MPU6050</td>
+                                <td class="p-3">GND</td>
+                                <td class="p-3 font-semibold text-slate-700">GND</td>
+                                <td class="p-3 font-sans text-slate-500" data-i18n="td-gnd">Bumi sepunya sistem mikropengawal.</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-bold text-indigo-700 font-sans">MPU6050</td>
+                                <td class="p-3">SCL</td>
+                                <td class="p-3 font-semibold text-indigo-600">A5 (Pin SCL)</td>
+                                <td class="p-3 font-sans text-slate-500" data-i18n="td-scl">Talian jam bas I2C (Alamat perkakasan lalai: 0x68).</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-bold text-indigo-700 font-sans">MPU6050</td>
+                                <td class="p-3">SDA</td>
+                                <td class="p-3 font-semibold text-indigo-600">A4 (Pin SDA)</td>
+                                <td class="p-3 font-sans text-slate-500" data-i18n="td-sda">Talian data bersiri bas I2C.</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-bold text-emerald-700 font-sans" data-i18n="comp-led-green">LED Hijau</td>
+                                <td class="p-3">Anod (+)</td>
+                                <td class="p-3 font-semibold text-blue-600">Pin Digital 2</td>
+                                <td class="p-3 font-sans text-slate-500" data-i18n="td-led-green"><strong>WAJIB</strong> siri dengan perintang 220&Omega; untuk had arus &lt;20mA.</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-bold text-rose-700 font-sans" data-i18n="comp-led-red">LED Merah</td>
+                                <td class="p-3">Anod (+)</td>
+                                <td class="p-3 font-semibold text-blue-600">Pin Digital 3</td>
+                                <td class="p-3 font-sans text-slate-500" data-i18n="td-led-red"><strong>WAJIB</strong> siri dengan perintang 220&Omega; lindungi port output MCU.</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-bold text-amber-700 font-sans" data-i18n="comp-buzzer">Pembaz Piezo</td>
+                                <td class="p-3">Positif (+)</td>
+                                <td class="p-3 font-semibold text-blue-600">Pin Digital 8</td>
+                                <td class="p-3 font-sans text-slate-500" data-i18n="td-buzzer">Pembaz pasif guna <code class="bg-slate-100 px-1 font-mono">tone(8, 1800)</code>; pembaz aktif guna HIGH/LOW.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Arduino Template Code -->
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="font-bold text-slate-900 text-sm" data-i18n="code-master-title">Templat Kod Asas Arduino C++ (Minggu 3 & 4)</h3>
+                        <button onclick="copyMasterTemplate()" class="px-3 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-md font-semibold text-xs border border-indigo-200 transition">
+                            <span data-i18n="btn-copy-template">Salin Templat Kod Penuh</span>
+                        </button>
+                    </div>
+                    <pre id="master-code-block" class="p-4 bg-slate-900 text-slate-200 rounded-xl overflow-x-auto font-mono text-xs leading-relaxed max-h-96">
+/*
+ * =========================================================================
+ * BDA37601 Makmal Terbuka Sistem Kawalan / Open-Ended Control Laboratory
+ * Pensyarah / Pembangun Modul: Ts. Dr. Hanani Abd Wahab
+ * Jadual 7 Minggu: Integrasi MPU6050 dengan Kawalan Penggerak (LED & Pembaz)
+ * Perkakasan: Arduino Uno / Nano + MPU6050 + 2x LED + Pembaz Piezo
+ * =========================================================================
+ */
+
+#include &lt;Wire.h&gt;
+#include &lt;Adafruit_MPU6050.h&gt;
+#include &lt;Adafruit_Sensor.h&gt;
+
+Adafruit_MPU6050 mpu;
+
+// Takrifan Pin Penggerak / Actuator Pinout Definitions
+const int PIN_LED_GREEN = 2;  // Penunjuk keadaan normal / Normal state
+const int PIN_LED_RED   = 3;  // Penunjuk keadaan amaran / Alarm indicator
+const int PIN_BUZZER    = 8;  // Pembaz amaran audio / Auditory alarm
+
+// Konfigurasi Ambang Kecondongan / Tilt Threshold (Minggu 3)
+const float AMBANG_TILT_DEG = 30.0;
+
+void setup() {
+  Serial.begin(115200);
+  while (!Serial) delay(10);
+
+  // Tetapkan mod pin output
+  pinMode(PIN_LED_GREEN, OUTPUT);
+  pinMode(PIN_LED_RED, OUTPUT);
+  pinMode(PIN_BUZZER, OUTPUT);
+
+  // Inisialisasi bas I2C penderia MPU6050
+  if (!mpu.begin()) {
+    Serial.println("Ralat: Cip MPU6050 tidak dijumpai! Periksa wayar I2C (SCL/SDA).");
+    while (1) {
+      // Kelipkan LED merah jika ralat sambungan
+      digitalWrite(PIN_LED_RED, HIGH);
+      delay(150);
+      digitalWrite(PIN_LED_RED, LOW);
+      delay(150);
+    }
+  }
+
+  Serial.println("MPU6050 Berjaya Dikesan & Beroperasi!");
+  mpu.setAccelerometerRange(MPU6050_RANGE_4_G);
+  mpu.setGyroRange(MPU6050_RANGE_500_DEG);
+  mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
+}
+
+void loop() {
+  sensors_event_t a, g, temp;
+  mpu.getEvent(&a, &g, &temp);
+
+  // 1. Pengiraan Sudut Pitch & Roll Berasaskan Trigonometri
+  // Pitch = atan2(Ay, sqrt(Ax^2 + Az^2)) * 180 / PI
+  float pitch = atan2(a.acceleration.y, sqrt(a.acceleration.x * a.acceleration.x + a.acceleration.z * a.acceleration.z)) * 180.0 / PI;
+
+  // Roll = atan2(-Ax, Az) * 180 / PI
+  float roll = atan2(-a.acceleration.x, a.acceleration.z) * 180.0 / PI;
+
+  // Magnitud kecondongan maksimum
+  float maxTilt = max(abs(pitch), abs(roll));
+
+  // 2. Output Data Telemetri Bersiri (Serial Monitor & Plotter)
+  Serial.print("Pitch:"); Serial.print(pitch);
+  Serial.print(" Roll:"); Serial.print(roll);
+  Serial.print(" MaxTilt:"); Serial.println(maxTilt);
+
+  // 3. Kawalan Logik Ambang Penggerak (Threshold Logic)
+  if (maxTilt >= AMBANG_TILT_DEG) {
+    // Keadaan Terpicu / Triggered State (Tilt >= 30 deg)
+    digitalWrite(PIN_LED_GREEN, LOW);
+    digitalWrite(PIN_LED_RED, HIGH);
+    tone(PIN_BUZZER, 1800); // Isyarat audio frekuensi 1.8 kHz
+  } else {
+    // Keadaan Normal Selamat / Safe State (Tilt < 30 deg)
+    digitalWrite(PIN_LED_GREEN, HIGH);
+    digitalWrite(PIN_LED_RED, LOW);
+    noTone(PIN_BUZZER);
+  }
+
+  delay(40); // Kadar pensampelan 25 Hz
+}
+                    </pre>
+                </div>
+
+                <!-- Video Tutorials References -->
+                <div class="bg-indigo-50/60 p-4 rounded-xl border border-indigo-100">
+                    <h4 class="font-bold text-slate-900 text-xs mb-2" data-i18n="video-ref-title">Rujukan Video Manual Makmal (YouTube):</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                        <a href="https://www.youtube.com/watch?v=a37xWuNJsQI" target="_blank" rel="noopener noreferrer" class="p-2.5 bg-white rounded-lg border border-slate-200 hover:border-indigo-400 block transition text-slate-700 hover:text-indigo-600">
+                            <span class="font-semibold block" data-i18n="vid-1-t">Asas MPU6050 & Sambungan</span>
+                            <span class="text-[11px] text-slate-500" data-i18n="vid-1-d">Langkah litar & bacaan I2C &rarr;</span>
+                        </a>
+                        <a href="https://www.youtube.com/watch?v=FbQosBR9Epk" target="_blank" rel="noopener noreferrer" class="p-2.5 bg-white rounded-lg border border-slate-200 hover:border-indigo-400 block transition text-slate-700 hover:text-indigo-600">
+                            <span class="font-semibold block" data-i18n="vid-2-t">Kawalan Logik Ambang Penggerak</span>
+                            <span class="text-[11px] text-slate-500" data-i18n="vid-2-d">Integrasi LED & Pembaz &rarr;</span>
+                        </a>
+                        <a href="https://www.youtube.com/watch?v=MXRtr7diDxc" target="_blank" rel="noopener noreferrer" class="p-2.5 bg-white rounded-lg border border-slate-200 hover:border-indigo-400 block transition text-slate-700 hover:text-indigo-600">
+                            <span class="font-semibold block" data-i18n="vid-3-t">Penentukuran & Offset Sifar</span>
+                            <span class="text-[11px] text-slate-500" data-i18n="vid-3-d">Menyingkirkan hingar ralat &rarr;</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-6 mt-8 text-center text-xs text-slate-600">
+        <div class="max-w-7xl mx-auto px-4 space-y-1.5">
+            <p class="font-bold text-slate-800 text-sm">
+                <span data-i18n="footer-lecturer-prefix">Pembangun Modul & Pensyarah:</span> 
+                <span class="text-indigo-700">Ts. Dr. Hanani Abd Wahab</span>
+            </p>
+            <p data-i18n="footer-text">BDA37601 Makmal Kejuruteraan Terbuka &copy; Fakulti Kejuruteraan Mekanikal & Pembuatan. Sistem 7 Minggu (Dwi Bahasa BM/EN).</p>
+        </div>
+    </footer>
+
+    <!-- Toast Notification Popup -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white text-xs px-4 py-2.5 rounded-xl shadow-xl transform translate-y-16 opacity-0 transition-all duration-300 z-50 flex items-center space-x-2 pointer-events-none">
+        <span id="toast-icon">✓</span>
+        <span id="toast-msg">Notifikasi</span>
+    </div>
+
+    <script>
+        // State variables
+        let currentLang = 'bm';
+        let audioContext = null;
+        let buzzerOscillator = null;
+        let buzzerGainNode = null;
+        let isAudioEnabled = false;
+
+        let curPitch = 0;
+        let curRoll = 0;
+
+        // Bilingual Dictionary
+        const translations = {
+            bm: {
+                "header-subtitle": "Sistem Terbuka MPU6050 & Kawalan Penggerak",
+                "nav-schedule": "Jadual Kerja (7M)",
+                "nav-simulator": "Simulator 3D",
+                "nav-themes": "5 Tema Projek",
+                "nav-rubric": "Rubrik Pemarkahan (100%)",
+                "nav-wiring": "Litar & Rujukan Kod",
+                "hero-tag-1": "Manual Kursus & Jadual 7 Minggu",
+                "hero-tag-2": "Pembelajaran Berasaskan Masalah (PBL)",
+                "hero-title": "Makmal Terbuka Sistem Kawalan BDA37601",
+                "hero-desc": "Topik: MPU6050 6-DOF Sensor Integration with Actuator Control (LED & Pembaz). Dirangka khas untuk membimbing pasukan 5 orang pelajar daripada latihan berpandu asas kepada reka bentuk kejuruteraan berautonomi sepenuhnya dalam 7 minggu.",
+                "hero-lecturer-badge": "Pembangun Modul & Pensyarah",
+                "hero-stat-1": "Tempoh: <strong>7 Minggu Sahaja</strong>",
+                "hero-stat-2": "Saiz Kumpulan: <strong>5 Orang Pelajar</strong>",
+                "hero-stat-3": "Fasa Rekaan Terbuka: <strong>Minggu 4 - 7</strong>",
+                "schedule-heading": "Jadual Kerja Lengkap & Pencapaian Penting (7 Minggu)",
+                "schedule-subheading": "Pantau tugasan, hasil serahan mingguan, dan pencapaian setiap sesi makmal.",
+                "filter-label": "Tapis Minggu:",
+                "opt-all": "Papar Semua (M1 - M7)",
+                "opt-w1": "Minggu 1: Taklimat & Kumpulan",
+                "opt-w2": "Minggu 2: Perkakasan & Penderiaan",
+                "opt-w3": "Minggu 3: Penggerak & Logik Ambang",
+                "opt-w4": "Minggu 4: Cadangan Reka Bentuk",
+                "opt-w5": "Minggu 5: Pembangunan Sistem (70%)",
+                "opt-w6": "Minggu 6: Pengesahan & Draf (100%)",
+                "opt-w7": "Minggu 7: Pembentangan Akhir Makmal",
+                "deliverable-badge": "Hasil Serahan",
+                "final-eval-badge": "Penilaian Akhir",
+
+                // Week 1 - 7
+                "w1-title": "Taklimat Makmal, Pembentukan Kumpulan & Agihan Kit",
+                "w1-tag": "Mula / Kickoff",
+                "w1-obj": "Objektif: Memahami struktur makmal terbuka, keselamatan, dan organisasi kumpulan.",
+                "w1-p1": "<strong>Taklimat Kursus:</strong> Penerangan keperluan Outcome-Based Education (OBE) oleh Ts. Dr. Hanani Abd Wahab, rubrik 100%, dan amalan keselamatan elektrikal makmal.",
+                "w1-p2": "<strong>Pembentukan Pasukan:</strong> Melantik ketua kumpulan, membentuk pasukan 5 ahli, dan agihan kit komponen (Arduino, MPU6050, LED, pembaz).",
+                "w1-deliv": "Daftar Kumpulan & Pengesahan Kit",
+
+                "w2-title": "Persediaan Perisian, Orientasi Perkakasan & Penderiaan Asas",
+                "w2-obj": "Objektif: Pemasangan pemacu, konfigurasi IDE, dan pemantauan telemetri MPU6050 secara langsung.",
+                "w2-p1": "<strong>Susun Atur Pinout:</strong> Kenal pasti pin mikropengawal (5V, 3.3V, GND, pin I2C A4/SDA, A5/SCL) serta kekutuban LED.",
+                "w2-p2": "<strong>Pemasangan Pustaka:</strong> Pasang pustaka Adafruit_MPU6050 & periksa alamat I2C 0x68.",
+                "w2-p3": "<strong>Telemetri Masa Nyata:</strong> Papar bacaan pecutan 3-paksi (m/s²) dan giroskop (°/s) pada Serial Monitor dan Serial Plotter.",
+                "w2-deliv": "Paparan Data Bersiri MPU6050",
+
+                "w3-title": "Integrasi Penggerak & Kawalan Logik Ambang (Threshold)",
+                "w3-obj": "Objektif: Mengira sudut condong trigonometri dan memacu LED serta pembaz berdasarkan syarat logik.",
+                "w3-p1": "<strong>Pendawaian Penggerak:</strong> Sambung LED Hijau (Pin 2), LED Merah (Pin 3) dengan perintang 220Ω serta Pembaz Piezo (Pin 8).",
+                "w3-p2": "<strong>Formula Matematik:</strong> Kira Pitch dan Roll menggunakan fungsi atan2() dalam darjah.",
+                "w3-p3": "<strong>Kawalan Ambang 30°:</strong> Keadaan Normal (<30° → LED Hijau HIDUP), Keadaan Pemicu (≥30° → LED Merah HIDUP + Pembaz Berbunyi).",
+                "w3-deliv": "Prototaip Ujian Ambang Berfungsi",
+
+                "w4-title": "Reka Bentuk Aplikasi Terbuka & Penghantaran Cadangan",
+                "w4-obj": "Objektif: Memilih tema kejuruteraan terbuka, melukis carta alir sistem dan skematik litar.",
+                "w4-p1": "<strong>Pemilihan Tema:</strong> Pilih 1 daripada 5 trek aplikasi (Postur, Topi Keledar Anti-Tidur, Seismos Gegegaran, Pengesan Jatuh, Kunci Pintar).",
+                "w4-p2": "<strong>Reka Bentuk Algoritma:</strong> Bangunkan carta alir piawai ISO dan senibina Finite State Machine (FSM).",
+                "w4-p3": "<strong>Kelulusan Pensyarah:</strong> Pembentangan ringkas kertas cadangan kepada Ts. Dr. Hanani Abd Wahab untuk semakan dan kelulusan.",
+                "w4-deliv": "Kertas Cadangan & Carta Alir",
+
+                "w5-title": "Pembangunan Sistem & Integrasi Perkakasan-Perisian (Prototaip 70%)",
+                "w5-obj": "Objektif: Membina prototaip fizikal, pengekodan penapis isyarat, dan penyahpepijatan litar.",
+                "w5-p1": "<strong>Algoritma Khusus:</strong> Melaksanakan purata bergerak (moving average), pengesanan puncak, atau pemasa penggera berperingkat.",
+                "w5-p2": "<strong>Pemasangan Kemas:</strong> Pengurusan wayar pelompat, sambungan bekalan kuasa stabil, dan binaan tapak ujian.",
+                "w5-p3": "<strong>Penentukuran Ralat:</strong> Mengurangkan ralat bacaan hingar penderia dan mengelakkan amaran palsu (false triggers).",
+                "w5-deliv": "≥ 70% Prototaip Berfungsi",
+
+                "w6-title": "Pengesahan Sistem, Ujian Ketahanan & Draf Laporan (100%)",
+                "w6-obj": "Objektif: Pengujian prestasi menyeluruh, perumah prototaip, dan penyediaan draf laporan akhir.",
+                "w6-p1": "<strong>Ujian Ketepatan (20+ Ujian):</strong> Menguji kadar tindak balas dan kebolehulangan sistem secara berterusan.",
+                "w6-p2": "<strong>Perumah & Pakej Prototaip:</strong> Memastikan mikropengawal dan MPU6050 dipasang teguh dalam selongsong/perumah pelindung.",
+                "w6-p3": "<strong>Penyusunan Draf Laporan:</strong> Menjana graf eksperimen, jadual kebenaran, rajah skematik EDA, dan analisis ralat.",
+                "w6-deliv": "Prototaip 100% & Draf Laporan",
+
+                "w7-title": "Pembentangan Akhir Makmal, Demonstrasi Langsung & Penilaian (100%)",
+                "w7-obj": "Objektif: Demonstrasi fungsi masa nyata, pembentangan teknikal kumpulan, sesi soal jawab bersama Ts. Dr. Hanani Abd Wahab, dan serahan laporan lengkap.",
+                "w7-p1": "<strong>Fungsi Perkakasan (35%):</strong> Kekemasan litar, kestabilan penderiaan MPU6050, kecekapan kod dan kreativiti sistem.",
+                "w7-p2": "<strong>Pembentangan & Q&A (35%):</strong> Pembentangan 10-15 minit, penglibatan aktif kelima-lima ahli pasukan, dan penguasaan teori kawalan.",
+                "w7-p3": "<strong>Laporan Makmal Akhir (30%):</strong> Penyerahan laporan komprehensif mengikut format rasmi Fakulti Kejuruteraan Mekanikal.",
+                "w7-deliv": "Demo Langsung + Laporan Penuh",
+
+                // Simulator
+                "sim-tag": "Enjin Fizik 3D & Sintesis Audio Masa Nyata",
+                "sim-title": "Bangku Ujian Maya MPU6050 & Kawalan Penggerak",
+                "sim-sub": "Uji formula kecondongan matematik, logik ambang (≥30°), dan tindak balas audio-visual LED serta pembaz secara interaktif.",
+                "btn-audio-enable": "Aktifkan Audio Pembaz",
+                "btn-audio-mute": "Senyapkan Audio",
+                "btn-reset-offset": "Tetap Semula Offset (0°)",
+                "sim-board-title": "Visualisasi Orientasi MPU6050",
+                "sim-net-tilt": "KEPADATAN TILT",
+                "sim-slider-heading": "Kawalan Kecondongan Sudut Penderia",
+                "sim-threshold-label": "Ambang M3: 30°",
+                "sim-pitch-label": "Paksi Pitch (Kecondongan Paksi Y/Z)",
+                "sim-roll-label": "Paksi Roll (Kecondongan Paksi X/Z)",
+                "btn-preset-flat": "Rata (0°)",
+                "btn-preset-safe": "Selamat (18°)",
+                "btn-preset-threshold": "Ambang Trigger (35°)",
+                "btn-preset-extreme": "Ekstrem (87°)",
+                "sim-actuator-status": "Status Semasa Penggerak Fizikal (LED & Pembaz)",
+                "sim-led-green": "LED Hijau",
+                "sim-led-red": "LED Merah",
+                "sim-buzzer": "Pembaz",
+                "sim-math-title": "Formula Kecondongan Trigonometri MPU6050:",
+
+                // Themes
+                "themes-badge": "Seksyen 3 Manual Makmal Terbuka",
+                "themes-heading": "5 Tema Aplikasi Kejuruteraan Terbuka",
+                "themes-subheading": "Pilih atau sesuaikan satu daripada 5 tema ini untuk cadangan Minggu 4 & demonstrasi Minggu 7.",
+                "t1-badge": "Ergonomik Kesihatan",
+                "t1-title": "Sistem Pemantau Postur Boleh Pakai",
+                "t1-desc": "Peranti boleh pakai pada tulang toraks atas bagi memantau kecondongan tulang belakang ketika bekerja di meja untuk mengelakkan kecederaan servikal.",
+                "t2-badge": "Keselamatan Automotif",
+                "t2-title": "Topi Keledar Pengesan Mengantuk Pemandu",
+                "t2-desc": "Topi atau topi keledar keselamatan yang mengesan lena mikro (micro-sleep), kepala tersengguk pantas, dan kehilangan tumpuan pemandu.",
+                "t3-badge": "Kejuruteraan Awam",
+                "t3-title": "Pemantau Gegaran & Seismik Struktur Bangunan",
+                "t3-desc": "Alat pemantau integriti struktur yang dipasang pada jambatan atau tiang bangunan bagi mengesan anomali getaran mekanikal dan gempa.",
+                "t4-badge": "Keselamatan Biomedikal",
+                "t4-title": "Sistem Keselamatan Pengesan Jatuh Warga Emas",
+                "t4-desc": "Peranti tali pinggang pintar untuk pesakit geriatrik atau pekerja altitud tinggi bagi mengesan impak insiden rebah dan jatuh.",
+                "t5-badge": "Keselamatan & IoT",
+                "t5-title": "Kunci Keselamatan Pintar Corak Gerakan",
+                "t5-desc": "Mekanisme verifikasi keselamatan tanpa kunci berasaskan jujukan orientasi spatial rahsia (cth. Condong Atas → Bawah → Guling Kanan).",
+                "label-sensor-role": "Fungsi MPU6050:",
+                "label-act-role": "Kawalan Penggerak:",
+                "btn-view-blueprint": "Lihat Pelan & Contoh Kod →",
+                "custom-badge": "Rekaan Autonomi",
+                "custom-title": "Cadang Inovasi Kumpulan Sendiri",
+                "custom-desc": "Kumpulan pelajar dialu-alukan mengemukakan aplikasi kustom baharu (seperti pengimbang dron, kawalan lengan robotik, penjejak biomekanik sukan).",
+                "custom-c1": "✓ Menggunakan bacaan data I2C MPU6050",
+                "custom-c2": "✓ Memandu LED dan Pembaz secara logik",
+                "custom-c3": "✓ Kelulusan pensyarah (Ts. Dr. Hanani) pada M4",
+                "btn-check-rubric": "Semak Rubrik Penilaian Kursus →",
+
+                // Rubric
+                "rubric-badge": "Skim Penilaian Rasmi OBE (100%)",
+                "rubric-heading": "Kalkulator Rubrik Penilaian Interaktif",
+                "rubric-subheading": "Kira anggaran gred markah merangkumi ketiga-tiga komponen modul penilaian makmal.",
+                "rubric-total-label": "Jumlah Markah",
+                "rubric-grade-label": "Gred Prestasi",
+                "r1-title": "1. Fungsi Prototaip & Perkakasan (35%)",
+                "r1-sub": "Wajaran: 35% (3 Kriteria × 5 Markah Maksimum)",
+                "r1-c1-t": "Integrasi Perkakasan (MPU6050, LED & Pembaz)",
+                "r1-c1-d": "Kekemasan litar, talian I2C stabil, perintang pembatas arus, tiada litar pintas.",
+                "r1-c2-t": "Algoritma & Kawalan Logik",
+                "r1-c2-d": "Struktur kod, ketepatan formula ambang matematik, kependaman tindak balas penggerak.",
+                "r1-c3-t": "Kreativiti & Relevansi Aplikasi Kejuruteraan",
+                "r1-c3-d": "Inovasi reka bentuk terbuka, penyelesaian masalah praktikal, nilai guna sebenar.",
+
+                "r2-title": "2. Pembentangan, Demonstrasi Langsung & Kemahiran Insaniah (35%)",
+                "r2-sub": "Wajaran: 35% (4 Kriteria × 5 Markah Maksimum)",
+                "r2-c1-t": "Demonstrasi Langsung Prototaip",
+                "r2-c1-d": "Kestabilan dan kelancaran operasi prototaip semasa ujian dinilai secara bersemuka.",
+                "r2-c2-t": "Kemahiran Komunikasi & Penyampaian",
+                "r2-c2-d": "Kelancaran bahasa, kualiti slaid pembentangan, dan pengurusan masa (10–15 minit).",
+                "r2-c3-t": "Kerjasama Pasukan (Teamwork)",
+                "r2-c3-d": "Penglibatan seimbang dan saksama antara kelima-lima ahli pasukan semasa pembentangan.",
+                "r2-c4-t": "Pengetahuan Teknikal & Soal Jawab (Q&A)",
+                "r2-c4-d": "Penguasaan fizik MPU6050, protokol I2C, penapisan isyarat, dan penerangan baris kod.",
+
+                "r3-title": "3. Laporan Akhir Makmal (30%)",
+                "r3-sub": "Wajaran: 30% (3 Kriteria × 5 Markah Maksimum)",
+                "r3-c1-t": "Pernyataan Masalah & Metodologi",
+                "r3-c1-d": "Kejelasan objektif, pemilihan trek aplikasi, dan ketepatan carta alir kejuruteraan.",
+                "r3-c2-t": "Rajah Skematik Litar & Analisis Kod",
+                "r3-c2-d": "Skematik perisian CAD (Fritzing/Proteus) dan huraian fungsi baris kod Arduino yang lengkap.",
+                "r3-c3-t": "Keputusan Eksperimen & Perbincangan Teknikal",
+                "r3-c3-d": "Graf data ujian, analisis ralat penderia, cadangan penambahbaikan, dan kesimpulan.",
+                "rubric-calc-note": "Kiraan rasmi berdasarkan pematuhan kriteria OBE BDA37601 (Ts. Dr. Hanani Abd Wahab).",
+                "btn-print-eval": "Cetak Ringkasan Penilaian",
+
+                // Wiring
+                "wiring-badge": "Panduan Sambungan Litar & Integrasi",
+                "wiring-heading": "Jadual Antaramuka Pin & Litar Skematik",
+                "wiring-subheading": "Konfigurasi sambungan perkakasan standard bagi mikropengawal Arduino Uno/Nano + penderia MPU6050 + LED + Pembaz.",
+                "th-comp": "Komponen",
+                "th-pin": "Pin Komponen",
+                "th-mcu": "Pin Arduino (Uno / Nano)",
+                "th-notes": "Catatan & Langkah Keselamatan",
+                "td-vcc": "Modul mempunyai IC pengatur voltan 3.3V terbina dalam. Sambung ke rel 5V stabil.",
+                "td-gnd": "Bumi sepunya sistem mikropengawal.",
+                "td-scl": "Talian jam bas I2C (Alamat perkakasan lalai: 0x68).",
+                "td-sda": "Talian data bersiri bas I2C.",
+                "comp-led-green": "LED Hijau",
+                "td-led-green": "WAJIB siri dengan perintang 220Ω untuk had arus <20mA.",
+                "comp-led-red": "LED Merah",
+                "td-led-red": "WAJIB siri dengan perintang 220Ω lindungi port output MCU.",
+                "comp-buzzer": "Pembaz Piezo",
+                "td-buzzer": "Pembaz pasif guna tone(8, 1800); pembaz aktif guna HIGH/LOW.",
+                "code-master-title": "Templat Kod Asas Arduino C++ (Minggu 3 & 4)",
+                "btn-copy-template": "Salin Templat Kod Penuh",
+                "video-ref-title": "Rujukan Video Manual Makmal (YouTube):",
+                "vid-1-t": "Asas MPU6050 & Sambungan",
+                "vid-1-d": "Langkah litar & bacaan I2C →",
+                "vid-2-t": "Kawalan Logik Ambang Penggerak",
+                "vid-2-d": "Integrasi LED & Pembaz →",
+                "vid-3-t": "Penentukuran & Offset Sifar",
+                "vid-3-d": "Menyingkirkan hingar ralat →",
+                "footer-lecturer-prefix": "Pembangun Modul & Pensyarah:",
+                "footer-text": "BDA37601 Makmal Kejuruteraan Terbuka © Fakulti Kejuruteraan Mekanikal & Pembuatan. Sistem 7 Minggu (Dwi Bahasa BM/EN)."
+            },
+            en: {
+                "header-subtitle": "MPU6050 & Actuator Control Open-Ended System",
+                "nav-schedule": "Work Schedule (7W)",
+                "nav-simulator": "3D Simulator",
+                "nav-themes": "5 Project Themes",
+                "nav-rubric": "Grading Rubric (100%)",
+                "nav-wiring": "Wiring & Master Code",
+                "hero-tag-1": "Course Manual & 7-Week Schedule",
+                "hero-tag-2": "Problem-Based Learning (PBL)",
+                "hero-title": "BDA37601 Open-Ended Control Laboratory",
+                "hero-desc": "Topic: MPU6050 6-DOF Sensor Integration with Actuator Control (LED & Buzzer). Structured to transition student teams of 5 from guided fundamentals into autonomous engineering design within 7 weeks.",
+                "hero-lecturer-badge": "Module Developer & Course Lecturer",
+                "hero-stat-1": "Duration: <strong>7 Weeks Only</strong>",
+                "hero-stat-2": "Team Size: <strong>5 Students</strong>",
+                "hero-stat-3": "Open Design Phase: <strong>Week 4 - 7</strong>",
+                "schedule-heading": "7-Week Comprehensive Schedule & Milestones",
+                "schedule-subheading": "Track weekly milestones, lab deliverables, and session requirements.",
+                "filter-label": "Filter Week:",
+                "opt-all": "Show All (W1 - W7)",
+                "opt-w1": "Week 1: Briefing & Groups",
+                "opt-w2": "Week 2: Hardware & Motion Sensing",
+                "opt-w3": "Week 3: Actuators & Threshold Logic",
+                "opt-w4": "Week 4: Application Proposal",
+                "opt-w5": "Week 5: Prototype Development (70%)",
+                "opt-w6": "Week 6: Validation & Report Draft (100%)",
+                "opt-w7": "Week 7: Final Lab Presentation",
+                "deliverable-badge": "Deliverable",
+                "final-eval-badge": "Final Assessment",
+
+                // Week 1 - 7
+                "w1-title": "Lab Briefing, Group Formation & Kit Distribution",
+                "w1-tag": "Kickoff",
+                "w1-obj": "Objective: Understand Open-Ended Lab framework, electrical safety, and group organization.",
+                "w1-p1": "<strong>Course Briefing:</strong> Overview of Outcome-Based Education (OBE) rubrics (100%) and lab safety standards by Ts. Dr. Hanani Abd Wahab.",
+                "w1-p2": "<strong>Team Formation:</strong> Form 5-student teams, assign leadership, and inspect distributed sensor & actuator kits.",
+                "w1-deliv": "Team Registration & Kit Check",
+
+                "w2-title": "Software Setup, Hardware Orientation & Basic Motion Sensing",
+                "w2-obj": "Objective: Driver installation, IDE setup, and live MPU6050 telemetry monitoring.",
+                "w2-p1": "<strong>Pinout Study:</strong> Identify MCU power rails (5V, 3.3V, GND), I2C pins (A4/SDA, A5/SCL), and LED polarities.",
+                "w2-p2": "<strong>Library Setup:</strong> Install Adafruit_MPU6050 library & verify I2C address 0x68.",
+                "w2-p3": "<strong>Live Telemetry:</strong> Stream 3-axis accelerometer (m/s²) and gyroscope (°/s) data via Serial Monitor & Plotter.",
+                "w2-deliv": "Live Serial Telemetry Stream",
+
+                "w3-title": "Actuator Integration & Threshold Logic Control",
+                "w3-obj": "Objective: Calculate trigonometric inclination and trigger LEDs and buzzer via conditional logic.",
+                "w3-p1": "<strong>Actuator Wiring:</strong> Connect Green LED (Pin 2), Red LED (Pin 3) with 220Ω resistors and Piezo Buzzer (Pin 8).",
+                "w3-p2": "<strong>Math Formulas:</strong> Derive Pitch and Roll in degrees using the atan2() trigonometric formula.",
+                "w3-p3": "<strong>30° Threshold:</strong> Normal State (<30° → Green LED ON), Trigger State (≥30° → Red LED ON + Buzzer Alarm).",
+                "w3-deliv": "Functional Threshold Prototype",
+
+                "w4-title": "Open-Ended Application Design & Proposal Submission",
+                "w4-obj": "Objective: Select an engineering theme, design standard logic flowchart and circuit schematics.",
+                "w4-p1": "<strong>Theme Selection:</strong> Pick 1 of 5 tracks (Posture, Anti-Drowsiness Helmet, Seismic Monitor, Fall Detector, Smart Lock).",
+                "w4-p2": "<strong>Algorithm Design:</strong> Develop standard ISO flowchart and Finite State Machine (FSM) architecture.",
+                "w4-p3": "<strong>Lecturer Approval:</strong> Present group design concept and get proposal sign-off from Ts. Dr. Hanani Abd Wahab.",
+                "w4-deliv": "Proposal & ISO Flowchart",
+
+                "w5-title": "System Development & Hardware-Software Integration (70% Prototype)",
+                "w5-obj": "Objective: Build physical prototype, code filtering routines, and debug circuit layout.",
+                "w5-p1": "<strong>Custom Algorithms:</strong> Implement moving average, peak detection, or multi-stage timers.",
+                "w5-p2": "<strong>Hardware Assembly:</strong> Clean jumper wire routing, secure breadboard placement, and stable power rail.",
+                "w5-p3": "<strong>Noise Tuning:</strong> Calibrate sensor offsets to prevent false alarm triggers.",
+                "w5-deliv": "≥ 70% Functional Prototype",
+
+                "w6-title": "System Validation, Stress Testing & Report Drafting (100%)",
+                "w6-obj": "Objective: Execute comprehensive reliability trials, fabricate enclosure, and draft report.",
+                "w6-p1": "<strong>Accuracy Trials (20+ Tests):</strong> Measure trigger response latency and repeatability.",
+                "w6-p2": "<strong>Packaging & Enclosure:</strong> Secure sensor and MCU inside rigid wearable casing or test fixture.",
+                "w6-p3": "<strong>Report Compilation:</strong> Produce experimental plots, truth tables, EDA schematic, and error budget.",
+                "w6-deliv": "100% Prototype & Draft Report",
+
+                "w7-title": "Final Lab Presentation, Live Demonstration & Evaluation (100%)",
+                "w7-obj": "Objective: Live prototype performance, technical oral presentation, Q&A panel with Ts. Dr. Hanani Abd Wahab, and report submission.",
+                "w7-p1": "<strong>Hardware Functionality (35%):</strong> Circuit neatness, MPU6050 reliability, responsive code, and engineering creativity.",
+                "w7-p2": "<strong>Presentation & Q&A (35%):</strong> 10–15 min presentation, equal team contribution, and deep control theory mastery.",
+                "w7-p3": "<strong>Final Lab Report (30%):</strong> Submit complete formal technical report adhering to Faculty guidelines.",
+                "w7-deliv": "Live Demo + Full Report",
+
+                // Simulator
+                "sim-tag": "Real-Time 3D Physics Engine & Audio Synthesizer",
+                "sim-title": "MPU6050 & Actuator Virtual Testbed",
+                "sim-sub": "Test mathematical tilt formulas, threshold triggering (≥30°), and audio-visual responses interactively.",
+                "btn-audio-enable": "Enable Buzzer Audio",
+                "btn-audio-mute": "Mute Buzzer",
+                "btn-reset-offset": "Reset Zero Offset (0°)",
+                "sim-board-title": "MPU6050 Orientation Visualizer",
+                "sim-net-tilt": "NET TILT MAGNITUDE",
+                "sim-slider-heading": "Sensor Tilt Angle Controls",
+                "sim-threshold-label": "W3 Threshold: 30°",
+                "sim-pitch-label": "Pitch Axis (Y/Z Plane Tilt)",
+                "sim-roll-label": "Roll Axis (X/Z Plane Tilt)",
+                "btn-preset-flat": "Flat (0°)",
+                "btn-preset-safe": "Safe (18°)",
+                "btn-preset-threshold": "Threshold Trigger (35°)",
+                "btn-preset-extreme": "Extreme (87°)",
+                "sim-actuator-status": "Live Physical Actuator Outputs (LED & Buzzer)",
+                "sim-led-green": "Green LED",
+                "sim-led-red": "Red LED",
+                "sim-buzzer": "Piezo Buzzer",
+                "sim-math-title": "MPU6050 Trigonometric Tilt Estimation:",
+
+                // Themes
+                "themes-badge": "Section 3 Lab Manual",
+                "themes-heading": "5 Open-Ended Application Themes",
+                "themes-subheading": "Choose or adapt one of these 5 themes for your Week 4 proposal & Week 7 demo.",
+                "t1-badge": "Ergonomics",
+                "t1-title": "Smart Wearable Posture Corrector",
+                "t1-desc": "Wearable thoracic spine unit monitoring slouching angles during desk work to prevent chronic cervical fatigue.",
+                "t2-badge": "Automotive Safety",
+                "t2-title": "Driver Fatigue & Anti-Sleep Helmet",
+                "t2-desc": "Smart cap/helmet detecting micro-sleep nodding, sudden head drops, and driver disorientation.",
+                "t3-badge": "Civil Structural",
+                "t3-title": "Structural & Seismic Vibration Monitor",
+                "t3-desc": "Structural integrity monitor deployed on bridges/columns to detect abnormal oscillations and tremors.",
+                "t4-badge": "Biomedical Safety",
+                "t4-title": "Geriatric Wearable Fall Detector",
+                "t4-desc": "Smart belt system for high-risk patients or riggers to instantly identify free-fall impact crashes.",
+                "t5-badge": "Security & IoT",
+                "t5-title": "Spatial Gesture & Impact Smart Lock",
+                "t5-desc": "Keyless access system recognizing secret sequential 3D gestures (e.g., Tilt UP → Tilt DOWN → Roll RIGHT).",
+                "label-sensor-role": "MPU6050 Role:",
+                "label-act-role": "Actuator Output:",
+                "btn-view-blueprint": "View Blueprint & Starter Code →",
+                "custom-badge": "Autonomous Design",
+                "custom-title": "Propose Your Own Custom Innovation",
+                "custom-desc": "Students are encouraged to pitch novel concepts (drone stabilization testbed, robotic arm mimic, athletic tracker).",
+                "custom-c1": "✓ Must read MPU6050 I2C registers",
+                "custom-c2": "✓ Must drive LED and Buzzer logically",
+                "custom-c3": "✓ Subject to approval by Ts. Dr. Hanani in W4",
+                "btn-check-rubric": "Check Course Grading Rubric →",
+
+                // Rubric
+                "rubric-badge": "Official OBE Grading Scheme (100%)",
+                "rubric-heading": "Interactive Rubric & Score Calculator",
+                "rubric-subheading": "Estimate final marks across all three Outcome-Based assessment modules.",
+                "rubric-total-label": "Total Calculated",
+                "rubric-grade-label": "Performance Grade",
+                "r1-title": "1. Prototype & Hardware Functionality (35%)",
+                "r1-sub": "Weightage: 35% (3 Criteria × 5 Marks Maximum)",
+                "r1-c1-t": "Hardware Integration (MPU6050, LED & Buzzer)",
+                "r1-c1-d": "Wiring neatness, stable I2C bus, current limiting resistors, zero short-circuit hazard.",
+                "r1-c2-t": "Algorithm & Logic Control",
+                "r1-c2-d": "Code structure, trigonometric math precision, actuation response latency.",
+                "r1-c3-t": "Application Creativity & Engineering Relevance",
+                "r1-c3-d": "Open-ended novelty, realistic problem-solving, practical utility.",
+
+                "r2-title": "2. Presentation, Live Demonstration & Soft Skills (35%)",
+                "r2-sub": "Weightage: 35% (4 Criteria × 5 Marks Maximum)",
+                "r2-c1-t": "Live Prototype Demonstration",
+                "r2-c1-d": "Real-time stability and flawless execution during physical evaluation.",
+                "r2-c2-t": "Communication & Delivery Skills",
+                "r2-c2-d": "Language fluency, slide presentation quality, and time management (10–15 min).",
+                "r2-c3-t": "Teamwork & Collaboration",
+                "r2-c3-d": "Balanced, active participation of all 5 team members during presentation.",
+                "r2-c4-t": "Technical Mastery & Q&A Defense",
+                "r2-c4-d": "MPU6050 sensor physics, I2C protocol, noise filters, and code line explanations.",
+
+                "r3-title": "3. Final Lab Report (30%)",
+                "r3-sub": "Weightage: 30% (3 Criteria × 5 Marks Maximum)",
+                "r3-c1-t": "Problem Statement & Methodology",
+                "r3-c1-d": "Clarity of objectives, theme formulation, and ISO engineering flowchart.",
+                "r3-c2-t": "Circuit Schematic & Code Breakdown",
+                "r3-c2-d": "EDA CAD diagram (Fritzing/Proteus) and thoroughly commented Arduino code.",
+                "r3-c3-t": "Experimental Results & Technical Discussion",
+                "r3-c3-d": "Experimental graphs, sensor error analysis, limitations, and future outlook.",
+                "rubric-calc-note": "Computed in strict adherence to BDA37601 OBE standards (Ts. Dr. Hanani Abd Wahab).",
+                "btn-print-eval": "Print Evaluation Summary",
+
+                // Wiring
+                "wiring-badge": "Wiring Guide & Circuit Interfacing",
+                "wiring-heading": "Pinout Interfacing Table & Schematic Guide",
+                "wiring-subheading": "Standard hardware pin connections for Arduino Uno/Nano + MPU6050 + LEDs + Piezo Buzzer.",
+                "th-comp": "Component",
+                "th-pin": "Component Pin",
+                "th-mcu": "Arduino Pin (Uno / Nano)",
+                "th-notes": "Notes & Safety Considerations",
+                "td-vcc": "Module features onboard 3.3V LDO regulator. Connect to clean 5V rail.",
+                "td-gnd": "Common system ground reference.",
+                "td-scl": "I2C clock bus line (Default hardware address: 0x68).",
+                "td-sda": "I2C serial data bus line.",
+                "comp-led-green": "Green LED",
+                "td-led-green": "MUST place 220Ω resistor in series to limit current <20mA.",
+                "comp-led-red": "Red LED",
+                "td-led-red": "MUST place 220Ω resistor in series to protect MCU pin.",
+                "comp-buzzer": "Piezo Buzzer",
+                "td-buzzer": "For passive buzzer use tone(8, 1800); for active buzzer use HIGH/LOW.",
+                "code-master-title": "Master Starter Code Template (Week 3 & 4)",
+                "btn-copy-template": "Copy Master Code Template",
+                "video-ref-title": "Lab Manual Video References (YouTube):",
+                "vid-1-t": "MPU6050 Basics & Pinout",
+                "vid-1-d": "Wiring & I2C serial reading →",
+                "vid-2-t": "Threshold Actuator Control",
+                "vid-2-d": "LED & Buzzer integration →",
+                "vid-3-t": "Offset Calibration Tuning",
+                "vid-3-d": "Eliminating sensor drift →",
+                "footer-lecturer-prefix": "Module Developer & Course Lecturer:",
+                "footer-text": "BDA37601 Open-Ended Control Laboratory © Faculty of Mechanical & Manufacturing Engineering. 7-Week System (Bilingual BM/EN)."
+            }
+        };
+
+        // Language toggle function
+        function setLanguage(lang) {
+            currentLang = lang;
+            const dict = translations[lang];
+
+            // Update all elements with data-i18n attribute
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (dict[key]) {
+                    el.innerHTML = dict[key];
+                }
+            });
+
+            // Update switcher button active styles
+            const btnBm = document.getElementById('lang-btn-bm');
+            const btnEn = document.getElementById('lang-btn-en');
+            if (lang === 'bm') {
+                btnBm.className = 'px-2.5 py-1 rounded-lg transition bg-white text-indigo-700 shadow-xs font-bold';
+                btnEn.className = 'px-2.5 py-1 rounded-lg transition text-slate-500 hover:text-slate-900';
+            } else {
+                btnEn.className = 'px-2.5 py-1 rounded-lg transition bg-white text-indigo-700 shadow-xs font-bold';
+                btnBm.className = 'px-2.5 py-1 rounded-lg transition text-slate-500 hover:text-slate-900';
+            }
+
+            // Update simulator audio button text based on state
+            const audioBtnText = document.getElementById('audio-status-text');
+            if (isAudioEnabled) {
+                audioBtnText.textContent = dict['btn-audio-mute'];
+            } else {
+                audioBtnText.textContent = dict['btn-audio-enable'];
+            }
+
+            // Recalculate rubric letter text
+            calculateRubricScores();
+            updatePhysicsFromSliders();
+
+            showToast(lang === 'bm' ? "Bahasa ditukar ke Bahasa Melayu 🇲🇾" : "Language switched to English 🇬🇧");
+        }
+
+        // Web Audio API Synthesizer
+        function initAudio() {
+            if (!audioContext) {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                audioContext = new AudioCtx();
+            }
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+        }
+
+        function toggleVirtualBuzzerAudio() {
+            initAudio();
+            isAudioEnabled = !isAudioEnabled;
+            const btn = document.getElementById('btn-audio-toggle');
+            const icon = document.getElementById('audio-icon');
+            const text = document.getElementById('audio-status-text');
+            const dict = translations[currentLang];
+
+            if (isAudioEnabled) {
+                icon.textContent = '🔊';
+                text.textContent = dict['btn-audio-mute'];
+                btn.classList.remove('bg-slate-100', 'text-slate-700');
+                btn.classList.add('bg-indigo-600', 'text-white', 'border-indigo-600');
+                showToast(currentLang === 'bm' ? "Audio pembaz diaktifkan!" : "Virtual buzzer sound enabled!");
+            } else {
+                stopBuzzerSound();
+                icon.textContent = '🔇';
+                text.textContent = dict['btn-audio-enable'];
+                btn.classList.add('bg-slate-100', 'text-slate-700');
+                btn.classList.remove('bg-indigo-600', 'text-white', 'border-indigo-600');
+                showToast(currentLang === 'bm' ? "Audio pembaz dimatikan." : "Virtual buzzer muted.");
+            }
+            updatePhysicsFromSliders();
+        }
+
+        function startBuzzerSound() {
+            if (!isAudioEnabled || buzzerOscillator) return;
+            try {
+                buzzerOscillator = audioContext.createOscillator();
+                buzzerGainNode = audioContext.createGain();
+
+                buzzerOscillator.type = 'sawtooth';
+                buzzerOscillator.frequency.setValueAtTime(1600, audioContext.currentTime);
+
+                // Comfortable volume
+                buzzerGainNode.gain.setValueAtTime(0.06, audioContext.currentTime);
+
+                buzzerOscillator.connect(buzzerGainNode);
+                buzzerGainNode.connect(audioContext.destination);
+
+                buzzerOscillator.start();
+            } catch (e) {
+                console.error("Audio error", e);
+            }
+        }
+
+        function stopBuzzerSound() {
+            if (buzzerOscillator) {
+                try {
+                    buzzerOscillator.stop();
+                    buzzerOscillator.disconnect();
+                } catch(e) {}
+                buzzerOscillator = null;
+                buzzerGainNode = null;
+            }
+        }
+
+        // Live Virtual Physics Update
+        function updatePhysicsFromSliders() {
+            const pitchSlider = document.getElementById('slider-pitch');
+            const rollSlider = document.getElementById('slider-roll');
+
+            curPitch = parseFloat(pitchSlider.value);
+            curRoll = parseFloat(rollSlider.value);
+
+            document.getElementById('label-slider-pitch').textContent = curPitch.toFixed(0) + '°';
+            document.getElementById('label-slider-roll').textContent = curRoll.toFixed(0) + '°';
+
+            // Calculate tilt magnitude: sqrt(pitch^2 + roll^2)
+            const tiltMagnitude = Math.sqrt(curPitch * curPitch + curRoll * curRoll);
+
+            // Update numerical values
+            document.getElementById('val-pitch').textContent = curPitch.toFixed(1) + '°';
+            document.getElementById('val-roll').textContent = curRoll.toFixed(1) + '°';
+            document.getElementById('val-tilt-mag').textContent = tiltMagnitude.toFixed(1) + '°';
+
+            // 3D sensor board visual rotation
+            const board = document.getElementById('sensor-3d-board');
+            if (board) {
+                board.style.transform = `rotateX(${curPitch}deg) rotateZ(${-curRoll}deg)`;
+            }
+
+            // 30 Degree Threshold logic
+            const threshold = 30.0;
+            const isTriggered = tiltMagnitude >= threshold;
+
+            const ledGreen = document.getElementById('led-green');
+            const ledRed = document.getElementById('led-red');
+            const buzzerIcon = document.getElementById('buzzer-icon');
+            const badge = document.getElementById('trigger-badge');
+            const greenText = document.getElementById('text-green-state');
+            const redText = document.getElementById('text-red-state');
+            const buzzerText = document.getElementById('text-buzzer-state');
+            const logicText = document.getElementById('logic-explanation');
+
+            if (isTriggered) {
+                // Triggered state: Red LED ON, Green LED OFF, Buzzer ON
+                ledGreen.className = 'w-8 h-8 rounded-full bg-emerald-950 border border-emerald-900 mb-2 transition-all duration-200';
+                greenText.textContent = currentLang === 'bm' ? 'PADAM / OFF' : 'OFF';
+                greenText.className = 'text-[10px] text-slate-500 font-mono mt-0.5';
+
+                ledRed.className = 'w-8 h-8 rounded-full bg-rose-500 glow-red mb-2 transition-all duration-200 animate-pulse';
+                redText.textContent = currentLang === 'bm' ? 'TERPICU / ACTIVE' : 'ACTIVE ON';
+                redText.className = 'text-[10px] text-rose-400 font-mono mt-0.5 font-bold';
+
+                buzzerIcon.className = 'w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs mb-2 glow-yellow animate-bounce';
+                buzzerIcon.textContent = '🔔';
+                buzzerText.textContent = currentLang === 'bm' ? 'AMARAN (1.6kHz)' : 'ALARM (1.6kHz)';
+                buzzerText.className = 'text-[10px] text-amber-400 font-mono mt-0.5 font-bold';
+
+                badge.className = 'px-2.5 py-0.5 rounded-full font-semibold bg-rose-500/20 text-rose-400 border border-rose-500/30';
+                badge.textContent = currentLang === 'bm' ? 'TERPICU (≥ 30°)' : 'TRIGGERED (≥ 30°)';
+
+                logicText.className = 'text-rose-400 font-semibold mt-0.5 break-all';
+                logicText.textContent = `if (maxTilt >= 30.0) -> TRIGGERED! [Tilt=${tiltMagnitude.toFixed(1)}° >= 30.0°]`;
+
+                startBuzzerSound();
+            } else {
+                // Normal safe state: Green LED ON, Red LED OFF, Buzzer OFF
+                ledGreen.className = 'w-8 h-8 rounded-full bg-emerald-500 glow-green mb-2 transition-all duration-200';
+                greenText.textContent = currentLang === 'bm' ? 'HIDUP / NORMAL' : 'ON (Normal)';
+                greenText.className = 'text-[10px] text-emerald-400 font-mono mt-0.5 font-semibold';
+
+                ledRed.className = 'w-8 h-8 rounded-full bg-rose-950 border border-rose-900 mb-2 transition-all duration-200';
+                redText.textContent = currentLang === 'bm' ? 'PADAM / OFF' : 'OFF';
+                redText.className = 'text-[10px] text-slate-500 font-mono mt-0.5';
+
+                buzzerIcon.className = 'w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs mb-2 transition-all';
+                buzzerIcon.textContent = '🔕';
+                buzzerText.textContent = currentLang === 'bm' ? 'SENYAP / QUIET' : 'QUIET';
+                buzzerText.className = 'text-[10px] text-slate-500 font-mono mt-0.5';
+
+                badge.className = 'px-2.5 py-0.5 rounded-full font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+                badge.textContent = currentLang === 'bm' ? 'NORMAL (< 30°)' : 'NORMAL (< 30°)';
+
+                logicText.className = 'text-emerald-400 font-semibold mt-0.5 break-all';
+                logicText.textContent = `if (maxTilt < 30.0) -> SAFE. [Tilt=${tiltMagnitude.toFixed(1)}° < 30.0°]`;
+
+                stopBuzzerSound();
+            }
+        }
+
+        function setPresetAngles(p, r) {
+            document.getElementById('slider-pitch').value = p;
+            document.getElementById('slider-roll').value = r;
+            updatePhysicsFromSliders();
+        }
+
+        function resetSensorValues() {
+            setPresetAngles(0, 0);
+            showToast(currentLang === 'bm' ? "Offset ditetap semula ke 0.0°" : "Zero-offset calibrated to 0.0°");
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            const target = document.getElementById('tab-' + tabId);
+            if (target) target.classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.className = 'nav-btn px-3 py-2 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition';
+            });
+            const activeBtn = document.getElementById('btn-tab-' + tabId);
+            if (activeBtn) {
+                activeBtn.className = 'nav-btn px-3 py-2 text-xs font-semibold rounded-lg text-indigo-600 bg-indigo-50 border border-indigo-200 transition';
+            }
+
+            // Stop buzzer if user leaves simulator tab
+            if (tabId !== 'simulator') {
+                stopBuzzerSound();
+            }
+        }
+
+        function toggleMobileNav() {
+            const menu = document.getElementById('mobile-nav');
+            menu.classList.toggle('hidden');
+        }
+
+        function jumpToWeek(weekCode) {
+            const cards = document.querySelectorAll('.week-card');
+            cards.forEach(card => {
+                if (weekCode === 'all' || card.getAttribute('data-week') === weekCode) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+        }
+
+        // Project blueprints database (BM & EN)
+        const projectBlueprints = {
+            1: {
+                themeBm: "Tema 1: Ergonomik Kesihatan",
+                themeEn: "Theme 1: Health Ergonomics",
+                titleBm: "Sistem Pemantau Postur Boleh Pakai",
+                titleEn: "Smart Wearable Posture Corrector",
+                descBm: "Dipakai pada bahagian belakang toraks. Sentiasa mengira darjah kecondongan spina pengguna. Jika sudut membongkok melebihi 15° berlarutan lebih 5 saat tanpa gangguan, pengguna menerima amaran visual progresif (LED Merah) disusuli getaran/bip pembaz peringatan.",
+                descEn: "Worn along the thoracic spine. Continuously computes user spinal inclination. If slouching exceeds 15° for more than 5 uninterrupted seconds, user receives progressive visual warning (Red LED) followed by haptic/buzzer alarm reminder.",
+                flowBm: "Mula -> Baca Pecutan (Ax, Ay, Az) -> Kira Sudut Pitch Belakang\n-> Sudut > 15 darjah? \n   YA    -> Tambah Pemasa Membongkok -> Pemasa > 5000ms? -> [KELIP LED MERAH + BIP PEMBAZ]\n   TIDAK -> Tetap Semula Pemasa -> [LED HIJAU KEKAL HIDUP + SENYAP]\n-> Lengah 50ms -> Gelung Semula",
+                flowEn: "Start -> Read Accel (Ax, Ay, Az) -> Compute Back Pitch\n-> Pitch > 15 deg? \n   YES -> Increment Slouch Timer -> Timer > 5000ms? -> [RED LED BLINK + BUZZER CHIRP]\n   NO  -> Reset Slouch Timer -> [GREEN LED ON + SILENT]\n-> Delay 50ms -> Loop",
+                code: `// Posture Corrector Logic (Arduino C++)
+float pitch = atan2(a.acceleration.y, sqrt(a.acceleration.x*a.acceleration.x + a.acceleration.z*a.acceleration.z)) * 180.0 / PI;
+static unsigned long slouchStart = 0;
+
+if (abs(pitch) > 15.0) {
+  if (slouchStart == 0) slouchStart = millis();
+  if (millis() - slouchStart > 5000) {
+    digitalWrite(PIN_LED_RED, (millis() % 400 < 200));
+    tone(PIN_BUZZER, 2000, 100);
+  }
+} else {
+  slouchStart = 0;
+  digitalWrite(PIN_LED_GREEN, HIGH);
+  digitalWrite(PIN_LED_RED, LOW);
+  noTone(PIN_BUZZER);
+}`
+            },
+            2: {
+                themeBm: "Tema 2: Keselamatan Automotif",
+                themeEn: "Theme 2: Automotive Safety",
+                titleBm: "Topi Keledar Pengesan Mengantuk Pemandu",
+                titleEn: "Driver Fatigue & Anti-Sleep Helmet",
+                descBm: "Diintegrasikan ke dalam topi keledar atau topi keselamatan pemandu. Memantau halaju sudut dan sudut condong kepala. Kejadian mengantuk mikro dicirikan oleh jatuhan kepala ke bawah secara tiba-tiba atau ketidakstabilan giroskop paksi Y.",
+                descEn: "Integrated into a safety helmet or cap. Monitors driver's head pitch and angular velocity. Micro-sleep is characterized by rapid downward head drop followed by absence of normal micro-adjustments.",
+                flowBm: "Mula -> Baca Gyro Y & Pecutan Pitch\n-> Senggukan Kepala Dikesan (Pitch < -20° ATAU GyroY > 120 deg/s)?\n   YA    -> [KELIP PANTAS LED MERAH + SIREN 2.5kHz KELANTANGAN TINGGI]\n   TIDAK -> [LED HIJAU PEMANTAUAN BIASA]\n-> Gelung Semula",
+                flowEn: "Start -> Read Gyro Y & Accel Pitch\n-> Head Drop Detected (Pitch < -20° OR GyroY > 120 deg/s)?\n   YES -> [FLASH RED LED + 2.5kHz HIGH SIREN ALARM]\n   NO  -> [GREEN LED STEADY MONITORING]\n-> Loop",
+                code: `// Anti-Sleep Helmet Algorithm
+float pitch = atan2(a.acceleration.y, sqrt(a.acceleration.x*a.acceleration.x + a.acceleration.z*a.acceleration.z)) * 180.0 / PI;
+float gyroRate = abs(g.gyro.y);
+
+if (pitch < -20.0 || gyroRate > 2.1) { // nod off event
+  digitalWrite(PIN_LED_RED, HIGH);
+  tone(PIN_BUZZER, 2400); // loud siren
+} else {
+  digitalWrite(PIN_LED_RED, LOW);
+  noTone(PIN_BUZZER);
+}`
+            },
+            3: {
+                themeBm: "Tema 3: Kejuruteraan Awam & Bangunan",
+                themeEn: "Theme 3: Civil Structural Health",
+                titleBm: "Pemantau Gegaran & Seismik Struktur Bangunan",
+                titleEn: "Structural & Seismic Vibration Monitor",
+                descBm: "Dipasang teguh pada rasuk jambatan atau tiang bangunan. Mengira jumlah magnitud vektor pecutan dinamik 3-paksi. Menolak komponen 1g graviti bumi bagi mengasingkan getaran frekuensi tinggi struktur.",
+                descEn: "Fixed to structural beam. Calculates total dynamic acceleration vector magnitude. Filters steady 1g gravitational component to isolate high-frequency building tremor vibrations.",
+                flowBm: "Mula -> Baca Ax, Ay, Az -> Magnitud G = sqrt(Ax^2 + Ay^2 + Az^2) / 9.81\n-> Gegaran Bersih = abs(Magnitud G - 1.0g)\n-> Gegaran > 1.0g (Kritikal)? -> [LED MERAH + SIREN KECEMASAN]\n-> Gegaran > 0.3g (Sederhana)? -> [LED MERAH KELIP PERLAHAN]\n-> Gegaran <= 0.3g (Normal)?   -> [LED HIJAU STABIL]",
+                flowEn: "Start -> Read Ax, Ay, Az -> Total G = sqrt(Ax^2 + Ay^2 + Az^2) / 9.81\n-> Net Tremor = abs(Total G - 1.0g)\n-> Tremor > 1.0g (Critical)? -> [RED LED + EMERGENCY SIREN]\n-> Tremor > 0.3g (Moderate)? -> [RED LED SLOW BLINK]\n-> Tremor <= 0.3g (Normal)?  -> [GREEN LED SOLID SAFE]",
+                code: `// Seismic Vibration Monitor
+float totalG = sqrt(a.acceleration.x*a.acceleration.x + a.acceleration.y*a.acceleration.y + a.acceleration.z*a.acceleration.z) / 9.81;
+float tremor = abs(totalG - 1.0); // subtract static 1g
+
+if (tremor > 1.0) {
+  // Critical earthquake tremor
+  digitalWrite(PIN_LED_RED, HIGH);
+  tone(PIN_BUZZER, 1200);
+} else if (tremor > 0.3) {
+  // Moderate oscillation warning
+  digitalWrite(PIN_LED_GREEN, LOW);
+  digitalWrite(PIN_LED_RED, (millis() % 500 < 250));
+  noTone(PIN_BUZZER);
+} else {
+  digitalWrite(PIN_LED_GREEN, HIGH);
+  digitalWrite(PIN_LED_RED, LOW);
+  noTone(PIN_BUZZER);
+}`
+            },
+            4: {
+                themeBm: "Tema 4: Keselamatan Biomedikal",
+                themeEn: "Theme 4: Biomedical Safety",
+                titleBm: "Sistem Keselamatan Pengesan Jatuh Warga Emas",
+                titleEn: "Wearable Fall Detection Safety System",
+                descBm: "Direka bentuk untuk warga emas atau pekerja berseorangan di tempat tinggi. Melaksanakan mesin keadaan berbilang fasa: Fasa 1 Jatuh Bebas (pecutan menghampiri 0g selama >80ms), Fasa 2 Impak Menghentam Tanah (>2.8g), Fasa 3 Keadaan terbaring kaku.",
+                descEn: "Designed for elderly or solitary workers. Implements a multi-phase state machine: Phase 1 Free-fall (magnitude near 0g for >80ms), Phase 2 High-impact ground crash (>2.8g), Phase 3 Inactivity lying down.",
+                flowBm: "KEADAAN 0: Berjalan Normal\n-> Magnitud G < 0.4g? -> KEADAAN 1: Jatuh Bebas Dikesan\n-> Dalam 400ms G > 2.8g? -> KEADAAN 2: Impak Hentaman Lantai Dikesan\n-> Terbaring kaku 3000ms? -> KEADAAN 3: [KECEMASAN JATUH! -> SIREN SOS + STROB LED MERAH]",
+                flowEn: "STATE 0: Normal Walking\n-> Total G < 0.4g? -> STATE 1: Free Fall Detected\n-> Within 400ms G > 2.8g? -> STATE 2: Impact Detected\n-> Stays flat for 3000ms? -> STATE 3: [EMERGENCY FALL! -> SOS BUZZER + RED STROBE]",
+                code: `// Multi-Stage Fall Detection State Machine
+float gMag = sqrt(a.acceleration.x*a.acceleration.x + a.acceleration.y*a.acceleration.y + a.acceleration.z*a.acceleration.z) / 9.81;
+
+if (fallState == 0 && gMag < 0.4) {
+  fallTimer = millis();
+  fallState = 1; // Free-fall window
+} else if (fallState == 1 && (millis() - fallTimer < 500)) {
+  if (gMag > 2.8) { // Impact ground crash
+    fallState = 2;
+    sosTimer = millis();
+  }
+} else if (fallState == 2) {
+  // SOS trigger alert
+  digitalWrite(PIN_LED_RED, (millis() % 200 > 100));
+  tone(PIN_BUZZER, 2000);
+}`
+            },
+            5: {
+                themeBm: "Tema 5: Keselamatan & IoT",
+                themeEn: "Theme 5: Security & IoT",
+                titleBm: "Kunci Keselamatan Pintar Corak Gerakan",
+                titleEn: "Gesture & Impact Smart Lock System",
+                descBm: "Mekanisme kunci elektronik tanpa kunci konvensional. Pintu hanya dibuka sekiranya pengguna melakukan gerakan spatial mengikut urutan rahsia (cth. Condong ATAS -> Condong BAWAH -> Guling KANAN) dalam masa 5 saat.",
+                descEn: "Electronic lock mechanism unlocking only upon matching a secret orientation sequence (e.g. Tilt UP -> Tilt DOWN -> Roll RIGHT) within 5 seconds without improper shaking.",
+                flowBm: "Keadaan Asal Terkunci (LED MERAH HIDUP)\n-> Gerakan 1: Pitch Atas > +35° -> Bip 1\n-> Gerakan 2: Pitch Bawah < -35° -> Bip 2\n-> Gerakan 3: Guling Kanan > +40° -> Bip 3\n-> URUTAN TEPAT? -> [LED HIJAU HIDUP + BIP BERKEMBAR BUKA KUNCI]\n-> TAMAT MASA / SALAH? -> [LED MERAH KELIP + KUNCI DIHALANG]",
+                flowEn: "Start Locked (RED LED ON)\n-> Gesture 1: Tilt Pitch > +35° -> Beep 1\n-> Gesture 2: Tilt Pitch < -35° -> Beep 2\n-> Gesture 3: Roll Right > +40° -> Beep 3\n-> SEQUENCE VALID? -> [GREEN LED ON + UNLOCK DOUBLE CHIRP]\n-> TIMEOUT OR WRONG ORDER? -> [RED LED + ALARM LOCKOUT]",
+                code: `// Gesture Unlock FSM Logic
+if (seqStep == 0 && pitch > 35) { seqStep = 1; tone(PIN_BUZZER, 1000, 60); }
+else if (seqStep == 1 && pitch < -35) { seqStep = 2; tone(PIN_BUZZER, 1500, 60); }
+else if (seqStep == 2 && roll > 40) {
+  // Access Granted
+  digitalWrite(PIN_LED_GREEN, HIGH);
+  digitalWrite(PIN_LED_RED, LOW);
+  tone(PIN_BUZZER, 2400, 250);
+  seqStep = 0;
+}`
+            }
+        };
+
+        function openProjectDetails(id) {
+            const data = projectBlueprints[id];
+            if (!data) return;
+            const isBm = (currentLang === 'bm');
+            document.getElementById('modal-theme-id').textContent = isBm ? data.themeBm : data.themeEn;
+            document.getElementById('modal-title').textContent = isBm ? data.titleBm : data.titleEn;
+            document.getElementById('modal-description').textContent = isBm ? data.descBm : data.descEn;
+            document.getElementById('modal-flowchart').textContent = isBm ? data.flowBm : data.flowEn;
+            document.getElementById('modal-code').textContent = data.code;
+            document.getElementById('project-detail-modal').classList.remove('hidden');
+        }
+
+        function closeProjectDetails() {
+            document.getElementById('project-detail-modal').classList.add('hidden');
+        }
+
+        function calculateRubricScores() {
+            // Category 1: Prototype (35%) -> 3 criteria (max 15 marks)
+            const c1_1 = parseFloat(document.getElementById('score-c1-1').value);
+            const c1_2 = parseFloat(document.getElementById('score-c1-2').value);
+            const c1_3 = parseFloat(document.getElementById('score-c1-3').value);
+            const sumCat1 = c1_1 + c1_2 + c1_3;
+            const weightedCat1 = (sumCat1 / 15.0) * 35.0;
+            document.getElementById('subtotal-cat1').textContent = weightedCat1.toFixed(1) + ' / 35.0%';
+
+            // Category 2: Presentation & Soft Skills (35%) -> 4 criteria (max 20 marks)
+            const c2_1 = parseFloat(document.getElementById('score-c2-1').value);
+            const c2_2 = parseFloat(document.getElementById('score-c2-2').value);
+            const c2_3 = parseFloat(document.getElementById('score-c2-3').value);
+            const c2_4 = parseFloat(document.getElementById('score-c2-4').value);
+            const sumCat2 = c2_1 + c2_2 + c2_3 + c2_4;
+            const weightedCat2 = (sumCat2 / 20.0) * 35.0;
+            document.getElementById('subtotal-cat2').textContent = weightedCat2.toFixed(1) + ' / 35.0%';
+
+            // Category 3: Report (30%) -> 3 criteria (max 15 marks)
+            const c3_1 = parseFloat(document.getElementById('score-c3-1').value);
+            const c3_2 = parseFloat(document.getElementById('score-c3-2').value);
+            const c3_3 = parseFloat(document.getElementById('score-c3-3').value);
+            const sumCat3 = c3_1 + c3_2 + c3_3;
+            const weightedCat3 = (sumCat3 / 15.0) * 30.0;
+            document.getElementById('subtotal-cat3').textContent = weightedCat3.toFixed(1) + ' / 30.0%';
+
+            // Grand Total
+            const grandTotal = weightedCat1 + weightedCat2 + weightedCat3;
+            document.getElementById('rubric-grand-total').textContent = grandTotal.toFixed(1) + '%';
+
+            // Grade Letter
+            const gradeLetter = document.getElementById('rubric-grade-letter');
+            const isBm = (currentLang === 'bm');
+            if (grandTotal >= 80) {
+                gradeLetter.textContent = isBm ? 'A (Cemerlang / Distinction)' : 'A (Distinction)';
+                gradeLetter.className = 'text-xl font-bold text-emerald-400';
+            } else if (grandTotal >= 75) {
+                gradeLetter.textContent = isBm ? 'A- (Sangat Baik / Very Good)' : 'A- (Very Good)';
+                gradeLetter.className = 'text-xl font-bold text-emerald-300';
+            } else if (grandTotal >= 70) {
+                gradeLetter.textContent = isBm ? 'B+ (Kepujian / Good)' : 'B+ (Good)';
+                gradeLetter.className = 'text-xl font-bold text-cyan-300';
+            } else if (grandTotal >= 65) {
+                gradeLetter.textContent = isBm ? 'B (Memuaskan / Satisfactory)' : 'B (Satisfactory)';
+                gradeLetter.className = 'text-xl font-bold text-amber-300';
+            } else if (grandTotal >= 50) {
+                gradeLetter.textContent = isBm ? 'C (Lulus / Pass)' : 'C (Pass)';
+                gradeLetter.className = 'text-xl font-bold text-amber-500';
+            } else {
+                gradeLetter.textContent = isBm ? 'F (Gagal / Fail)' : 'F (Fail)';
+                gradeLetter.className = 'text-xl font-bold text-rose-400';
+            }
+        }
+
+        function printEvaluationSummary() {
+            window.print();
+        }
+
+        // Clipboard helpers
+        function copyCodeSnippet() {
+            const code = document.getElementById('modal-code').innerText;
+            copyTextToClipboard(code, currentLang === 'bm' ? "Kod Arduino berjaya disalin!" : "Arduino starter code copied!");
+        }
+
+        function copyMasterTemplate() {
+            const code = document.getElementById('master-code-block').innerText;
+            copyTextToClipboard(code, currentLang === 'bm' ? "Templat induk Arduino berjaya disalin!" : "Master Arduino template copied!");
+        }
+
+        function copyTextToClipboard(text, successMsg) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.opacity = "0";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showToast(successMsg);
+            } catch (err) {
+                console.error("Unable to copy", err);
+            }
+            document.body.removeChild(textArea);
+        }
+
+        // Toast Popup Helper
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').textContent = msg;
+            toast.classList.remove('translate-y-16', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-16', 'opacity-0');
+            }, 2500);
+        }
+
+        // Initialize on DOM load
+        window.addEventListener('DOMContentLoaded', () => {
+            calculateRubricScores();
+            updatePhysicsFromSliders();
+        });
+    </script>
+</body>
+</html>
