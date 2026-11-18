@@ -1,0 +1,2627 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Control Engineering Open-Ended Lab | TWIP Self-Balancing Scooter</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- KaTeX for Mathematical Equations -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body {
+      background-color: #f8fafc;
+      color: #0f172a;
+    }
+    .tab-active {
+      background-color: #1d4ed8;
+      color: #ffffff;
+      box-shadow: 0 4px 6px -1px rgba(29, 78, 216, 0.25);
+    }
+    .tab-inactive {
+      background-color: #ffffff;
+      color: #475569;
+      border: 1px solid #e2e8f0;
+    }
+    .tab-inactive:hover {
+      background-color: #f1f5f9;
+      color: #0f172a;
+    }
+    .katex-display {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 0.4rem 0;
+    }
+    pre::-webkit-scrollbar {
+      height: 8px;
+    }
+    pre::-webkit-scrollbar-track {
+      background: #1e293b;
+    }
+    pre::-webkit-scrollbar-thumb {
+      background: #475569;
+      border-radius: 4px;
+    }
+    input[type="range"] {
+      accent-color: #2563eb;
+    }
+    @media print {
+      .no-print { display: none !important; }
+      body { background: white; }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased">
+
+  <!-- Top Academic Header -->
+  <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-50 shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <!-- Course Title & Branding -->
+        <div class="flex items-start sm:items-center gap-3">
+          <div class="bg-blue-600 p-2.5 rounded-xl shadow-inner shrink-0 mt-0.5 sm:mt-0">
+            <i data-lucide="cpu" class="w-6 h-6 text-white"></i>
+          </div>
+          <div>
+            <div class="flex flex-wrap items-center gap-2">
+              <span id="badge-course" class="text-xs font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                Kejuruteraan Mekanikal • Tahun 3
+              </span>
+              <span id="badge-duration" class="text-xs font-medium px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                Makmal Terbuka 5 Minggu
+              </span>
+            </div>
+            <h1 id="header-title" class="text-lg sm:text-xl font-bold tracking-tight text-white mt-1">
+              Makmal Kejuruteraan Kawalan: Sistem Skuter Imbangan Kendiri (TWIP)
+            </h1>
+          </div>
+        </div>
+
+        <!-- Staff Info & Language Switcher -->
+        <div class="flex flex-wrap items-center justify-between md:justify-end gap-3 pt-2 md:pt-0 border-t md:border-t-0 border-slate-800">
+          <div class="text-xs text-slate-300 leading-relaxed">
+            <div class="flex items-center gap-1.5">
+              <i data-lucide="graduation-cap" class="w-3.5 h-3.5 text-blue-400"></i>
+              <span><strong id="lbl-lecturer">Pensyarah:</strong> Ts. Dr. Hanani</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <i data-lucide="wrench" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span><strong id="lbl-engineer">Penolong Jurutera:</strong> En. Adib</span>
+            </div>
+          </div>
+
+          <!-- Language Toggle Button -->
+          <div class="flex items-center bg-slate-800 p-1 rounded-lg border border-slate-700 no-print">
+            <button onclick="setLanguage('ms')" id="btn-lang-ms" class="px-3 py-1.5 text-xs font-bold rounded-md transition-all bg-blue-600 text-white">
+              BM
+            </button>
+            <button onclick="setLanguage('en')" id="btn-lang-en" class="px-3 py-1.5 text-xs font-bold rounded-md transition-all text-slate-400 hover:text-white">
+              EN
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="bg-white border-b border-slate-200 sticky top-[76px] md:top-[68px] z-40 shadow-sm no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 overflow-x-auto">
+      <div class="flex space-x-2 min-w-max" id="nav-tabs">
+        <button onclick="switchTab('overview')" data-tab="overview" class="tab-btn tab-active flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all">
+          <i data-lucide="compass" class="w-4 h-4"></i>
+          <span id="nav-overview">1. Pengenalan & Keselamatan</span>
+        </button>
+        <button onclick="switchTab('theory')" data-tab="theory" class="tab-btn tab-inactive flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all">
+          <i data-lucide="book-open" class="w-4 h-4"></i>
+          <span id="nav-theory">2. Panduan Teoritikal & Kod</span>
+        </button>
+        <button onclick="switchTab('schedule')" data-tab="schedule" class="tab-btn tab-inactive flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all">
+          <i data-lucide="calendar-clock" class="w-4 h-4"></i>
+          <span id="nav-schedule">3. Jadual 5 Minggu & Giliran</span>
+        </button>
+        <button onclick="switchTab('roles')" data-tab="roles" class="tab-btn tab-inactive flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all">
+          <i data-lucide="users" class="w-4 h-4"></i>
+          <span id="nav-roles">4. Pembahagian Tugas</span>
+        </button>
+        <button onclick="switchTab('assessment')" data-tab="assessment" class="tab-btn tab-inactive flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all">
+          <i data-lucide="award" class="w-4 h-4"></i>
+          <span id="nav-assessment">5. Rubrik & Oral Test</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content Container -->
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div id="content-area"></div>
+  </main>
+
+  <!-- Toast Notification -->
+  <div id="toast-box" class="fixed bottom-5 right-5 z-50 hidden bg-slate-900 text-white text-xs sm:text-sm font-medium px-4 py-3 rounded-xl shadow-xl border border-slate-700 flex items-center gap-2">
+    <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+    <span id="toast-msg">Disalin ke papan keratan!</span>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 mt-12 py-6 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4">
+      <p id="footer-text" class="font-medium text-slate-600">
+        Portal Makmal Terbuka Kejuruteraan Kawalan (Tahun 3 Kejuruteraan Mekanikal) • Diselia oleh Ts. Dr. Hanani & En. Adib
+      </p>
+      <p id="footer-sub" class="mt-1">
+        Platform Perkakasan: Skuter Imbangan Kendiri (TWIP) • Sensor MPU6050 • Arduino IDE / ESP32 &amp; Excel Data Acquisition
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    // =========================================================================
+    // 1. APPLICATION STATE
+    // =========================================================================
+    let currentLang = localStorage.getItem('ce_lab_lang') || 'ms';
+    let currentTab = 'overview';
+    let selectedGroup = parseInt(localStorage.getItem('ce_lab_group'), 10) || 1;
+    let selectedSessionWeek = 1;
+    let checklistState = JSON.parse(localStorage.getItem('ce_lab_checklist') || '{}');
+    let currentVivaIdx = 0;
+    let vivaShowAnswer = false;
+    let codeMode = 'usb'; // 'usb' or 'blynk'
+
+    // Interactive FBD & Stability Simulator State
+    let fbdParams = {
+      Mb: 12.0,  // Body + payload mass (kg)
+      l: 0.45,   // Center of gravity height (m)
+      Kp: 85.0,  // Proportional stiffness gain (Nm/rad)
+      Kd: 14.0   // Derivative damping gain (Nms/rad)
+    };
+    let fbdAnimId = null;
+    let fbdSimTime = 0;
+    let fbdImpulseVel = 1.8; // Initial angular disturbance velocity (rad/s)
+
+    // Group Rotation Matrix (6 Groups sharing 3 Scooters: Unit A, B, C)
+    const groupScheduleData = {
+      1: { unit: 'Unit A', partner: 'G2', half1: 'phys', half2: 'work' },
+      2: { unit: 'Unit A', partner: 'G1', half1: 'work', half2: 'phys' },
+      3: { unit: 'Unit B', partner: 'G4', half1: 'phys', half2: 'work' },
+      4: { unit: 'Unit B', partner: 'G3', half1: 'work', half2: 'phys' },
+      5: { unit: 'Unit C', partner: 'G6', half1: 'phys', half2: 'work' },
+      6: { unit: 'Unit C', partner: 'G5', half1: 'work', half2: 'phys' }
+    };
+
+    // =========================================================================
+    // 2. ARDUINO C++ STARTER CODES (USB + EVENT MARKER & ESP32 BLYNK DUAL-TIMER)
+    // =========================================================================
+    const arduinoCodeUsb = `#include <Wire.h>
+#include <Servo.h>
+
+// ============================================================================
+// TWIP OUTER-LOOP CONTROLLER: ARDUINO + MPU6050 + EVENT MARKER (100 Hz)
+// ============================================================================
+const int MPU_ADDR = 0x68;
+const int PIN_MARKER_BTN = 2;   // Push button to GND (marks t = 0s disturbance)
+const int PIN_ACTUATOR   = 9;   // Servo / External Actuator PWM Pin
+
+Servo actuator;
+
+// Complementary Filter & Timing Variables (100 Hz -> dt = 0.01 s)
+unsigned long prevMicros = 0;
+const unsigned long SAMPLE_US = 10000; // 10,000 us = 10 ms
+float pitchAngle = 0.0;
+float gyroYOffset = 0.0;
+
+// PID Controller Gains (Adjust via Serial Monitor: e.g. "P12.5", "I0.8", "D1.2")
+float Kp = 12.0;
+float Ki = 0.5;
+float Kd = 1.2;
+float setpoint = 0.0;
+
+float integralError = 0.0;
+float prevError = 0.0;
+
+void setup() {
+  Serial.begin(115200);
+  Wire.begin();
+  pinMode(PIN_MARKER_BTN, INPUT_PULLUP);
+  actuator.attach(PIN_ACTUATOR);
+  actuator.write(90); // Neutral position
+
+  // Wake up MPU6050
+  Wire.beginTransmission(MPU_ADDR);
+  Wire.write(0x6B);
+  Wire.write(0);
+  Wire.endTransmission(true);
+
+  // Calibrate Gyroscope Y-axis at rest (keep scooter steady for 1 second)
+  long sumGyro = 0;
+  for (int i = 0; i < 200; i++) {
+    Wire.beginTransmission(MPU_ADDR);
+    Wire.write(0x45); // GYRO_YOUT_H
+    Wire.endTransmission(false);
+    Wire.requestFrom(MPU_ADDR, 2, true);
+    int16_t gy = (Wire.read() << 8) | Wire.read();
+    sumGyro += gy;
+    delay(5);
+  }
+  gyroYOffset = sumGyro / 200.0;
+
+  Serial.println("Time_s,Pitch_deg,PID_Out,Marker");
+  prevMicros = micros();
+}
+
+void loop() {
+  // Check Serial Live Tuning commands (P, I, D, S)
+  if (Serial.available() > 0) {
+    char cmd = Serial.read();
+    float val = Serial.parseFloat();
+    if (cmd == 'P' || cmd == 'p') Kp = val;
+    if (cmd == 'I' || cmd == 'i') Ki = val;
+    if (cmd == 'D' || cmd == 'd') Kd = val;
+    if (cmd == 'S' || cmd == 's') setpoint = val;
+  }
+
+  unsigned long nowMicros = micros();
+  if (nowMicros - prevMicros >= SAMPLE_US) {
+    float dt = (nowMicros - prevMicros) / 1000000.0;
+    prevMicros = nowMicros;
+
+    // 1. Read Accelerometer & Gyroscope from MPU6050
+    Wire.beginTransmission(MPU_ADDR);
+    Wire.write(0x3B);
+    Wire.endTransmission(false);
+    Wire.requestFrom(MPU_ADDR, 14, true);
+
+    int16_t ax = (Wire.read() << 8) | Wire.read();
+    int16_t ay = (Wire.read() << 8) | Wire.read();
+    int16_t az = (Wire.read() << 8) | Wire.read();
+    int16_t tmp = (Wire.read() << 8) | Wire.read();
+    int16_t gx = (Wire.read() << 8) | Wire.read();
+    int16_t gy = (Wire.read() << 8) | Wire.read();
+    int16_t gz = (Wire.read() << 8) | Wire.read();
+
+    float accPitch = atan2((float)ax, sqrt((float)ay * ay + (float)az * az)) * 57.2958;
+    float gyroRate = ((float)gy - gyroYOffset) / 131.0; // deg/s
+
+    // 2. Complementary Filter (98% Gyro + 2% Accel)
+    pitchAngle = 0.98 * (pitchAngle + gyroRate * dt) + 0.02 * accPitch;
+
+    // 3. Discrete PID Calculation with Anti-Windup
+    float error = setpoint - pitchAngle;
+    integralError = constrain(integralError + error * dt, -30.0, 30.0);
+    float derivativeError = (error - prevError) / dt;
+    prevError = error;
+
+    float pidOutput = (Kp * error) + (Ki * integralError) + (Kd * derivativeError);
+    int servoCmd = constrain(90 + (int)pidOutput, 30, 150);
+    actuator.write(servoCmd);
+
+    // 4. Print CSV Telemetry (Marker = 1 when button pressed during disturbance)
+    int marker = (digitalRead(PIN_MARKER_BTN) == LOW) ? 1 : 0;
+    Serial.print(millis() / 1000.0, 3);
+    Serial.print(",");
+    Serial.print(pitchAngle, 2);
+    Serial.print(",");
+    Serial.print(pidOutput, 2);
+    Serial.print(",");
+    Serial.println(marker);
+  }
+}`;
+
+    const arduinoCodeBlynk = `// ============================================================================
+// TWIP OUTER-LOOP CONTROLLER: ESP32 + MPU6050 + BLYNK IOT (DUAL-TIMER)
+// Local PID Loop: 100 Hz (10 ms) | Blynk Cloud Telemetry: 10 Hz (100 ms)
+// ============================================================================
+#define BLYNK_TEMPLATE_ID   "TMPL_YOUR_ID"
+#define BLYNK_TEMPLATE_NAME "TWIP_Control_Lab"
+#define BLYNK_AUTH_TOKEN    "YOUR_BLYNK_TOKEN"
+
+#include <WiFi.h>
+#include <BlynkSimpleEsp32.h>
+#include <Wire.h>
+#include <ESP32Servo.h>
+
+char ssid[] = "Group_Hotspot_Name";
+char pass[] = "Group_Hotspot_Pass";
+
+const int MPU_ADDR = 0x68;
+const int PIN_ACTUATOR = 18;
+Servo actuator;
+BlynkTimer timer;
+
+float pitchAngle = 0.0;
+float gyroYOffset = 0.0;
+float Kp = 12.0, Ki = 0.5, Kd = 1.2, setpoint = 0.0;
+float integralError = 0.0, prevError = 0.0, pidOutput = 0.0;
+
+// Blynk Virtual Pin Sliders for Wireless Live Tuning
+BLYNK_WRITE(V1) { setpoint = param.asFloat(); }
+BLYNK_WRITE(V2) { Kp = param.asFloat(); }
+BLYNK_WRITE(V3) { Ki = param.asFloat(); }
+BLYNK_WRITE(V4) { Kd = param.asFloat(); }
+
+// Fast Local Control Loop (100 Hz -> 10 ms)
+void runControlLoop() {
+  const float dt = 0.01;
+  Wire.beginTransmission(MPU_ADDR);
+  Wire.write(0x3B);
+  Wire.endTransmission(false);
+  Wire.requestFrom(MPU_ADDR, 14, true);
+
+  int16_t ax = (Wire.read() << 8) | Wire.read();
+  int16_t ay = (Wire.read() << 8) | Wire.read();
+  int16_t az = (Wire.read() << 8) | Wire.read();
+  Wire.read(); Wire.read();
+  Wire.read(); Wire.read();
+  int16_t gy = (Wire.read() << 8) | Wire.read();
+  Wire.read(); Wire.read();
+
+  float accPitch = atan2((float)ax, sqrt((float)ay * ay + (float)az * az)) * 57.2958;
+  float gyroRate = ((float)gy - gyroYOffset) / 131.0;
+  pitchAngle = 0.98 * (pitchAngle + gyroRate * dt) + 0.02 * accPitch;
+
+  float error = setpoint - pitchAngle;
+  integralError = constrain(integralError + error * dt, -30.0, 30.0);
+  float derivativeError = (error - prevError) / dt;
+  prevError = error;
+
+  pidOutput = (Kp * error) + (Ki * integralError) + (Kd * derivativeError);
+  actuator.write(constrain(90 + (int)pidOutput, 30, 150));
+}
+
+// Cloud Telemetry Loop (10 Hz -> 100 ms to avoid Wi-Fi lag)
+void sendBlynkTelemetry() {
+  Blynk.virtualWrite(V0, pitchAngle); // SuperChart Pitch Angle
+  Blynk.virtualWrite(V5, pidOutput);  // Control Effort
+}
+
+void setup() {
+  Serial.begin(115200);
+  Wire.begin(21, 22); // ESP32 SDA = GPIO 21, SCL = GPIO 22
+  actuator.attach(PIN_ACTUATOR);
+  actuator.write(90);
+
+  Wire.beginTransmission(MPU_ADDR);
+  Wire.write(0x6B);
+  Wire.write(0);
+  Wire.endTransmission(true);
+
+  Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass);
+  timer.setInterval(10L, runControlLoop);      // 100 Hz PID
+  timer.setInterval(100L, sendBlynkTelemetry); // 10 Hz Blynk
+}
+
+void loop() {
+  Blynk.run();
+  timer.run();
+}`;
+
+    // =========================================================================
+    // 3. BILINGUAL CONTENT DICTIONARY (MALAY & ENGLISH)
+    // =========================================================================
+    const translations = {
+      ms: {
+        badgeCourse: "Kejuruteraan Mekanikal • Tahun 3",
+        badgeDuration: "Makmal Terbuka 5 Minggu",
+        headerTitle: "Makmal Kejuruteraan Kawalan: Sistem Skuter Imbangan Kendiri (TWIP)",
+        lblLecturer: "Pensyarah:",
+        lblEngineer: "Penolong Jurutera:",
+        navOverview: "1. Pengenalan & Keselamatan",
+        navTheory: "2. Panduan Teoritikal & Kod",
+        navSchedule: "3. Jadual 5 Minggu & Giliran",
+        navRoles: "4. Pembahagian Tugas",
+        navAssessment: "5. Rubrik & Oral Test",
+        footerText: "Portal Makmal Terbuka Kejuruteraan Kawalan (Tahun 3 Kejuruteraan Mekanikal) • Diselia oleh Ts. Dr. Hanani & En. Adib",
+        footerSub: "Platform Perkakasan: Skuter Imbangan Kendiri (TWIP) • Sensor MPU6050 • Arduino IDE / ESP32 & Excel Data Acquisition",
+
+        // Tab 1: Overview
+        ovProblemTag: "Pernyataan Masalah Terbuka (Open-Ended Problem Statement)",
+        ovProblemTitle: "Adaptasi Skuter Imbangan Kendiri sebagai Robot Penghantar Kargo Ringan (AGV)",
+        ovProblemBody: "Sebuah syarikat logistik ingin mengadaptasi skuter imbangan kendiri (Two-Wheeled Inverted Pendulum) sebagai robot penghantar kargo ringan automatik di dalam kilang. Sebagai jurutera kawalan, kumpulan anda dikehendaki mencirikan tindak balas dinamik asal skuter tersebut tanpa mengubah suai litar dalamannya, membina model matematik (Fungsi Pindah), dan mereka bentuk satu sistem kawalan gelung luaran (outer-loop controller) menggunakan mikropengawal (Arduino/ESP32) serta sensor MPU6050 bagi meminimumkan ayunan sudut kecondongan (pitch) dan masa enapan apabila dikenakan gangguan beban secara tiba-tiba.",
+        ovConstraintsTitle: "Kekangan Kejuruteraan & Infrastruktur Makmal",
+        ovConstraints: [
+          { icon: "layers", title: "Nisbah Peralatan (6 Kumpulan : 3 Skuter)", desc: "Setiap 2 kumpulan berkongsi 1 unit skuter (Unit A, Unit B, Unit C) melalui sistem penggiliran stesen 45 minit." },
+          { icon: "shield-check", title: "Pendekatan Plug-and-Play (Non-Invasive)", desc: "Dilarang membuka casing atau memotong wayar dalaman skuter. Semua sensor dan aktuator luaran mesti boleh tanggal." },
+          { icon: "cpu", title: "Ekosistem Arduino IDE + MPU6050", desc: "Pemprosesan isyarat, penapis sensor, dan algoritma PID ditulis terus dalam C++ (Arduino IDE) tanpa kebergantungan pada toolbox automatik." },
+          { icon: "target", title: "Penilaian Akhir Minggu 5", desc: "Setiap kumpulan akan diuji secara langsung melalui demonstrasi gangguan rawak, pembentangan teknikal, dan ujian lisan individu (Oral Test)." }
+        ],
+        ovActuatorsTitle: "3 Pilihan Mekanisme Aktuator Luaran (Tanpa Ubah Suai Litar Skuter)",
+        ovActuatorsSubtitle: "Memandangkan litar dalaman skuter tidak boleh disentuh, Arduino + MPU6050 bertindak sebagai 'penunggang robotik' dari luar menggunakan salah satu mekanisme boleh tanggal berikut:",
+        ovActuators: [
+          {
+            id: "countermass",
+            badge: "Pilihan A • Anjakan Pusat Graviti",
+            title: "Pemberat Pengimbang Gelangsar (Active Sliding Counter-Mass)",
+            setupLabel: "Binaan Mekanikal:",
+            setup: "Pasang motor servo berdaya kilas tinggi dengan lengan (servo arm) atau mekanisme rack-and-pinion yang membawa pemberat (~0.5 kg) pada palang stereng atau platform.",
+            principleLabel: "Prinsip Kawalan:",
+            principle: "Apabila MPU6050 mengesan skuter mula tercondong ke hadapan (θ > 0°) akibat beban, pengawal PID menggerakkan pemberat ke belakang untuk menghasilkan tork pemulihan bagi meredam ayunan.",
+            partsLabel: "Komponen Utama:",
+            parts: "MPU6050, Servo Motor (MG996R), Pemberat 0.5 kg, Pendakap Boleh Tanggal"
+          },
+          {
+            id: "flywheel",
+            badge: "Pilihan B • Momentum Sudut",
+            title: "Roda Tindak Balas Inersia (Reaction Wheel / Flywheel Damper)",
+            setupLabel: "Binaan Mekanikal:",
+            setup: "Pasang satu motor DC dengan pemacu (motor driver) yang memutarkan roda pemberat (flywheel) secara menegak pada palang stereng.",
+            principleLabel: "Prinsip Kawalan:",
+            principle: "Berdasarkan keabadian momentum sudut, apabila skuter condong, algoritma PID memecutkan atau membrekkan flywheel. Tork tindak balas inersia akan menstabilkan badan skuter serta-merta.",
+            partsLabel: "Komponen Utama:",
+            parts: "MPU6050, Motor DC + Driver (L298N/IBT-2), Roda Flywheel, Bateri Luaran"
+          },
+          {
+            id: "platooning",
+            badge: "Pilihan C • Kawalan Jarak (AGV)",
+            title: "Kawalan Jarak Automatik (Tilt-Induced Platooning Control)",
+            setupLabel: "Binaan Mekanikal:",
+            setup: "Pasang sensor jarak Ultrasonik/LiDAR di hadapan platform bersama mekanisme pemberat pengimbang kecil yang dikawal oleh servo.",
+            principleLabel: "Prinsip Kawalan:",
+            principle: "Jika jarak dengan objek/dinding kurang daripada 1.0 m, pengawal PID menggerakkan pemberat ke belakang supaya skuter condong sedikit—menyebabkan skuter asal berundur dan berhenti tepat pada 1.0 m.",
+            partsLabel: "Komponen Utama:",
+            parts: "MPU6050, Sensor Ultrasonik (HC-SR04), Servo Motor, Pemberat Pengimbang"
+          }
+        ],
+        ovSafetyTitle: "Senarai Semak Keselamatan Wajib (Disahkan oleh En. Adib)",
+        ovSafetySubtitle: "Tandakan semua item di bawah sebelum menghidupkan kuasa skuter di kawasan ujian:",
+        ovSafetyItems: [
+          { id: "s1", text: "Tali Keselamatan (Safety Tether) atau rangka sokongan telah dipasang pada palang stereng untuk mengelakkan skuter terhempas jika hilang kawalan." },
+          { id: "s2", text: "Pengapit Pelapik Kaki (Footpad Clamp) atau pemberat statik diletakkan dengan kemas bagi mengaktifkan suis keselamatan kaki tanpa penunggang." },
+          { id: "s3", text: "Tiada penggerudian, hentakan, atau tekanan tajam dikenakan pada bahagian bawah platform yang menempatkan pek bateri Li-Ion 36V." },
+          { id: "s4", text: "Komunikasi data menggunakan kabel USB panjang (2–3 meter) atau tanpa wayar (ESP32 + Blynk / Bluetooth) supaya komputer riba berada pada jarak selamat." },
+          { id: "s5", text: "Pemasangan pendakap (bracket) Arduino, MPU6050, dan aktuator luaran telah diperiksa oleh Penolong Jurutera En. Adib." }
+        ],
+        ovSafetyProgress: "Status Kesediaan Keselamatan:",
+
+        // Tab 2: Theory, FBD, Data Acquisition & Code
+        refSectionTitle: "Pautan Rujukan Pemodelan & Muat Turun Perisian",
+        refLinks: [
+          {
+            badge: "Rujukan Teori",
+            title: "CTMS: Inverted Pendulum Modeling",
+            desc: "Tutorial lengkap penerbitan persamaan dinamik dan pemodelan sistem bandul songsang oleh University of Michigan.",
+            btnText: "Buka Panduan CTMS",
+            url: "https://ctms.engin.umich.edu/CTMS/index.php?example=InvertedPendulum&section=SystemModeling",
+            color: "blue"
+          },
+          {
+            badge: "Pilihan Simulasi",
+            title: "MathWorks (MATLAB & Simulink)",
+            desc: "Portal rasmi MATLAB/Simulink bagi pelajar yang ingin membuat pengesahan simulasi tambahan di luar makmal.",
+            btnText: "Layari MathWorks",
+            url: "https://www.mathworks.com/",
+            color: "amber"
+          },
+          {
+            badge: "Perisian Wajib",
+            title: "Arduino IDE Software",
+            desc: "Muat turun perisian rasmi Arduino IDE untuk menulis kod pengawal PID, membaca data MPU6050, dan memaparkan graf Serial Plotter.",
+            btnText: "Muat Turun Arduino IDE",
+            url: "https://www.arduino.cc/en/software/",
+            color: "emerald"
+          }
+        ],
+
+        // Interactive FBD & Stability Simulator (BM)
+        fbdTitle: "Gambar Rajah Jasad Bebas (FBD) Interaktif & Simulator Kestabilan",
+        fbdSubtitle: "Ubah parameter fizikal (jisim beban Mb, ketinggian pusat graviti l) dan gandaan pengawal (Kp, Kd) untuk melihat kesan langsung terhadap kestabilan sistem, lokasi kutub satah-s, dan tindak balas sudut θ(t).",
+        fbdParamMb: "Jisim Badan + Beban (Mb)",
+        fbdParamL: "Ketinggian Pusat Graviti (l)",
+        fbdParamKp: "Gandaan Kekakuan (Kp)",
+        fbdParamKd: "Gandaan Redaman (Kd)",
+        fbdBtnDisturb: "Kenakan Gangguan Impuls",
+        fbdBtnReset: "Set Semula Parameter",
+        fbdCritLabel: "Syarat Kestabilan Kritikal:",
+        fbdStatusStable: "STABIL (Underdamped / Overdamped)",
+        fbdStatusMarginal: "SEMPADAN STABIL (Marginally Stable)",
+        fbdStatusUnstable: "TIDAK STABIL (Kutub di Separuh Satah Kanan)",
+        fbdSPlaneTitle: "Peta Kutub Satah-s (s-Plane)",
+        fbdRespTitle: "Simulasi Tindak Balas Sudut θ(t)",
+
+        // Mathematical Equations
+        thMathTitle: "1. Pemodelan Matematik Bandul Songsang Dua Roda (TWIP)",
+        thMathDesc: "Dengan menganggap sudut kecondongan θ kecil di sekitar titik keseimbangan tegak (sin θ ≈ θ, cos θ ≈ 1), persamaan dinamik berlinear sistem ialah:",
+        thFilterTitle: "2. Penapisan Isyarat MPU6050 (Complementary Filter)",
+        thFilterDesc: "Sensor Accelerometer sensitif terhadap getaran motor (hingar frekuensi tinggi), manakala Gyroscope mengalami hanyutan (drift). Gabungan kedua-duanya menghasilkan bacaan sudut bersih pada kadar persampelan 100 Hz (Δt = 0.01 s):",
+
+        // System ID Calculator
+        calcTitle: "3. Kalkulator System Identification (Daripada Data Eksperimen Excel)",
+        calcDesc: "Masukkan nilai Peratus Lajakan (%OS) dan Masa Puncak (Tp) yang diukur daripada graf tindak balas langkah/impuls skuter anda:",
+        calcInputOS: "Peratus Lajakan, %OS (%)",
+        calcInputTp: "Masa Puncak, Tp (saat)",
+        calcBtn: "Kira Parameter Fungsi Pindah G(s)",
+        calcResZeta: "Nisbah Redaman (ζ)",
+        calcResWn: "Frekuensi Tabii (ωn)",
+        calcResTs: "Masa Enapan 2% (Ts)",
+        calcResTf: "Fungsi Pindah Tertib Kedua G(s):",
+
+        // Data Acquisition SOP & Code
+        daqTitle: "4. SOP Pengumpulan Data (Data Acquisition) & Kod Pemula Arduino IDE",
+        daqSubtitle: "Pilih kaedah telemetri yang digunakan oleh kumpulan anda untuk merekod data sudut θ ke dalam Excel:",
+        daqTabUsb: "Kaedah A: Kabel USB Panjang + Excel (Event Marker)",
+        daqTabBlynk: "Kaedah B: ESP32 + Blynk IoT Tanpa Wayar (Dual-Timer)",
+        daqUsbSteps: [
+          "Sambungkan MPU6050 ke Arduino (VCC→5V/3.3V, GND→GND, SDA→A4, SCL→A5) dan suis tekan Event Marker ke Pin D2 (INPUT_PULLUP).",
+          "Buka Arduino Serial Monitor pada kadar 115200 baud. Tekan suis Event Marker serentak semasa mengenakan gangguan beban/tolakan (nilai Marker bertukar dari 0 ke 1).",
+          "Nyahaktif kotak 'Autoscroll', tekan Ctrl+A dan Ctrl+C, kemudian tampal ke dalam Microsoft Excel (gunakan Data → Text to Columns → Comma).",
+          "Jadikan baris pertama yang mempunyai Marker = 1 sebagai titik masa rujukan t = 0.00 s untuk memplot graf tindak balas."
+        ],
+        daqBlynkSteps: [
+          "Gunakan papan ESP32 (SDA→GPIO 21, SCL→GPIO 22) yang disambungkan ke Mobile Hotspot kumpulan menggunakan templat Blynk IoT.",
+          "Seni Bina Dual-Timer: Gelung kawalan PID berjalan secara tempatan pada 100 Hz (10 ms), manakala penghantaran graf ke Blynk SuperChart dihadkan pada 10 Hz (100 ms) bagi mengelakkan kelewatan Wi-Fi.",
+          "Gunakan widget Slider pada aplikasi telefon Blynk (V2: Kp, V3: Ki, V4: Kd) untuk melakukan Live Tuning secara tanpa wayar semasa skuter bergerak.",
+          "Klik butang 'Export to CSV' pada konsol Blynk untuk memuat turun data graf dan membukanya dalam Excel."
+        ],
+        btnCopyCode: "Salin Kod Arduino",
+
+        // Tab 3: Schedule & 2-Hour Protocol
+        schFinderTitle: "Pencari Giliran Skuter & Stesen Kumpulan",
+        schFinderDesc: "Pilih nombor kumpulan anda (G1–G6) untuk melihat unit skuter yang diagihkan serta giliran stesen dalam setiap sesi makmal:",
+        schSelectGroup: "Pilih Kumpulan Anda:",
+        schAssignedUnit: "Unit Skuter Agihan",
+        schPartnerGroup: "Kumpulan Rakan Kongsi",
+        schHalf1: "Separuh Masa 1 (00:15 – 01:00)",
+        schHalf2: "Separuh Masa 2 (01:00 – 01:45)",
+        schStPhys: "Stesen Fizikal (Pengujian Atas Skuter)",
+        schStWork: "Stesen Meja Kerja (Analisis Excel & Kod Arduino)",
+
+        twoHrTitle: "Panduan Langkah demi Langkah Sesi Makmal 2 Jam (120 Minit)",
+        twoHrSubtitle: "Pilih minggu di bawah untuk melihat aliran kerja terperinci mengikut giliran stesen kumpulan anda (G1–G6) dalam tempoh 2 jam:",
+        twoHrSelectWeek: "Pilih Minggu Sesi:",
+        twoHrBadgeTotal: "Tempoh: 2 Jam (120 Minit)",
+        twoHrSlot1Time: "00:00 – 00:15 (15 Minit)",
+        twoHrSlot1Title: "Fasa 1: Taklimat, Semakan Keselamatan & Kalibrasi Awal",
+        twoHrSlot2Time: "00:15 – 01:00 (45 Minit)",
+        twoHrSlot2Prefix: "Fasa 2 (Separuh Masa 1):",
+        twoHrSlot3Time: "01:00 – 01:45 (45 Minit)",
+        twoHrSlot3Prefix: "Fasa 3 (Separuh Masa 2 — Tukar Stesen):",
+        twoHrSlot4Time: "01:45 – 02:00 (15 Minit)",
+        twoHrSlot4Title: "Fasa 4: Pengemasan Peralatan, Simpan Data & Semakan Kemajuan",
+        twoHrPhysTag: "STESEN FIZIKAL (ATAS SKUTER)",
+        twoHrWorkTag: "STESEN MEJA KERJA (ANALISIS & KOD)",
+        twoHrEvalTag: "SESI PENILAIAN AKHIR (SEMUA KUMPULAN)",
+        twoHrPlans: {
+          1: {
+            briefing: [
+              "Lapor kehadiran kepada Ts. Dr. Hanani dan terima taklimat ringkas objektif Minggu 1.",
+              "Semak unit skuter agihan (Unit A/B/C) bersama Penolong Jurutera En. Adib (paras bateri & fungsi suis kaki).",
+              "Pastikan tali keselamatan (safety tether) dan pengapit pelapik kaki (footpad clamp) dipasang sebelum skuter dihidupkan."
+            ],
+            physSteps: [
+              "Ukur parameter fizikal skuter (jisim anggaran Mb, jejari roda r, dan tinggi pusat graviti l) dengan bimbingan En. Adib.",
+              "Lekatkan sensor MPU6050 di bahagian tengah platform menggunakan double-sided foam tape untuk menyerap getaran motor.",
+              "Pasang papan Arduino/ESP32 secara kemas pada palang stereng menggunakan pengikat boleh tanggal (velcro/bracket).",
+              "Uji bacaan sudut kecondongan (θ) pada Serial Plotter sambil mencondongkan skuter secara manual untuk mengesahkan arah paksi (+ depan, - belakang)."
+            ],
+            workSteps: [
+              "Bina litar pendawaian MPU6050 (VCC, GND, SDA, SCL) dan butang Event Marker (Pin D2) di atas breadboard.",
+              "Tulis dan muat naik kod Complementary Filter (α = 0.98) dalam Arduino IDE serta sahkan tiada hanyutan (drift) selama 60 saat.",
+              "Lukis gambar rajah blok sistem gelung tertutup (mengenal pasti Reference, Controller, Plant, Sensor, dan Disturbance).",
+              "Siapkan draf Cadangan Eksperimen (1–2 muka surat) untuk semakan akhir sesi."
+            ],
+            wrapup: [
+              "Matikan kuasa skuter, tanggalkan bracket Arduino/MPU6050, dan kembalikan skuter ke ruang simpanan En. Adib.",
+              "Simpan salinan kod penapis sensor (.ino) dan serahkan draf Cadangan Eksperimen kepada Ts. Dr. Hanani."
+            ]
+          },
+          2: {
+            briefing: [
+              "Semak maklum balas draf Cadangan Eksperimen daripada Ts. Dr. Hanani.",
+              "Sahkan papan Arduino/ESP32 dan sensor MPU6050 berfungsi dengan kadar persampelan tetap 100 Hz (10 ms).",
+              "Sediakan pemberat gangguan piawai (cth: beban 1 kg) dan periksa tali keselamatan bersama En. Adib."
+            ],
+            physSteps: [
+              "Pasang rig sensor MPU6050 + butang Event Marker pada unit skuter kumpulan anda.",
+              "Mulakan rekod data (Serial Monitor 115200 baud atau Blynk SuperChart) dan tekan butang Event Marker (Marker = 1) serentak semasa melepaskan gangguan tolakan/beban.",
+              "Ulang ujian gangguan sebanyak 3 kali (6 saat setiap ujian) bagi mendapatkan lengkung tindak balas yang konsisten.",
+              "Salin/eksport data mentah CSV (Time, Pitch, Marker) ke komputer riba sebelum menyerahkan skuter kepada kumpulan rakan."
+            ],
+            workSteps: [
+              "Import data CSV ke dalam Microsoft Excel (Data → Text to Columns) dan tetapkan t = 0 s pada baris pertama Marker = 1.",
+              "Plot graf tindak balas fana θ(t) dan ukur nilai peratus lajakan (%OS), masa puncak (Tp), dan masa enapan 2% (Ts).",
+              "Gunakan Kalkulator System ID dalam portal ini untuk mengira nisbah redaman (ζ), frekuensi tabii (ωn), dan Fungsi Pindah G(s).",
+              "Sahkan kedudukan kutub pada satah-s dan kemaskini helaian pengesahan model Minggu 2."
+            ],
+            wrapup: [
+              "Matikan skuter, tanggalkan peralatan luaran, dan pastikan tiada kabel tertinggal di kawasan ujian.",
+              "Tunjukkan graf eksperimen Excel dan persamaan G(s) kumpulan anda kepada Ts. Dr. Hanani sebelum tamat makmal."
+            ]
+          },
+          3: {
+            briefing: [
+              "Bincang parameter G(s) Minggu 2 dan semak strategi reka bentuk pengawal PID bersama Ts. Dr. Hanani.",
+              "Periksa struktur mekanikal tambahan (servo linkage / pemberat gelangsar) bersama En. Adib bagi memastikan tiada ubah suai litar dalaman skuter."
+            ],
+            physSteps: [
+              "Uji pemasangan fizikal aktuator luaran boleh tanggal pada palang stereng atau platform skuter.",
+              "Pastikan bekalan kuasa luaran (bateri berasingan untuk servo/ESP32) stabil dan tidak membebankan pin 5V mikropengawal.",
+              "Jalankan ujian statik (dry-run) pergerakan aktuator terhadap simulasi sudut kecondongan.",
+              "Rekodkan had fizikal aktuator (sudut maksimum, deadzone, dan masa tindak balas) untuk tetapan had kod PID."
+            ],
+            workSteps: [
+              "Berdasarkan G(s) Minggu 2, kira anggaran awal gandaan PID (Kp, Ki, Kd) menggunakan kaedah Ziegler-Nichols atau penempatan kutub.",
+              "Tulis algoritma PID diskret dalam Arduino IDE dengan pemasa tetap (Δt = 0.01 s) serta had anti-windup pada bahagian Integral.",
+              "Aktifkan fungsi Live Tuning (melalui Serial Monitor atau Slider Blynk) supaya nilai Kp, Ki, Kd boleh diubah tanpa muat naik semula kod.",
+              "Uji kepekaan kestabilan parameter kumpulan anda menggunakan Simulator FBD & s-Plane dalam portal."
+            ],
+            wrapup: [
+              "Simpan struktur mekanikal tambahan di tempat khas yang disediakan oleh En. Adib.",
+              "Sahkan kod PID berjaya dikompil tanpa ralat dan tunjukkan pengiraan awal (Kp, Ki, Kd) kepada Ts. Dr. Hanani."
+            ]
+          },
+          4: {
+            briefing: [
+              "Taklimat ringkas strategi penalaan akhir (fine-tuning) dan persediaan data perbandingan Before vs. After.",
+              "Pemeriksaan keselamatan wajib oleh En. Adib sebelum ujian gelung tertutup penuh dijalankan."
+            ],
+            physSteps: [
+              "Pasang keseluruhan sistem (sensor MPU6050 + mikropengawal + aktuator luaran) pada skuter dengan tali keselamatan.",
+              "Rekodkan ujian asas (Tanpa Pengawal Luaran / Baseline) diikuti ujian dengan Pengawal Luaran (PID Aktif) di bawah gangguan yang sama.",
+              "Lakukan live fine-tuning pada nilai Kp, Ki, Kd untuk meminimumkan ayunan (%OS), masa enapan (Ts), dan ralat keadaan mantap.",
+              "Simpan set data CSV terbaik ('Before' dan 'After') untuk analisis prestasi akhir."
+            ],
+            workSteps: [
+              "Tindihkan (overlay) graf tindak balas θ(t) 'Before vs. After' dalam Excel menggunakan skala masa yang seragam.",
+              "Lengkapkan jadual perbandingan kuantitatif (% pengurangan overshoot, masa enapan, dan ralat keadaan mantap).",
+              "Analisis punca perbezaan antara model teori G(s) dan perkakasan sebenar (geseran mekanikal, deadzone motor, hingar sensor).",
+              "Susun slaid pembentangan Minggu 5 dan agihkan skop soalan Oral Test bagi setiap ahli kumpulan."
+            ],
+            wrapup: [
+              "Tanggalkan semua rig daripada skuter dan pastikan skuter dikembalikan dalam keadaan asal yang bersih.",
+              "Sahkan semua bukti data Minggu 4 lengkap bersama Ts. Dr. Hanani sebagai persediaan penilaian Minggu 5."
+            ]
+          },
+          5: {
+            briefing: [
+              "00:00 – 00:10 (10 Minit): Taklimat susunan giliran penilaian akhir oleh Ts. Dr. Hanani dan semakan keselamatan skuter oleh En. Adib."
+            ],
+            evalSchedule: [
+              "00:10 – 00:26 (16 Min): Penilaian Kumpulan 1 (Unit A) — 5m Demo Langsung + 6m Pembentangan + 5m Oral Test Individu",
+              "00:26 – 00:42 (16 Min): Penilaian Kumpulan 2 (Unit A) — 5m Demo Langsung + 6m Pembentangan + 5m Oral Test Individu",
+              "00:42 – 00:58 (16 Min): Penilaian Kumpulan 3 (Unit B) — 5m Demo Langsung + 6m Pembentangan + 5m Oral Test Individu",
+              "00:58 – 01:14 (16 Min): Penilaian Kumpulan 4 (Unit B) — 5m Demo Langsung + 6m Pembentangan + 5m Oral Test Individu",
+              "01:14 – 01:30 (16 Min): Penilaian Kumpulan 5 (Unit C) — 5m Demo Langsung + 6m Pembentangan + 5m Oral Test Individu",
+              "01:30 – 01:46 (16 Min): Penilaian Kumpulan 6 (Unit C) — 5m Demo Langsung + 6m Pembentangan + 5m Oral Test Individu"
+            ],
+            wrapup: [
+              "01:46 – 02:00 (14 Minit): Penyerahan Laporan Teknikal Akhir & kod sumber (.ino) kepada Ts. Dr. Hanani.",
+              "Pemulangan lengkap semua peralatan, sensor, dan unit skuter dalam keadaan baik kepada En. Adib."
+            ]
+          }
+        },
+        schTitle: "Pelan Induk Makmal 5 Minggu",
+        weeksData: [
+          {
+            week: "Minggu 1",
+            title: "Penerokaan Sistem, Keselamatan & Penapisan MPU6050",
+            focus: "Sensor & Penapisan Isyarat",
+            activities: [
+              "Taklimat keselamatan oleh Ts. Dr. Hanani & En. Adib serta pemeriksaan unit skuter.",
+              "Pemasangan pendakap boleh tanggal untuk Arduino/ESP32 dan MPU6050 tanpa mengubah suai skuter.",
+              "Melaksanakan Complementary Filter dalam Arduino IDE bagi mendapatkan sudut kecondongan (θ) yang bebas hingar dan hanyutan."
+            ],
+            deliverable: "Draf Cadangan Eksperimen (1–2 muka surat) & Gambar Rajah Blok Sistem."
+          },
+          {
+            week: "Minggu 2",
+            title: "System Identification & Pemodelan Fungsi Pindah G(s)",
+            focus: "Pemerolehan Data & Matematik",
+            activities: [
+              "Mengenakan gangguan beban/impuls piawai dan merekodkan data sudut ke dalam Excel.",
+              "Mengukur %OS, Tp, dan Ts daripada graf eksperimen untuk mengira parameter ζ dan ωn.",
+              "Menerbitkan Fungsi Pindah tertib kedua G(s) dan menyemak kestabilan kutub."
+            ],
+            deliverable: "Graf Tindak Balas Asal (Excel) & Persamaan Fungsi Pindah G(s) yang disahkan."
+          },
+          {
+            week: "Minggu 3",
+            title: "Reka Bentuk Pengawal PID & Pembangunan Aktuator Luaran",
+            focus: "Reka Bentuk Kawalan & Mekanikal",
+            activities: [
+              "Mengira parameter awal Kp, Ki, Kd menggunakan kaedah Ziegler-Nichols atau penempatan kutub.",
+              "Membina mekanisme pengimbang/aktuator luaran boleh tanggal (cth: servo linkage / pemberat gelangsar).",
+              "Menulis kod PID diskret (Δt = 10 ms) dengan had anti-windup dan fungsi Live Tuning."
+            ],
+            deliverable: "Kod Sumber PID (.ino), Bukti Pengiraan Gandaan, & Prototaip Rig Luaran."
+          },
+          {
+            week: "Minggu 4",
+            title: "Integrasi Penuh, Penalaan Fizikal (Fine-Tuning) & Analisis Ralat",
+            focus: "Pengujian Gelung Tertutup",
+            activities: [
+              "Menjalankan ujian perbandingan prestasi sebelum dan selepas pengawal luaran diaktifkan.",
+              "Melakukan penalaan halus pada Kp, Ki, Kd untuk meminimumkan ayunan dan masa enapan.",
+              "Menganalisis punca perbezaan antara teori dan eksperimen (geseran, deadzone, ketaklinearan)."
+            ],
+            deliverable: "Jadual Perbandingan Kuantitatif (Before vs. After) & Tindihan Graf Excel."
+          },
+          {
+            week: "Minggu 5",
+            title: "Demonstrasi Langsung, Pembentangan Teknikal & Oral Test",
+            focus: "Penilaian Akhir (CLO)",
+            activities: [
+              "Demonstrasi langsung di hadapan Ts. Dr. Hanani dengan gangguan beban rawak (5 minit).",
+              "Pembentangan teknikal berkumpulan mengenai metodologi dan analisis prestasi (6 minit).",
+              "Sesi soal jawab lisan individu (Oral Test / Viva) bagi setiap ahli kumpulan (5 minit)."
+            ],
+            deliverable: "Laporan Teknikal Akhir, Kod Sumber Lengkap, & Penilaian Oral Test Individu."
+          }
+        ],
+
+        // Tab 4: Roles
+        rolesTitle: "Pembahagian Tugas Ahli Kumpulan (4 Ahli / Kumpulan)",
+        rolesSubtitle: "Setiap ahli wajib mengetuai satu bidang teknikal utama dan bersedia menjawab soalan Oral Test berkaitan skop masing-masing:",
+        rolesData: [
+          {
+            role: "Ketua 1: Pemodelan & Reka Bentuk Kawalan",
+            badge: "Control & Modeling Lead",
+            color: "blue",
+            duties: [
+              "Menerbitkan gambar rajah blok sistem dan persamaan matematik TWIP.",
+              "Mengira nilai ζ, ωn, dan Fungsi Pindah G(s) daripada data eksperimen Minggu 2.",
+              "Menentukan pengiraan awal gandaan PID (Kp, Ki, Kd) serta analisis kestabilan satah-s."
+            ]
+          },
+          {
+            role: "Ketua 2: Sistem Terbenam & Penapisan Sensor",
+            badge: "Embedded & Firmware Lead",
+            color: "emerald",
+            duties: [
+              "Menguruskan pendawaian MPU6050, butang Event Marker, dan mikropengawal (Arduino/ESP32).",
+              "Menulis kod Complementary Filter dan algoritma PID dengan masa persampelan tetap 100 Hz.",
+              "Mengendalikan telemetri masa nyata (Serial Plotter / Blynk Live Tuning)."
+            ]
+          },
+          {
+            role: "Ketua 3: Rig Mekanikal & Keselamatan Makmal",
+            badge: "Mechanical Rig & Safety Lead",
+            color: "amber",
+            duties: [
+              "Mereka bentuk pendakap boleh tanggal untuk sensor dan aktuator luaran pada skuter.",
+              "Memastikan tali keselamatan (safety tether) dan pengapit pelapik kaki sentiasa dipasang sebelum ujian.",
+              "Menyelaras pengeluaran dan pemulangan peralatan bersama Penolong Jurutera En. Adib."
+            ]
+          },
+          {
+            role: "Ketua 4: Analisis Data & Dokumentasi Teknikal",
+            badge: "Data Analytics & Report Lead",
+            color: "purple",
+            duties: [
+              "Mengeksport data CSV, memplot graf tindak balas fana dalam Excel, dan mengukur %OS, Tp, Ts.",
+              "Menyediakan jadual perbandingan prestasi Before vs. After dan analisis ralat perkakasan.",
+              "Menyelaras log kemajuan mingguan, slaid pembentangan, dan Laporan Teknikal Akhir."
+            ]
+          }
+        ],
+        antiFreeRiderTitle: "Polisi Akauntabiliti Individu & Logbook Mingguan",
+        antiFreeRiderBody: "Bagi mengelakkan isu 'free-rider', 50% daripada markah akhir dinilai melalui Ujian Lisan (Oral Test) individu pada Minggu 5. Ts. Dr. Hanani boleh menyoal mana-mana ahli mengenai kod Arduino, pengiraan G(s), atau graf Excel tanpa mengira peranan utama mereka.",
+
+        // Tab 5: Assessment & Viva Simulator
+        assTitle: "Struktur Pemarkahan & Rubrik Penilaian Minggu 5",
+        assWeights: [
+          { label: "Demonstrasi Langsung (Ujian Gangguan)", pct: "20%", desc: "Kestabilan skuter mengekalkan sudut sasaran apabila diberikan gangguan beban rawak oleh pensyarah." },
+          { label: "Pembentangan Teknikal & Laporan", pct: "30%", desc: "Kejelasan metodologi System ID, justifikasi penalaan PID, dan analisis perbezaan teori vs. eksperimen." },
+          { label: "Ujian Lisan Individu (Oral Test / Viva)", pct: "50%", desc: "Kefahaman mendalam setiap pelajar mengenai dinamik sistem, kestabilan, dan kesan parameter PID." }
+        ],
+        rubricHeaders: ["Kriteria Penilaian", "Cemerlang (4)", "Baik (3)", "Memuaskan (2)", "Lemah (1)"],
+        rubricRows: [
+          {
+            crit: "System Identification & Pemodelan G(s)",
+            c4: "Data eksperimen sangat bersih; pengiraan ζ, ωn, dan G(s) tepat serta disahkan dengan graf Excel.",
+            c3: "Data eksperimen baik; pengiraan G(s) tepat dengan ralat minor pada bacaan graf.",
+            c2: "Pengiraan parameter tertib kedua kurang tepat atau penapisan hingar MPU6050 tidak konsisten.",
+            c1: "Gagal menerbitkan model G(s) daripada data eksperimen."
+          },
+          {
+            crit: "Reka Bentuk & Penalaan Pengawal PID",
+            c4: "Algoritma PID (100 Hz) berfungsi cemerlang; mengurangkan %OS dan Ts secara ketara dengan justifikasi kejuruteraan.",
+            c3: "Pengawal PID berjaya menstabilkan sistem dengan penambahbaikan prestasi yang jelas.",
+            c2: "Penalaan dibuat secara cuba-jaya tanpa justifikasi matematik; ayunan masih ketara.",
+            c1: "Pengawal gagal menstabilkan sistem atau kod tidak berfungsi semasa demonstrasi."
+          },
+          {
+            crit: "Kefahaman Konsep (Oral Test Individu)",
+            c4: "Menjawab semua soalan viva dengan yakin, tepat, dan mampu mengaitkan teori kawalan dengan kelakuan fizikal skuter.",
+            c3: "Menjawab kebanyakan soalan dengan baik dan memahami fungsi utama kod serta graf kumpulan.",
+            c2: "Jawapan terhad kepada hafalan umum; kurang jelas kesan perubahan Kp, Ki, Kd.",
+            c1: "Tidak dapat menerangkan hasil kerja kumpulan sendiri semasa disoal."
+          }
+        ],
+        vivaTitle: "Simulator Latihan Soalan Oral Test (Viva)",
+        vivaSubtitle: "Gunakan kad imbas interaktif di bawah untuk menguji kesediaan ahli kumpulan sebelum sesi penilaian Minggu 5:",
+        vivaBtnShow: "Papar Skema Jawapan",
+        vivaBtnHide: "Sembunyi Jawapan",
+        vivaBtnNext: "Soalan Seterusnya",
+        vivaQuestions: [
+          {
+            q: "1. Berdasarkan graf eksperimen kumpulan anda, bagaimanakah anda menentukan sama ada tindak balas asal skuter berada dalam keadaan underdamped atau overdamped?",
+            a: "Sistem adalah underdamped (0 < ζ < 1) jika graf sudut θ(t) melajak melepasi nilai sasaran (overshoot) dan berayun sebelum berhenti pada keadaan mantap. Jika graf meningkat secara perlahan tanpa sebarang lajakan atau ayunan, ia adalah overdamped (ζ > 1)."
+          },
+          {
+            q: "2. Mengapakah kita perlu menggunakan Complementary Filter pada sensor MPU6050 dan tidak menggunakan bacaan Accelerometer semata-mata?",
+            a: "Accelerometer sangat sensitif terhadap getaran mekanikal daripada motor skuter (hingar frekuensi tinggi) yang menyebabkan bacaan sudut melompat-lompat. Gyroscope pula memberikan bacaan pantas dan licin tetapi mengalami hanyutan (drift) dari semasa ke semasa. Complementary Filter menggabungkan penapis laluan rendah (low-pass) pada accelerometer dan penapis laluan tinggi (high-pass) pada gyroscope."
+          },
+          {
+            q: "3. Apakah kesan fizikal yang berlaku pada skuter jika nilai gandaan Derivative (Kd) dinaikkan terlalu tinggi dalam kod Arduino?",
+            a: "Terbitan (derivative) mengira kadar perubahan ralat (de/dt). Jika Kd terlalu tinggi, hingar frekuensi tinggi daripada sensor MPU6050 akan digandakan secara mendadak, menyebabkan aktuator/motor skuter bergetar dengan kuat (chattering) dan menjadi panas."
+          },
+          {
+            q: "4. Mengapakah graf tindak balas sebenar pada skuter masih mempunyai sedikit ralat keadaan mantap (steady-state error) atau ayunan kecil walaupun simulasi menunjukkan ralat sifar?",
+            a: "Model matematik linear mengabaikan ketaklinearan dunia sebenar seperti zon mati motor (motor deadzone), geseran statik (stiction) pada galas roda, kelewatan masa pemprosesan (time delay), dan had ketepuan (saturation) aktuator."
+          },
+          {
+            q: "5. Dalam kod Arduino, mengapakah penggunaan fungsi delay() dilarang dalam gelung kawalan PID dan digantikan dengan pemasa tetap millis()/micros()?",
+            a: "Pengiraan komponen Integral (∑ e·Δt) dan Derivative (Δe/Δt) bergantung secara langsung kepada selang masa persampelan Δt yang malar. Fungsi delay() menyekat pemproses dan menjadikan Δt tidak konsisten, seterusnya merosakkan ketepatan pengawal PID."
+          }
+        ]
+      },
+
+      en: {
+        badgeCourse: "Mechanical Engineering • Year 3",
+        badgeDuration: "5-Week Open-Ended Lab",
+        headerTitle: "Control Engineering Lab: Self-Balancing Scooter System (TWIP)",
+        lblLecturer: "Lecturer:",
+        lblEngineer: "Assistant Engineer:",
+        navOverview: "1. Overview & Safety",
+        navTheory: "2. Theory, FBD & Code",
+        navSchedule: "3. 5-Week Schedule & Rotation",
+        navRoles: "4. Team Task Distribution",
+        navAssessment: "5. Rubric & Oral Test",
+        footerText: "Control Engineering Open-Ended Lab Portal (Year 3 Mechanical Engineering) • Supervised by Ts. Dr. Hanani & En. Adib",
+        footerSub: "Hardware Platform: Self-Balancing Scooter (TWIP) • MPU6050 IMU • Arduino IDE / ESP32 & Excel Data Acquisition",
+
+        // Tab 1: Overview
+        ovProblemTag: "Open-Ended Engineering Problem Statement",
+        ovProblemTitle: "Adapting a Self-Balancing Scooter as a Light-Cargo Autonomous Guided Vehicle (AGV)",
+        ovProblemBody: "A logistics company intends to adapt a two-wheeled self-balancing scooter (TWIP) into an automated indoor light-cargo carrier. As control engineers, your team is tasked with characterizing the scooter's existing closed-loop dynamics without modifying its internal circuitry, deriving a second-order mathematical transfer function model, and designing an external outer-loop controller (using Arduino/ESP32 and an MPU6050 IMU) to minimize pitch angle oscillation and settling time when subjected to sudden payload disturbances.",
+        ovConstraintsTitle: "Engineering Constraints & Lab Infrastructure",
+        ovConstraints: [
+          { icon: "layers", title: "Equipment Ratio (6 Groups : 3 Scooters)", desc: "Every 2 groups share 1 scooter unit (Unit A, Unit B, Unit C) via a structured 45-minute station rotation." },
+          { icon: "shield-check", title: "Non-Invasive Plug-and-Play Approach", desc: "Opening the scooter casing or cutting internal wires is strictly prohibited. All external sensors and actuators must be removable." },
+          { icon: "cpu", title: "Arduino IDE + MPU6050 Ecosystem", desc: "Signal filtering and discrete PID control algorithms are written directly in C++ (Arduino IDE) without black-box auto-tuners." },
+          { icon: "target", title: "Week 5 Capstone Evaluation", desc: "Each group is evaluated via live random disturbance testing, a technical presentation, and an individual Oral Test (Viva)." }
+        ],
+        ovActuatorsTitle: "3 External Actuator Mechanism Options (Non-Invasive Outer-Loop)",
+        ovActuatorsSubtitle: "Because internal scooter circuits cannot be modified, Arduino + MPU6050 acts as an external 'robotic rider' using one of these removable mechanisms:",
+        ovActuators: [
+          {
+            id: "countermass",
+            badge: "Option A • CoG Shifting",
+            title: "Active Sliding Counter-Mass",
+            setupLabel: "Mechanical Setup:",
+            setup: "Mount a high-torque servo arm or rack-and-pinion slider carrying a small counterweight (~0.5 kg) onto the steering bar or platform.",
+            principleLabel: "Control Principle:",
+            principle: "When MPU6050 detects a forward pitch tilt (θ > 0°), the PID controller shifts the counterweight backward, generating an opposing restoring torque to damp oscillation.",
+            partsLabel: "Key Components:",
+            parts: "MPU6050, High-Torque Servo (MG996R), 0.5 kg Mass, Removable Bracket"
+          },
+          {
+            id: "flywheel",
+            badge: "Option B • Angular Momentum",
+            title: "Reaction Wheel / Flywheel Damper",
+            setupLabel: "Mechanical Setup:",
+            setup: "Mount a DC motor with a motor driver driving a weighted flywheel vertically along the steering column.",
+            principleLabel: "Control Principle:",
+            principle: "By conservation of angular momentum, when the scooter tilts, the PID controller accelerates or brakes the flywheel, producing an inertial reaction torque that rapidly damps pitch oscillation.",
+            partsLabel: "Key Components:",
+            parts: "MPU6050, DC Motor + Driver (L298N/IBT-2), Flywheel Disc, External Battery"
+          },
+          {
+            id: "platooning",
+            badge: "Option C • AGV Distance Control",
+            title: "Tilt-Induced Distance / Platooning Control",
+            setupLabel: "Mechanical Setup:",
+            setup: "Mount a front-facing Ultrasonic/LiDAR distance sensor alongside a servo-actuated tilting counterweight mechanism.",
+            principleLabel: "Control Principle:",
+            principle: "If distance to a target/wall drops below 1.0 m, the PID controller shifts the counterweight backward to tilt the platform—causing the scooter's inner loop to reverse and hold at 1.0 m.",
+            partsLabel: "Key Components:",
+            parts: "MPU6050, Ultrasonic Sensor (HC-SR04), Servo Motor, Counterweight"
+          }
+        ],
+        ovSafetyTitle: "Mandatory Safety Checklist (Verified by En. Adib)",
+        ovSafetySubtitle: "Check all items below before powering on the scooter inside the testing zone:",
+        ovSafetyItems: [
+          { id: "s1", text: "Safety Tether or support frame is securely attached to the steering bar to prevent the scooter from crashing if instability occurs." },
+          { id: "s2", text: "Footpad Clamp or static counterweight is safely mounted to engage the rider foot switches during unmanned tests." },
+          { id: "s3", text: "No drilling, impacts, or sharp loads applied to the underside of the platform housing the 36V Li-Ion battery pack." },
+          { id: "s4", text: "Telemetry uses a long USB cable (2–3 m) or wireless link (ESP32 + Blynk / Bluetooth) so laptops remain at a safe distance." },
+          { id: "s5", text: "Mounting brackets for Arduino, MPU6050, and external actuators have been inspected by Assistant Engineer En. Adib." }
+        ],
+        ovSafetyProgress: "Safety Readiness Status:",
+
+        // Tab 2: Theory, FBD, Data Acquisition & Code
+        refSectionTitle: "System Modeling References & Software Downloads",
+        refLinks: [
+          {
+            badge: "Theory Reference",
+            title: "CTMS: Inverted Pendulum Modeling",
+            desc: "Comprehensive equations of motion and state-space/transfer function modeling guide by the University of Michigan.",
+            btnText: "Open CTMS Guide",
+            url: "https://ctms.engin.umich.edu/CTMS/index.php?example=InvertedPendulum&section=SystemModeling",
+            color: "blue"
+          },
+          {
+            badge: "Optional Simulation",
+            title: "MathWorks (MATLAB & Simulink)",
+            desc: "Official MATLAB/Simulink portal for students who wish to perform supplementary offline simulation verification.",
+            btnText: "Visit MathWorks",
+            url: "https://www.mathworks.com/",
+            color: "amber"
+          },
+          {
+            badge: "Required Software",
+            title: "Arduino IDE Software",
+            desc: "Download the official Arduino IDE to program the PID controller, read MPU6050 data, and view the Serial Plotter.",
+            btnText: "Download Arduino IDE",
+            url: "https://www.arduino.cc/en/software/",
+            color: "emerald"
+          }
+        ],
+
+        // Interactive FBD & Stability Simulator (EN)
+        fbdTitle: "Interactive Free Body Diagram (FBD) & Stability Simulator",
+        fbdSubtitle: "Adjust physical parameters (body + payload mass Mb, CoG height l) and controller gains (Kp, Kd) to observe real-time effects on system stability, s-plane poles, and pitch response θ(t).",
+        fbdParamMb: "Body + Payload Mass (Mb)",
+        fbdParamL: "Center of Gravity Height (l)",
+        fbdParamKp: "Stiffness Gain (Kp)",
+        fbdParamKd: "Damping Gain (Kd)",
+        fbdBtnDisturb: "Apply Impulse Disturbance",
+        fbdBtnReset: "Reset Parameters",
+        fbdCritLabel: "Critical Stability Condition:",
+        fbdStatusStable: "STABLE (Underdamped / Overdamped)",
+        fbdStatusMarginal: "MARGINALLY STABLE (Poles on Imaginary Axis)",
+        fbdStatusUnstable: "UNSTABLE (Right-Half Plane Pole)",
+        fbdSPlaneTitle: "s-Plane Pole Location Map",
+        fbdRespTitle: "Simulated Pitch Response θ(t)",
+
+        // Mathematical Equations
+        thMathTitle: "1. Mathematical Modeling of Two-Wheeled Inverted Pendulum (TWIP)",
+        thMathDesc: "Assuming small pitch deviations θ around the upright equilibrium (sin θ ≈ θ, cos θ ≈ 1), the linearized equation of motion is:",
+        thFilterTitle: "2. MPU6050 Signal Filtering (Complementary Filter)",
+        thFilterDesc: "Accelerometers suffer from motor vibration (high-frequency noise), whereas gyroscopes drift over time. Combining both at 100 Hz (Δt = 0.01 s) yields clean pitch angles:",
+
+        // System ID Calculator
+        calcTitle: "3. System Identification Calculator (From Excel Experimental Data)",
+        calcDesc: "Enter Percent Overshoot (%OS) and Peak Time (Tp) measured from your scooter's step/impulse response plot:",
+        calcInputOS: "Percent Overshoot, %OS (%)",
+        calcInputTp: "Peak Time, Tp (seconds)",
+        calcBtn: "Calculate Transfer Function G(s)",
+        calcResZeta: "Damping Ratio (ζ)",
+        calcResWn: "Natural Frequency (ωn)",
+        calcResTs: "2% Settling Time (Ts)",
+        calcResTf: "Second-Order Transfer Function G(s):",
+
+        // Data Acquisition SOP & Code
+        daqTitle: "4. Data Acquisition SOP & Arduino IDE Starter Code",
+        daqSubtitle: "Select the telemetry method used by your group to log pitch angle θ data into Excel:",
+        daqTabUsb: "Method A: Long USB Cable + Excel (Event Marker)",
+        daqTabBlynk: "Method B: Wireless ESP32 + Blynk IoT (Dual-Timer)",
+        daqUsbSteps: [
+          "Wire MPU6050 to Arduino (VCC→5V/3.3V, GND→GND, SDA→A4, SCL→A5) and connect the Event Marker push button to Pin D2 (INPUT_PULLUP).",
+          "Open Arduino Serial Monitor at 115200 baud. Press the Event Marker button simultaneously when applying the payload/impulse disturbance (Marker changes from 0 to 1).",
+          "Uncheck 'Autoscroll', press Ctrl+A and Ctrl+C, then paste into Microsoft Excel (Data → Text to Columns → Comma).",
+          "Set the first row with Marker = 1 as reference time t = 0.00 s to plot the transient response curve."
+        ],
+        daqBlynkSteps: [
+          "Use an ESP32 board (SDA→GPIO 21, SCL→GPIO 22) connected to your group's Mobile Hotspot using the Blynk IoT template.",
+          "Dual-Timer Architecture: The local PID loop runs at 100 Hz (10 ms), while Blynk SuperChart telemetry is throttled to 10 Hz (100 ms) to prevent Wi-Fi lag.",
+          "Use Blynk mobile Slider widgets (V2: Kp, V3: Ki, V4: Kd) for wireless Live Tuning while the scooter is operating.",
+          "Click 'Export to CSV' in the Blynk Console to download logged data and open it in Excel."
+        ],
+        btnCopyCode: "Copy Arduino Code",
+
+        // Tab 3: Schedule & 2-Hour Protocol
+        schFinderTitle: "Group Scooter & Station Rotation Finder",
+        schFinderDesc: "Select your group number (G1–G6) to view your assigned scooter unit and station rotation within each lab session:",
+        schSelectGroup: "Select Your Group:",
+        schAssignedUnit: "Assigned Scooter Unit",
+        schPartnerGroup: "Sharing Partner Group",
+        schHalf1: "First Half (00:15 – 01:00)",
+        schHalf2: "Second Half (01:00 – 01:45)",
+        schStPhys: "Physical Station (On-Scooter Testing)",
+        schStWork: "Workstation (Excel Analysis & Arduino Code)",
+
+        twoHrTitle: "2-Hour Lab Session Step-by-Step Guide (120 Minutes)",
+        twoHrSubtitle: "Select a week below to view the detailed 2-hour workflow tailored to your group's station rotation (G1–G6):",
+        twoHrSelectWeek: "Select Session Week:",
+        twoHrBadgeTotal: "Duration: 2 Hours (120 Mins)",
+        twoHrSlot1Time: "00:00 – 00:15 (15 Mins)",
+        twoHrSlot1Title: "Phase 1: Briefing, Safety Inspection & Initial Calibration",
+        twoHrSlot2Time: "00:15 – 01:00 (45 Mins)",
+        twoHrSlot2Prefix: "Phase 2 (First Half):",
+        twoHrSlot3Time: "01:00 – 01:45 (45 Mins)",
+        twoHrSlot3Prefix: "Phase 3 (Second Half — Station Swap):",
+        twoHrSlot4Time: "01:45 – 02:00 (15 Mins)",
+        twoHrSlot4Title: "Phase 4: Equipment Pack-Up, Data Backup & Progress Check",
+        twoHrPhysTag: "PHYSICAL STATION (ON SCOOTER)",
+        twoHrWorkTag: "WORKSTATION (ANALYSIS & CODE)",
+        twoHrEvalTag: "FINAL CAPSTONE EVALUATION (ALL GROUPS)",
+        twoHrPlans: {
+          1: {
+            briefing: [
+              "Check in with Ts. Dr. Hanani and review Week 1 learning objectives.",
+              "Inspect assigned scooter unit (Unit A/B/C) with Assistant Engineer En. Adib (battery level & footpad switch check).",
+              "Verify safety tether and footpad clamp installation before powering on the scooter."
+            ],
+            physSteps: [
+              "Measure scooter physical parameters (estimated mass Mb, wheel radius r, and CoG height l) with En. Adib's guidance.",
+              "Mount the MPU6050 sensor at the center of the platform using double-sided foam tape to damp motor vibration.",
+              "Secure the Arduino/ESP32 board onto the steering column using removable velcro/brackets.",
+              "Verify pitch angle (θ) polarity on Serial Plotter while manually tilting the scooter (+ forward, - backward)."
+            ],
+            workSteps: [
+              "Wire the MPU6050 (VCC, GND, SDA, SCL) and Event Marker push button (Pin D2) on a breadboard.",
+              "Upload the Complementary Filter sketch (α = 0.98) in Arduino IDE and verify zero gyro drift over 60 seconds.",
+              "Draw the closed-loop block diagram (identifying Reference, Controller, Plant, Sensor, and Disturbance).",
+              "Finalize the 1–2 page Experiment Proposal draft for end-of-session review."
+            ],
+            wrapup: [
+              "Power off the scooter, detach Arduino/MPU6050 brackets, and return the unit to En. Adib's storage bay.",
+              "Back up your sensor filter sketch (.ino) and submit the Experiment Proposal draft to Ts. Dr. Hanani."
+            ]
+          },
+          2: {
+            briefing: [
+              "Review Week 1 Experiment Proposal feedback from Ts. Dr. Hanani.",
+              "Confirm Arduino/ESP32 and MPU6050 are sampling reliably at 100 Hz (10 ms).",
+              "Prepare standardized disturbance payload (e.g., 1 kg mass) and verify safety tether with En. Adib."
+            ],
+            physSteps: [
+              "Mount the MPU6050 + Event Marker rig onto your group's assigned scooter unit.",
+              "Start logging data (Serial Monitor 115200 baud or Blynk SuperChart) and press the Event Marker button (Marker = 1) right as you apply the impulse/payload disturbance.",
+              "Repeat the disturbance test 3 times (6 seconds per run) to obtain repeatable transient curves.",
+              "Save/export raw CSV data (Time, Pitch, Marker) to your laptop before handing over the scooter to your partner group."
+            ],
+            workSteps: [
+              "Import CSV data into Microsoft Excel (Data → Text to Columns) and align t = 0 s at the first row where Marker = 1.",
+              "Plot the transient pitch response θ(t) and measure Percent Overshoot (%OS), Peak Time (Tp), and 2% Settling Time (Ts).",
+              "Use the System ID Calculator in this portal to compute damping ratio (ζ), natural frequency (ωn), and Transfer Function G(s).",
+              "Verify s-plane pole locations and update your Week 2 model validation sheet."
+            ],
+            wrapup: [
+              "Power down the scooter, remove external hardware, and ensure the test zone is clear.",
+              "Present your Excel response plots and derived G(s) equation to Ts. Dr. Hanani before leaving."
+            ]
+          },
+          3: {
+            briefing: [
+              "Discuss Week 2 G(s) parameters and review PID controller design strategy with Ts. Dr. Hanani.",
+              "Inspect external mechanical actuator rigs (servo linkage / sliding mass) with En. Adib to ensure zero internal scooter modification."
+            ],
+            physSteps: [
+              "Test-fit the removable external actuator onto the steering bar or platform.",
+              "Ensure external actuator power (separate battery for servo/ESP32) is stable and does not brown out the microcontroller.",
+              "Conduct a static dry-run test verifying actuator deflection direction against manual pitch tilts.",
+              "Record physical actuator limits (max angle, deadzone, response speed) for PID output saturation clamping."
+            ],
+            workSteps: [
+              "Using Week 2 G(s), calculate initial PID gains (Kp, Ki, Kd) via Ziegler-Nichols or analytical pole placement.",
+              "Implement discrete PID control in Arduino IDE with fixed sampling (Δt = 0.01 s) and integral anti-windup.",
+              "Enable Live Tuning (via Serial Monitor or Blynk Sliders) so Kp, Ki, Kd can be adjusted without re-flashing.",
+              "Test parameter stability sensitivity using the interactive FBD & s-Plane Simulator in this portal."
+            ],
+            wrapup: [
+              "Store mechanical actuator rigs in the designated lab locker managed by En. Adib.",
+              "Verify error-free PID code compilation and show initial gain calculations (Kp, Ki, Kd) to Ts. Dr. Hanani."
+            ]
+          },
+          4: {
+            briefing: [
+              "Briefing on final live fine-tuning strategy and Before vs. After comparative data requirements.",
+              "Mandatory pre-test safety inspection by En. Adib prior to full closed-loop testing."
+            ],
+            physSteps: [
+              "Mount the complete system (MPU6050 + microcontroller + external actuator) onto the scooter with safety tether engaged.",
+              "Record baseline response (Outer-Loop OFF) followed by controlled response (Outer-Loop PID ON) under identical disturbances.",
+              "Perform live fine-tuning on Kp, Ki, Kd to minimize %OS, settling time (Ts), and steady-state error.",
+              "Save your best 'Before' and 'After' CSV datasets for final performance comparison."
+            ],
+            workSteps: [
+              "Overlay 'Before vs. After' pitch response curves θ(t) in Excel on a synchronized time axis.",
+              "Complete the quantitative improvement table (% overshoot reduction, settling time improvement, steady-state error).",
+              "Analyze discrepancies between theoretical G(s) and hardware behavior (friction, motor deadzone, sensor noise).",
+              "Prepare Week 5 presentation slides and assign Oral Test review topics across all group members."
+            ],
+            wrapup: [
+              "Detach all rigs from the scooter and return the unit in clean, original condition.",
+              "Confirm Week 4 datasets are verified by Ts. Dr. Hanani ahead of Week 5 evaluation."
+            ]
+          },
+          5: {
+            briefing: [
+              "00:00 – 00:10 (10 Mins): Final evaluation order briefing by Ts. Dr. Hanani and scooter safety check by En. Adib."
+            ],
+            evalSchedule: [
+              "00:10 – 00:26 (16 Mins): Group 1 Evaluation (Unit A) — 5m Live Demo + 6m Presentation + 5m Individual Oral Test",
+              "00:26 – 00:42 (16 Mins): Group 2 Evaluation (Unit A) — 5m Live Demo + 6m Presentation + 5m Individual Oral Test",
+              "00:42 – 00:58 (16 Mins): Group 3 Evaluation (Unit B) — 5m Live Demo + 6m Presentation + 5m Individual Oral Test",
+              "00:58 – 01:14 (16 Mins): Group 4 Evaluation (Unit B) — 5m Live Demo + 6m Presentation + 5m Individual Oral Test",
+              "01:14 – 01:30 (16 Mins): Group 5 Evaluation (Unit C) — 5m Live Demo + 6m Presentation + 5m Individual Oral Test",
+              "01:30 – 01:46 (16 Mins): Group 6 Evaluation (Unit C) — 5m Live Demo + 6m Presentation + 5m Individual Oral Test"
+            ],
+            wrapup: [
+              "01:46 – 02:00 (14 Mins): Submission of Final Technical Report & source code (.ino) to Ts. Dr. Hanani.",
+              "Complete return of all sensors, rigs, and scooter units in good condition to En. Adib."
+            ]
+          }
+        },
+        schTitle: "5-Week Lab Master Plan",
+        weeksData: [
+          {
+            week: "Week 1",
+            title: "System Exploration, Safety & MPU6050 Filtering",
+            focus: "Sensors & Signal Filtering",
+            activities: [
+              "Lab safety briefing by Ts. Dr. Hanani & En. Adib and scooter hardware inspection.",
+              "Non-invasive mounting of Arduino/ESP32 and MPU6050 using removable brackets.",
+              "Implementing a Complementary Filter in Arduino IDE to obtain drift-free pitch angles (θ)."
+            ],
+            deliverable: "Draft Experiment Proposal (1–2 pages) & Closed-Loop Block Diagram."
+          },
+          {
+            week: "Week 2",
+            title: "System Identification & Transfer Function G(s) Modeling",
+            focus: "Data Acquisition & Math",
+            activities: [
+              "Applying standardized payload/impulse disturbances and logging pitch data to Excel.",
+              "Measuring %OS, Tp, and Ts from experimental curves to compute ζ and ωn.",
+              "Deriving the second-order Transfer Function G(s) and verifying pole stability."
+            ],
+            deliverable: "Baseline Excel Response Plot & Validated Transfer Function G(s)."
+          },
+          {
+            week: "Week 3",
+            title: "PID Controller Design & External Actuator Prototyping",
+            focus: "Control Design & Mechanics",
+            activities: [
+              "Calculating initial Kp, Ki, Kd gains via Ziegler-Nichols or pole placement methods.",
+              "Building removable external balancing actuators (e.g., servo linkage / sliding counterweight).",
+              "Writing discrete PID code (Δt = 10 ms) with anti-windup and Live Tuning support."
+            ],
+            deliverable: "PID Source Code (.ino), Gain Calculations, & External Rig Prototype."
+          },
+          {
+            week: "Week 4",
+            title: "Full Integration, Physical Fine-Tuning & Error Analysis",
+            focus: "Closed-Loop Testing",
+            activities: [
+              "Running Before vs. After disturbance rejection tests with the outer-loop PID active.",
+              "Fine-tuning Kp, Ki, Kd gains on hardware to minimize oscillation and settling time.",
+              "Analyzing theoretical vs. physical discrepancies (friction, deadzone, nonlinearity)."
+            ],
+            deliverable: "Quantitative Comparison Table (Before vs. After) & Overlaid Excel Plots."
+          },
+          {
+            week: "Week 5",
+            title: "Live Demonstration, Technical Presentation & Oral Test",
+            focus: "Capstone Assessment (CLO)",
+            activities: [
+              "Live demonstration before Ts. Dr. Hanani under random payload disturbances (5 mins).",
+              "Group technical presentation covering System ID and controller tuning (6 mins).",
+              "Individual Oral Test (Viva) questioning for every group member (5 mins)."
+            ],
+            deliverable: "Final Technical Report, Complete Source Code, & Individual Oral Test Score."
+          }
+        ],
+
+        // Tab 4: Roles
+        rolesTitle: "Team Task Distribution (4 Members / Group)",
+        rolesSubtitle: "Each student must lead one core technical domain and be ready to defend all aspects during the Week 5 Oral Test:",
+        rolesData: [
+          {
+            role: "Lead 1: System Modeling & Control Design",
+            badge: "Control & Modeling Lead",
+            color: "blue",
+            duties: [
+              "Derive the closed-loop block diagram and TWIP linearized equations of motion.",
+              "Compute ζ, ωn, and Transfer Function G(s) from Week 2 experimental data.",
+              "Determine initial PID gains (Kp, Ki, Kd) and s-plane pole stability analysis."
+            ]
+          },
+          {
+            role: "Lead 2: Embedded Firmware & Sensor Filtering",
+            badge: "Embedded & Firmware Lead",
+            color: "emerald",
+            duties: [
+              "Manage MPU6050 wiring, Event Marker push button, and microcontroller (Arduino/ESP32).",
+              "Write Complementary Filter and discrete PID control code at a fixed 100 Hz sampling rate.",
+              "Operate real-time telemetry (Serial Plotter / Blynk wireless Live Tuning)."
+            ]
+          },
+          {
+            role: "Lead 3: Mechanical Rig & Lab Safety",
+            badge: "Mechanical Rig & Safety Lead",
+            color: "amber",
+            duties: [
+              "Design removable mounting brackets for external sensors and actuators on the scooter.",
+              "Ensure safety tether and footpad clamp are properly fitted prior to every test run.",
+              "Coordinate equipment check-out and return with Assistant Engineer En. Adib."
+            ]
+          },
+          {
+            role: "Lead 4: Data Analytics & Technical Documentation",
+            badge: "Data Analytics & Report Lead",
+            color: "purple",
+            duties: [
+              "Export CSV datasets, plot transient response curves in Excel, and measure %OS, Tp, Ts.",
+              "Compile Before vs. After performance tables and hardware error analyses.",
+              "Coordinate weekly progress deliverables, presentation slides, and Final Technical Report."
+            ]
+          }
+        ],
+        antiFreeRiderTitle: "Individual Accountability Policy & Weekly Logbook",
+        antiFreeRiderBody: "To eliminate free-riding, 50% of the final lab grade is assessed via the individual Oral Test (Viva) in Week 5. Ts. Dr. Hanani may question any team member on Arduino code, G(s) derivations, or Excel plots regardless of their primary role.",
+
+        // Tab 5: Assessment & Viva Simulator
+        assTitle: "Week 5 Grading Breakdown & Analytic Rubric",
+        assWeights: [
+          { label: "Live Demonstration (Disturbance Test)", pct: "20%", desc: "Ability of the scooter rig to maintain target pitch angle under random payload disturbances applied by the lecturer." },
+          { label: "Technical Presentation & Final Report", pct: "30%", desc: "Clarity of System ID methodology, PID tuning justification, and theory vs. hardware error analysis." },
+          { label: "Individual Oral Test (Viva)", pct: "50%", desc: "Deep individual understanding of system dynamics, pole stability, and physical effects of PID parameters." }
+        ],
+        rubricHeaders: ["Assessment Criteria", "Excellent (4)", "Good (3)", "Satisfactory (2)", "Poor (1)"],
+        rubricRows: [
+          {
+            crit: "System Identification & G(s) Modeling",
+            c4: "Clean experimental data; accurate ζ, ωn, and G(s) calculations verified against Excel plots.",
+            c3: "Good experimental data; G(s) derivation accurate with minor graphical reading errors.",
+            c2: "Second-order parameter calculations inaccurate or inconsistent MPU6050 noise filtering.",
+            c1: "Failed to derive a valid transfer function model G(s) from experimental data."
+          },
+          {
+            crit: "PID Controller Design & Tuning",
+            c4: "Discrete PID (100 Hz) performs reliably; significantly reduces %OS and Ts with sound engineering justification.",
+            c3: "PID controller successfully stabilizes the system with clear performance improvement.",
+            c2: "Trial-and-error tuning without mathematical justification; noticeable residual oscillation.",
+            c1: "Controller fails to stabilize the system or code malfunctions during live demo."
+          },
+          {
+            crit: "Conceptual Mastery (Individual Oral Test)",
+            c4: "Answers all viva questions confidently and accurately, linking control theory to physical scooter dynamics.",
+            c3: "Answers most questions well and understands the group's code and experimental plots.",
+            c2: "Answers rely on rote memorization; unclear on physical impact of changing Kp, Ki, Kd.",
+            c1: "Unable to explain the group's own work when questioned."
+          }
+        ],
+        vivaTitle: "Oral Test (Viva) Practice Simulator",
+        vivaSubtitle: "Use the interactive flashcards below to test your group members' readiness before Week 5:",
+        vivaBtnShow: "Show Model Answer",
+        vivaBtnHide: "Hide Answer",
+        vivaBtnNext: "Next Question",
+        vivaQuestions: [
+          {
+            q: "1. Based on your group's experimental plot, how do you determine whether the scooter's baseline response is underdamped or overdamped?",
+            a: "The system is underdamped (0 < ζ < 1) if the pitch angle θ(t) overshoots the target value and oscillates before settling. If it rises sluggishly without any overshoot or oscillation, it is overdamped (ζ > 1)."
+          },
+          {
+            q: "2. Why must we use a Complementary Filter on the MPU6050 instead of relying solely on raw Accelerometer readings?",
+            a: "The accelerometer is highly sensitive to mechanical motor vibrations (high-frequency noise), causing noisy angle spikes. The gyroscope provides smooth, fast angular velocity readings but suffers from integration drift over time. A Complementary Filter blends low-pass filtered accelerometer data with high-pass filtered gyroscope data."
+          },
+          {
+            q: "3. What physical behavior occurs on the scooter if the Derivative gain (Kd) is set too high in your Arduino code?",
+            a: "The derivative term amplifies the rate of change of error (de/dt). Excessive Kd amplifies high-frequency MPU6050 sensor noise, causing violent actuator/motor chattering and overheating."
+          },
+          {
+            q: "4. Why does the real hardware response exhibit small steady-state errors or micro-oscillations even when linear theory predicts zero steady-state error?",
+            a: "Linear transfer functions neglect real-world nonlinearities such as motor deadzone, wheel bearing static friction (stiction), microcontroller/actuator time delays, and PWM saturation limits."
+          },
+          {
+            q: "5. In Arduino C++, why is delay() prohibited inside a PID control loop and replaced with fixed-interval millis()/micros() timing?",
+            a: "Discrete Integral (∑ e·Δt) and Derivative (Δe/Δt) calculations depend directly on a constant sampling period Δt. Using delay() blocks execution and creates jitter in Δt, corrupting PID accuracy and phase margin."
+          }
+        ]
+      }
+    };
+
+    // =========================================================================
+    // 4. CORE NAVIGATION & LANGUAGE CONTROLLER
+    // =========================================================================
+    function setLanguage(lang) {
+      currentLang = lang;
+      localStorage.setItem('ce_lab_lang', lang);
+
+      const t = translations[lang];
+      document.getElementById('badge-course').textContent = t.badgeCourse;
+      document.getElementById('badge-duration').textContent = t.badgeDuration;
+      document.getElementById('header-title').textContent = t.headerTitle;
+      document.getElementById('lbl-lecturer').textContent = t.lblLecturer;
+      document.getElementById('lbl-engineer').textContent = t.lblEngineer;
+
+      document.getElementById('nav-overview').textContent = t.navOverview;
+      document.getElementById('nav-theory').textContent = t.navTheory;
+      document.getElementById('nav-schedule').textContent = t.navSchedule;
+      document.getElementById('nav-roles').textContent = t.navRoles;
+      document.getElementById('nav-assessment').textContent = t.navAssessment;
+
+      document.getElementById('footer-text').textContent = t.footerText;
+      document.getElementById('footer-sub').textContent = t.footerSub;
+
+      // Update language toggle button styles
+      const btnMs = document.getElementById('btn-lang-ms');
+      const btnEn = document.getElementById('btn-lang-en');
+      if (lang === 'ms') {
+        btnMs.className = 'px-3 py-1.5 text-xs font-bold rounded-md transition-all bg-blue-600 text-white';
+        btnEn.className = 'px-3 py-1.5 text-xs font-bold rounded-md transition-all text-slate-400 hover:text-white';
+      } else {
+        btnEn.className = 'px-3 py-1.5 text-xs font-bold rounded-md transition-all bg-blue-600 text-white';
+        btnMs.className = 'px-3 py-1.5 text-xs font-bold rounded-md transition-all text-slate-400 hover:text-white';
+      }
+
+      renderTabContent();
+    }
+
+    function switchTab(tabName) {
+      currentTab = tabName;
+      if (fbdAnimId) {
+        cancelAnimationFrame(fbdAnimId);
+        fbdAnimId = null;
+      }
+
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        if (btn.dataset.tab === tabName) {
+          btn.classList.remove('tab-inactive');
+          btn.classList.add('tab-active');
+        } else {
+          btn.classList.remove('tab-active');
+          btn.classList.add('tab-inactive');
+        }
+      });
+
+      renderTabContent();
+    }
+
+    function renderTabContent() {
+      const t = translations[currentLang];
+      const container = document.getElementById('content-area');
+
+      if (currentTab === 'overview') {
+        container.innerHTML = renderOverviewTab(t);
+      } else if (currentTab === 'theory') {
+        container.innerHTML = renderTheoryTab(t);
+        initFbdSimulator();
+        calculateSystemId();
+      } else if (currentTab === 'schedule') {
+        container.innerHTML = renderScheduleTab(t);
+      } else if (currentTab === 'roles') {
+        container.innerHTML = renderRolesTab(t);
+      } else if (currentTab === 'assessment') {
+        container.innerHTML = renderAssessmentTab(t);
+      }
+
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+      if (window.renderMathInElement) {
+        renderMathInElement(container, {
+          delimiters: [
+            { left: '$$', right: '$$', display: true },
+            { left: '$', right: '$', display: false }
+          ],
+          throwOnError: false
+        });
+      }
+    }
+
+    // =========================================================================
+    // 5. TAB 1: OVERVIEW, ACTUATOR OPTIONS & SAFETY CHECKLIST
+    // =========================================================================
+    function renderOverviewTab(t) {
+      const totalCount = t.ovSafetyItems.length;
+      const checkedCount = t.ovSafetyItems.filter(item => !!checklistState[item.id]).length;
+      const pct = Math.round((checkedCount / totalCount) * 100);
+
+      return `
+        <div class="space-y-6">
+          <!-- Open-Ended Problem Statement Hero -->
+          <div class="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white rounded-2xl p-6 sm:p-8 shadow-lg border border-slate-800">
+            <span class="inline-block text-xs font-extrabold uppercase tracking-wider px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+              ${t.ovProblemTag}
+            </span>
+            <h2 class="text-xl sm:text-2xl font-extrabold mt-3 leading-snug">
+              ${t.ovProblemTitle}
+            </h2>
+            <p class="text-sm sm:text-base text-slate-300 mt-3 leading-relaxed">
+              ${t.ovProblemBody}
+            </p>
+          </div>
+
+          <!-- Constraints Grid -->
+          <div>
+            <h3 class="text-lg font-bold text-slate-900 mb-3">${t.ovConstraintsTitle}</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              ${t.ovConstraints.map(c => `
+                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex items-start gap-4">
+                  <div class="bg-blue-50 text-blue-600 p-3 rounded-xl shrink-0">
+                    <i data-lucide="${c.icon}" class="w-5 h-5"></i>
+                  </div>
+                  <div>
+                    <h4 class="font-bold text-slate-900 text-sm sm:text-base">${c.title}</h4>
+                    <p class="text-xs sm:text-sm text-slate-600 mt-1 leading-relaxed">${c.desc}</p>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- 3 External Actuator Mechanism Options -->
+          <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+            <div class="pb-4 border-b border-slate-200">
+              <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <i data-lucide="cog" class="w-5 h-5 text-blue-600"></i>
+                <span>${t.ovActuatorsTitle}</span>
+              </h3>
+              <p class="text-xs sm:text-sm text-slate-600 mt-1">${t.ovActuatorsSubtitle}</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mt-5">
+              ${t.ovActuators.map((act, idx) => {
+                const badgeColors = [
+                  'bg-blue-100 text-blue-800 border-blue-200',
+                  'bg-amber-100 text-amber-900 border-amber-200',
+                  'bg-emerald-100 text-emerald-800 border-emerald-200'
+                ];
+                return `
+                  <div class="rounded-2xl border border-slate-200 bg-slate-50/70 p-5 flex flex-col justify-between hover:bg-white hover:shadow-md transition-all">
+                    <div>
+                      <span class="inline-block text-[11px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${badgeColors[idx]}">
+                        ${act.badge}
+                      </span>
+                      <h4 class="font-bold text-slate-900 text-base mt-2.5">${act.title}</h4>
+
+                      <!-- Schematic SVG Diagram -->
+                      <div class="my-3.5 bg-slate-900 rounded-xl p-3 border border-slate-800 flex items-center justify-center">
+                        ${renderActuatorSvg(act.id)}
+                      </div>
+
+                      <div class="space-y-2.5 text-xs sm:text-sm text-slate-700 leading-relaxed">
+                        <p><strong class="text-slate-900">${act.setupLabel}</strong> ${act.setup}</p>
+                        <p><strong class="text-slate-900">${act.principleLabel}</strong> ${act.principle}</p>
+                      </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-slate-200 text-xs text-slate-600">
+                      <strong class="text-slate-900">${act.partsLabel}</strong> ${act.parts}
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+
+          <!-- Interactive Safety Checklist -->
+          <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-200">
+              <div>
+                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <i data-lucide="shield-alert" class="w-5 h-5 text-red-600"></i>
+                  <span>${t.ovSafetyTitle}</span>
+                </h3>
+                <p class="text-xs sm:text-sm text-slate-600 mt-1">${t.ovSafetySubtitle}</p>
+              </div>
+              <div class="bg-slate-100 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-800 shrink-0">
+                ${t.ovSafetyProgress} <span class="${pct === 100 ? 'text-emerald-600' : 'text-blue-600'}">${checkedCount}/${totalCount} (${pct}%)</span>
+              </div>
+            </div>
+
+            <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden my-4">
+              <div class="h-full transition-all duration-300 ${pct === 100 ? 'bg-emerald-500' : 'bg-blue-600'}" style="width: ${pct}%"></div>
+            </div>
+
+            <div class="space-y-2.5">
+              ${t.ovSafetyItems.map(item => {
+                const isChecked = !!checklistState[item.id];
+                return `
+                  <label onclick="toggleChecklist('${item.id}')" class="flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-all ${
+                    isChecked ? 'bg-emerald-50/70 border-emerald-300 text-emerald-950' : 'bg-slate-50 border-slate-200 text-slate-800 hover:bg-slate-100'
+                  }">
+                    <input type="checkbox" ${isChecked ? 'checked' : ''} class="mt-1 w-4 h-4 rounded text-blue-600 pointer-events-none" />
+                    <span class="text-xs sm:text-sm leading-relaxed ${isChecked ? 'font-medium' : ''}">${item.text}</span>
+                  </label>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // =========================================================================
+    // 6. TAB 2: THEORY, INTERACTIVE FBD SIMULATOR, SYSTEM ID & CODE
+    // =========================================================================
+    function renderTheoryTab(t) {
+      const linkColors = {
+        blue: 'border-blue-200 bg-blue-50/50 text-blue-700',
+        amber: 'border-amber-200 bg-amber-50/50 text-amber-800',
+        emerald: 'border-emerald-200 bg-emerald-50/50 text-emerald-700'
+      };
+      const btnColors = {
+        blue: 'bg-blue-600 hover:bg-blue-700 text-white',
+        amber: 'bg-amber-600 hover:bg-amber-700 text-white',
+        emerald: 'bg-emerald-600 hover:bg-emerald-700 text-white'
+      };
+
+      const activeCode = codeMode === 'usb' ? arduinoCodeUsb : arduinoCodeBlynk;
+      const activeSteps = codeMode === 'usb' ? t.daqUsbSteps : t.daqBlynkSteps;
+
+      return `
+        <div class="space-y-6">
+          <!-- Reference & Software Download Links -->
+          <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+            <h2 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <i data-lucide="external-link" class="w-5 h-5 text-blue-600"></i>
+              <span>${t.refSectionTitle}</span>
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              ${t.refLinks.map(ref => `
+                <div class="rounded-xl border p-4 flex flex-col justify-between ${linkColors[ref.color]}">
+                  <div>
+                    <span class="text-[11px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-white/80">
+                      ${ref.badge}
+                    </span>
+                    <h3 class="font-bold text-slate-900 text-sm sm:text-base mt-2">${ref.title}</h3>
+                    <p class="text-xs text-slate-700 mt-1.5 leading-relaxed">${ref.desc}</p>
+                  </div>
+                  <a href="${ref.url}" target="_blank" rel="noopener noreferrer" class="mt-4 inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold transition-all shadow-sm ${btnColors[ref.color]}">
+                    <span>${ref.btnText}</span>
+                    <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+                  </a>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Interactive FBD & Stability Simulator -->
+          <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-4 border-b border-slate-200">
+              <div>
+                <h2 class="text-lg sm:text-xl font-bold text-slate-900 flex items-center gap-2">
+                  <i data-lucide="activity" class="w-5 h-5 text-blue-600"></i>
+                  <span>${t.fbdTitle}</span>
+                </h2>
+                <p class="text-xs sm:text-sm text-slate-600 mt-1">${t.fbdSubtitle}</p>
+              </div>
+              <div class="flex flex-wrap gap-2 shrink-0">
+                <button onclick="triggerFbdImpulse()" class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all">
+                  <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+                  <span>${t.fbdBtnDisturb}</span>
+                </button>
+                <button onclick="resetFbdParams()" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition-all">
+                  ${t.fbdBtnReset}
+                </button>
+              </div>
+            </div>
+
+            <!-- Parameter Sliders -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 my-5 bg-slate-50 p-4 rounded-xl border border-slate-200">
+              <div>
+                <div class="flex justify-between text-xs font-bold text-slate-700 mb-1">
+                  <span>${t.fbdParamMb}</span>
+                  <span id="val-mb" class="font-mono text-blue-700">${fbdParams.Mb.toFixed(1)} kg</span>
+                </div>
+                <input type="range" id="slider-mb" min="5" max="30" step="0.5" value="${fbdParams.Mb}" oninput="updateFbdParam('Mb', this.value)" class="w-full" />
+              </div>
+              <div>
+                <div class="flex justify-between text-xs font-bold text-slate-700 mb-1">
+                  <span>${t.fbdParamL}</span>
+                  <span id="val-l" class="font-mono text-blue-700">${fbdParams.l.toFixed(2)} m</span>
+                </div>
+                <input type="range" id="slider-l" min="0.20" max="0.80" step="0.02" value="${fbdParams.l}" oninput="updateFbdParam('l', this.value)" class="w-full" />
+              </div>
+              <div>
+                <div class="flex justify-between text-xs font-bold text-slate-700 mb-1">
+                  <span>${t.fbdParamKp}</span>
+                  <span id="val-kp" class="font-mono text-emerald-700">${fbdParams.Kp.toFixed(1)} Nm/rad</span>
+                </div>
+                <input type="range" id="slider-kp" min="10" max="200" step="2" value="${fbdParams.Kp}" oninput="updateFbdParam('Kp', this.value)" class="w-full" />
+              </div>
+              <div>
+                <div class="flex justify-between text-xs font-bold text-slate-700 mb-1">
+                  <span>${t.fbdParamKd}</span>
+                  <span id="val-kd" class="font-mono text-emerald-700">${fbdParams.Kd.toFixed(1)} Nms/rad</span>
+                </div>
+                <input type="range" id="slider-kd" min="0" max="40" step="0.5" value="${fbdParams.Kd}" oninput="updateFbdParam('Kd', this.value)" class="w-full" />
+              </div>
+            </div>
+
+            <!-- Live Stability Status Banner -->
+            <div id="fbd-status-bar" class="p-3.5 rounded-xl border mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs sm:text-sm font-bold"></div>
+
+            <!-- 3-Column Visual Simulation: FBD Canvas | s-Plane Map | Angle Response Plot -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <div class="bg-slate-900 rounded-xl p-3 border border-slate-800 flex flex-col items-center">
+                <div class="text-xs font-bold text-slate-300 mb-2">Interactive Free Body Diagram (TWIP)</div>
+                <canvas id="canvas-fbd" class="w-full h-60 rounded-lg bg-slate-950"></canvas>
+              </div>
+              <div class="bg-slate-900 rounded-xl p-3 border border-slate-800 flex flex-col items-center">
+                <div class="text-xs font-bold text-slate-300 mb-2">${t.fbdSPlaneTitle}</div>
+                <canvas id="canvas-splane" class="w-full h-60 rounded-lg bg-slate-950"></canvas>
+              </div>
+              <div class="bg-slate-900 rounded-xl p-3 border border-slate-800 flex flex-col items-center">
+                <div class="text-xs font-bold text-slate-300 mb-2">${t.fbdRespTitle}</div>
+                <canvas id="canvas-resp" class="w-full h-60 rounded-lg bg-slate-950"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Theoretical Equations & Complementary Filter -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+              <h3 class="text-base sm:text-lg font-bold text-slate-900">${t.thMathTitle}</h3>
+              <p class="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">${t.thMathDesc}</p>
+              <div class="bg-slate-50 rounded-xl p-3 my-3 border border-slate-200 text-sm">
+                $$(I_b + M_b l^2)\\ddot{\\theta} - M_b g l \\theta = \\tau_w + \\tau_{\\text{dist}}$$
+                $$G(s) = \\frac{\\Theta(s)}{U(s)} = \\frac{\\omega_n^2}{s^2 + 2\\zeta\\omega_n s + \\omega_n^2}$$
+              </div>
+            </div>
+
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+              <h3 class="text-base sm:text-lg font-bold text-slate-900">${t.thFilterTitle}</h3>
+              <p class="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">${t.thFilterDesc}</p>
+              <div class="bg-slate-50 rounded-xl p-3 my-3 border border-slate-200 text-sm">
+                $$\\theta_{\\text{acc}} = \\text{atan2}(a_x, \\sqrt{a_y^2 + a_z^2}) \\times \\frac{180}{\\pi}$$
+                $$\\theta_k = 0.98(\\theta_{k-1} + \\omega_y \\Delta t) + 0.02\\theta_{\\text{acc}}$$
+              </div>
+            </div>
+          </div>
+
+          <!-- Interactive System Identification Calculator -->
+          <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+            <h3 class="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
+              <i data-lucide="calculator" class="w-5 h-5 text-blue-600"></i>
+              <span>${t.calcTitle}</span>
+            </h3>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1">${t.calcDesc}</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 items-end">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">${t.calcInputOS}</label>
+                <input type="number" id="input-os" value="25" min="0.1" max="99" step="0.5" oninput="calculateSystemId()" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 font-mono text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">${t.calcInputTp}</label>
+                <input type="number" id="input-tp" value="0.45" min="0.05" max="10" step="0.01" oninput="calculateSystemId()" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 font-mono text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+              </div>
+              <button onclick="calculateSystemId()" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-sm transition-all">
+                ${t.calcBtn}
+              </button>
+            </div>
+
+            <div id="sysid-output" class="grid grid-cols-1 sm:grid-cols-4 gap-3 mt-5"></div>
+          </div>
+
+          <!-- Data Acquisition SOP & Copyable Arduino Starter Code -->
+          <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-200">
+              <div>
+                <h3 class="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <i data-lucide="code-2" class="w-5 h-5 text-blue-600"></i>
+                  <span>${t.daqTitle}</span>
+                </h3>
+                <p class="text-xs sm:text-sm text-slate-600 mt-1">${t.daqSubtitle}</p>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <button onclick="setCodeMode('usb')" class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+                  codeMode === 'usb' ? 'bg-blue-600 text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                }">
+                  ${t.daqTabUsb}
+                </button>
+                <button onclick="setCodeMode('blynk')" class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+                  codeMode === 'blynk' ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                }">
+                  ${t.daqTabBlynk}
+                </button>
+              </div>
+            </div>
+
+            <!-- SOP Steps -->
+            <ol class="my-4 space-y-2 text-xs sm:text-sm text-slate-700 list-decimal list-inside bg-slate-50 p-4 rounded-xl border border-slate-200">
+              ${activeSteps.map(step => `<li class="leading-relaxed">${step}</li>`).join('')}
+            </ol>
+
+            <!-- Code Viewer -->
+            <div class="relative rounded-xl overflow-hidden bg-slate-900 border border-slate-800">
+              <div class="flex items-center justify-between px-4 py-2.5 bg-slate-800 border-b border-slate-700">
+                <span class="text-xs font-mono text-slate-300">
+                  ${codeMode === 'usb' ? 'twip_mpu6050_usb_event_marker.ino' : 'twip_esp32_blynk_dual_timer.ino'}
+                </span>
+                <button onclick="copyStarterCode()" class="px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-1.5 transition-all">
+                  <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                  <span>${t.btnCopyCode}</span>
+                </button>
+              </div>
+              <pre id="starter-code-pre" class="p-4 text-xs font-mono text-emerald-300 overflow-x-auto leading-relaxed max-h-96">${escapeHtml(activeCode)}</pre>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // =========================================================================
+    // 7. TAB 3: 5-WEEK SCHEDULE & 2-HOUR STEP-BY-STEP PROTOCOL
+    // =========================================================================
+    function renderScheduleTab(t) {
+      const gInfo = groupScheduleData[selectedGroup];
+      const groupButtons = [1, 2, 3, 4, 5, 6].map(num => `
+        <button onclick="selectGroup(${num})" class="px-4 py-2 rounded-xl font-bold text-sm transition-all ${
+          selectedGroup === num
+            ? 'bg-blue-600 text-white shadow-md ring-2 ring-blue-300'
+            : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-100'
+        }">
+          G${num}
+        </button>
+      `).join('');
+
+      const weekButtons = [1, 2, 3, 4, 5].map(wk => `
+        <button onclick="selectSessionWeek(${wk})" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+          selectedSessionWeek === wk
+            ? 'bg-blue-600 text-white shadow-sm'
+            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+        }">
+          ${currentLang === 'ms' ? `Minggu ${wk}` : `Week ${wk}`}
+        </button>
+      `).join('');
+
+      const plan = t.twoHrPlans[selectedSessionWeek];
+      let twoHrBodyHtml = '';
+
+      if (selectedSessionWeek === 5) {
+        twoHrBodyHtml = `
+          <div class="space-y-4">
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+              <div class="text-xs font-bold text-slate-800 flex items-center gap-2">
+                <i data-lucide="clock" class="w-4 h-4 text-blue-600"></i>
+                <span>${plan.briefing[0]}</span>
+              </div>
+            </div>
+
+            <div class="bg-blue-50/60 border border-blue-200 rounded-xl p-4">
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-extrabold uppercase tracking-wider px-2.5 py-1 rounded bg-blue-600 text-white">
+                  ${t.twoHrEvalTag}
+                </span>
+                <span class="text-xs font-mono font-bold text-blue-900">G${selectedGroup} (${gInfo.unit})</span>
+              </div>
+              <div class="space-y-2">
+                ${plan.evalSchedule.map((slot, idx) => {
+                  const isCurrentGroup = (idx + 1) === selectedGroup;
+                  return `
+                    <div class="p-3 rounded-xl border text-xs sm:text-sm flex items-start gap-2.5 ${
+                      isCurrentGroup
+                        ? 'bg-amber-50 border-amber-400 text-slate-900 font-bold shadow-sm'
+                        : 'bg-white border-slate-200 text-slate-700'
+                    }">
+                      <i data-lucide="${isCurrentGroup ? 'star' : 'user-check'}" class="w-4 h-4 ${isCurrentGroup ? 'text-amber-500' : 'text-blue-600'} shrink-0 mt-0.5"></i>
+                      <span>${slot}</span>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+
+            <div class="bg-emerald-50/70 border border-emerald-200 rounded-xl p-4">
+              <ul class="space-y-1.5 text-xs sm:text-sm text-emerald-950 font-medium">
+                ${plan.wrapup.map(item => `
+                  <li class="flex items-start gap-2">
+                    <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+                    <span>${item}</span>
+                  </li>
+                `).join('')}
+              </ul>
+            </div>
+          </div>
+        `;
+      } else {
+        const isFirstHalfPhys = gInfo.half1 === 'phys';
+        const slot2StationTag = isFirstHalfPhys ? t.twoHrPhysTag : t.twoHrWorkTag;
+        const slot2Steps = isFirstHalfPhys ? plan.physSteps : plan.workSteps;
+        const slot2Style = isFirstHalfPhys ? 'bg-amber-50/60 border-amber-200' : 'bg-blue-50/60 border-blue-200';
+        const slot2BadgeStyle = isFirstHalfPhys ? 'bg-amber-500 text-slate-950' : 'bg-blue-600 text-white';
+
+        const slot3StationTag = isFirstHalfPhys ? t.twoHrWorkTag : t.twoHrPhysTag;
+        const slot3Steps = isFirstHalfPhys ? plan.workSteps : plan.physSteps;
+        const slot3Style = isFirstHalfPhys ? 'bg-blue-50/60 border-blue-200' : 'bg-amber-50/60 border-amber-200';
+        const slot3BadgeStyle = isFirstHalfPhys ? 'bg-blue-600 text-white' : 'bg-amber-500 text-slate-950';
+
+        twoHrBodyHtml = `
+          <div class="space-y-4">
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+                <span class="font-bold text-slate-900 text-sm">${t.twoHrSlot1Title}</span>
+                <span class="font-mono text-xs font-bold px-2.5 py-1 rounded-md bg-slate-200 text-slate-800">${t.twoHrSlot1Time}</span>
+              </div>
+              <ol class="space-y-1.5 text-xs sm:text-sm text-slate-700 list-decimal list-inside">
+                ${plan.briefing.map(s => `<li class="leading-relaxed">${s}</li>`).join('')}
+              </ol>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div class="rounded-xl border p-4 ${slot2Style}">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                  <span class="font-mono text-xs font-bold px-2.5 py-0.5 rounded bg-white/80 text-slate-800 border border-slate-200">${t.twoHrSlot2Time}</span>
+                  <span class="text-[11px] font-extrabold px-2.5 py-0.5 rounded-full ${slot2BadgeStyle}">${slot2StationTag}</span>
+                </div>
+                <div class="text-xs font-bold text-slate-800 mb-2.5">${t.twoHrSlot2Prefix} G${selectedGroup} (${gInfo.unit})</div>
+                <ol class="space-y-2 text-xs sm:text-sm text-slate-800 list-decimal list-inside">
+                  ${slot2Steps.map(s => `<li class="leading-relaxed">${s}</li>`).join('')}
+                </ol>
+              </div>
+
+              <div class="rounded-xl border p-4 ${slot3Style}">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                  <span class="font-mono text-xs font-bold px-2.5 py-0.5 rounded bg-white/80 text-slate-800 border border-slate-200">${t.twoHrSlot3Time}</span>
+                  <span class="text-[11px] font-extrabold px-2.5 py-0.5 rounded-full ${slot3BadgeStyle}">${slot3StationTag}</span>
+                </div>
+                <div class="text-xs font-bold text-slate-800 mb-2.5">${t.twoHrSlot3Prefix} G${selectedGroup} (${gInfo.unit})</div>
+                <ol class="space-y-2 text-xs sm:text-sm text-slate-800 list-decimal list-inside">
+                  ${slot3Steps.map(s => `<li class="leading-relaxed">${s}</li>`).join('')}
+                </ol>
+              </div>
+            </div>
+
+            <div class="bg-emerald-50/70 border border-emerald-200 rounded-xl p-4">
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+                <span class="font-bold text-emerald-950 text-sm">${t.twoHrSlot4Title}</span>
+                <span class="font-mono text-xs font-bold px-2.5 py-1 rounded-md bg-emerald-200/80 text-emerald-950">${t.twoHrSlot4Time}</span>
+              </div>
+              <ol class="space-y-1.5 text-xs sm:text-sm text-emerald-950 list-decimal list-inside">
+                ${plan.wrapup.map(s => `<li class="leading-relaxed">${s}</li>`).join('')}
+              </ol>
+            </div>
+          </div>
+        `;
+      }
+
+      const weekCards = t.weeksData.map(w => `
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="bg-slate-50 border-b border-slate-200 px-5 py-3.5 flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-3">
+              <span class="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">${w.week}</span>
+              <h3 class="font-bold text-slate-900 text-base">${w.title}</h3>
+            </div>
+            <span class="text-xs font-semibold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-200">
+              ${w.focus}
+            </span>
+          </div>
+          <div class="p-5 space-y-4">
+            <ul class="space-y-2">
+              ${w.activities.map(act => `
+                <li class="flex items-start gap-2.5 text-sm text-slate-700">
+                  <i data-lucide="check-circle-2" class="w-4 h-4 text-blue-600 shrink-0 mt-1"></i>
+                  <span>${act}</span>
+                </li>
+              `).join('')}
+            </ul>
+            <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex items-start gap-2.5 text-xs sm:text-sm text-emerald-900">
+              <i data-lucide="file-check" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+              <div><strong>Deliverable:</strong> ${w.deliverable}</div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      return `
+        <div class="space-y-6">
+          <!-- Interactive Group Rotation Finder -->
+          <div class="bg-gradient-to-r from-slate-900 to-blue-950 text-white rounded-2xl p-6 shadow-md">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-slate-700">
+              <div>
+                <h2 class="text-lg sm:text-xl font-bold flex items-center gap-2">
+                  <i data-lucide="repeat" class="w-5 h-5 text-amber-400"></i>
+                  <span>${t.schFinderTitle}</span>
+                </h2>
+                <p class="text-xs sm:text-sm text-slate-300 mt-1">${t.schFinderDesc}</p>
+              </div>
+              <div class="flex flex-col sm:items-end gap-1.5">
+                <span class="text-xs font-semibold text-blue-300 uppercase tracking-wider">${t.schSelectGroup}</span>
+                <div class="flex flex-wrap gap-1.5">
+                  ${groupButtons}
+                </div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-5">
+              <div class="bg-white/10 backdrop-blur border border-white/15 rounded-xl p-4">
+                <div class="text-xs text-blue-300 font-semibold">${t.schAssignedUnit}</div>
+                <div class="text-xl font-extrabold text-amber-400 mt-1">${gInfo.unit}</div>
+              </div>
+              <div class="bg-white/10 backdrop-blur border border-white/15 rounded-xl p-4">
+                <div class="text-xs text-blue-300 font-semibold">${t.schPartnerGroup}</div>
+                <div class="text-base font-bold text-white mt-1">${gInfo.partner}</div>
+              </div>
+              <div class="bg-white/10 backdrop-blur border border-white/15 rounded-xl p-4">
+                <div class="text-xs text-emerald-300 font-semibold">${t.schHalf1}</div>
+                <div class="text-xs sm:text-sm font-semibold text-white mt-1">
+                  ${gInfo.half1 === 'phys' ? t.schStPhys : t.schStWork}
+                </div>
+              </div>
+              <div class="bg-white/10 backdrop-blur border border-white/15 rounded-xl p-4">
+                <div class="text-xs text-amber-300 font-semibold">${t.schHalf2}</div>
+                <div class="text-xs sm:text-sm font-semibold text-white mt-1">
+                  ${gInfo.half2 === 'phys' ? t.schStPhys : t.schStWork}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Interactive 2-Hour Step-by-Step Lab Execution Guide -->
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-200 mb-5">
+              <div>
+                <div class="flex flex-wrap items-center gap-2">
+                  <h2 class="text-lg sm:text-xl font-bold text-slate-900 flex items-center gap-2">
+                    <i data-lucide="timer" class="w-5 h-5 text-blue-600"></i>
+                    <span>${t.twoHrTitle}</span>
+                  </h2>
+                  <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800">${t.twoHrBadgeTotal}</span>
+                </div>
+                <p class="text-xs sm:text-sm text-slate-600 mt-1">${t.twoHrSubtitle}</p>
+              </div>
+              <div class="flex flex-col sm:items-end gap-1.5 shrink-0">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">${t.twoHrSelectWeek}</span>
+                <div class="flex flex-wrap gap-1.5">
+                  ${weekButtons}
+                </div>
+              </div>
+            </div>
+
+            ${twoHrBodyHtml}
+          </div>
+
+          <!-- Weekly Master Cards -->
+          <div class="space-y-4">
+            <h2 class="text-xl font-bold text-slate-900">${t.schTitle}</h2>
+            ${weekCards}
+          </div>
+        </div>
+      `;
+    }
+
+    // =========================================================================
+    // 8. TAB 4: TEAM TASK DISTRIBUTION
+    // =========================================================================
+    function renderRolesTab(t) {
+      const badgeStyles = {
+        blue: 'bg-blue-100 text-blue-800',
+        emerald: 'bg-emerald-100 text-emerald-800',
+        amber: 'bg-amber-100 text-amber-800',
+        purple: 'bg-purple-100 text-purple-800'
+      };
+
+      return `
+        <div class="space-y-6">
+          <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+            <h2 class="text-xl font-bold text-slate-900">${t.rolesTitle}</h2>
+            <p class="text-sm text-slate-600 mt-1">${t.rolesSubtitle}</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mt-6">
+              ${t.rolesData.map(r => `
+                <div class="rounded-2xl border border-slate-200 p-5 bg-slate-50/70 hover:bg-white hover:shadow-md transition-all">
+                  <span class="text-xs font-bold px-2.5 py-1 rounded-full ${badgeStyles[r.color]}">${r.badge}</span>
+                  <h3 class="font-bold text-slate-900 text-base mt-2.5">${r.role}</h3>
+                  <ul class="mt-3 space-y-2">
+                    ${r.duties.map(d => `
+                      <li class="flex items-start gap-2 text-xs sm:text-sm text-slate-700">
+                        <i data-lucide="check" class="w-4 h-4 text-blue-600 shrink-0 mt-0.5"></i>
+                        <span>${d}</span>
+                      </li>
+                    `).join('')}
+                  </ul>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <div class="bg-amber-50 border border-amber-300 rounded-2xl p-6 flex items-start gap-4">
+            <div class="bg-amber-500 text-slate-950 p-2.5 rounded-xl shrink-0">
+              <i data-lucide="user-check" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-amber-950 text-base">${t.antiFreeRiderTitle}</h3>
+              <p class="text-xs sm:text-sm text-amber-900 mt-1 leading-relaxed">${t.antiFreeRiderBody}</p>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // =========================================================================
+    // 9. TAB 5: RUBRIC & ORAL TEST (VIVA) SIMULATOR
+    // =========================================================================
+    function renderAssessmentTab(t) {
+      const qObj = t.vivaQuestions[currentVivaIdx];
+
+      return `
+        <div class="space-y-6">
+          <!-- Weightage Cards -->
+          <div>
+            <h2 class="text-xl font-bold text-slate-900 mb-3">${t.assTitle}</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              ${t.assWeights.map((w, i) => `
+                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+                  <div class="text-3xl font-extrabold ${i === 2 ? 'text-blue-600' : 'text-slate-900'}">${w.pct}</div>
+                  <div class="font-bold text-slate-900 text-sm sm:text-base mt-1">${w.label}</div>
+                  <p class="text-xs text-slate-600 mt-2 leading-relaxed">${w.desc}</p>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Analytic Rubric Table -->
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="bg-slate-900 text-white text-xs uppercase tracking-wider">
+                    ${t.rubricHeaders.map(h => `<th class="p-3.5 font-bold">${h}</th>`).join('')}
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 text-xs sm:text-sm">
+                  ${t.rubricRows.map(row => `
+                    <tr class="hover:bg-slate-50">
+                      <td class="p-3.5 font-bold text-slate-900 bg-slate-50/70">${row.crit}</td>
+                      <td class="p-3.5 text-slate-700">${row.c4}</td>
+                      <td class="p-3.5 text-slate-700">${row.c3}</td>
+                      <td class="p-3.5 text-slate-700">${row.c2}</td>
+                      <td class="p-3.5 text-slate-700">${row.c1}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Interactive Viva Flashcard Simulator -->
+          <div class="bg-gradient-to-br from-blue-950 to-slate-900 text-white rounded-2xl p-6 shadow-lg">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-slate-700">
+              <div>
+                <h3 class="text-lg font-bold flex items-center gap-2">
+                  <i data-lucide="message-square-question" class="w-5 h-5 text-amber-400"></i>
+                  <span>${t.vivaTitle}</span>
+                </h3>
+                <p class="text-xs text-slate-300 mt-1">${t.vivaSubtitle}</p>
+              </div>
+              <span class="text-xs font-mono font-bold px-3 py-1 rounded-full bg-white/10 text-blue-300 self-start">
+                ${currentVivaIdx + 1} / ${t.vivaQuestions.length}
+              </span>
+            </div>
+
+            <div class="mt-5 bg-white/10 border border-white/15 rounded-xl p-5">
+              <p class="text-sm sm:text-base font-bold text-white leading-relaxed">${qObj.q}</p>
+              ${vivaShowAnswer ? `
+                <div class="mt-4 p-4 rounded-xl bg-emerald-950/80 border border-emerald-500/40 text-xs sm:text-sm text-emerald-100 leading-relaxed">
+                  ${qObj.a}
+                </div>
+              ` : ''}
+            </div>
+
+            <div class="flex flex-wrap gap-3 mt-4">
+              <button onclick="toggleVivaAnswer()" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs sm:text-sm transition-all">
+                ${vivaShowAnswer ? t.vivaBtnHide : t.vivaBtnShow}
+              </button>
+              <button onclick="nextVivaQuestion()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs sm:text-sm transition-all">
+                ${t.vivaBtnNext}
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // =========================================================================
+    // 10. INTERACTIVE FBD & STABILITY SIMULATOR ENGINE
+    // =========================================================================
+    function updateFbdParam(key, val) {
+      fbdParams[key] = parseFloat(val);
+      if (key === 'Mb') document.getElementById('val-mb').textContent = `${fbdParams.Mb.toFixed(1)} kg`;
+      if (key === 'l') document.getElementById('val-l').textContent = `${fbdParams.l.toFixed(2)} m`;
+      if (key === 'Kp') document.getElementById('val-kp').textContent = `${fbdParams.Kp.toFixed(1)} Nm/rad`;
+      if (key === 'Kd') document.getElementById('val-kd').textContent = `${fbdParams.Kd.toFixed(1)} Nms/rad`;
+      updateFbdAnalysis();
+    }
+
+    function triggerFbdImpulse() {
+      fbdSimTime = 0;
+      fbdImpulseVel = 2.0;
+    }
+
+    function resetFbdParams() {
+      fbdParams = { Mb: 12.0, l: 0.45, Kp: 85.0, Kd: 14.0 };
+      document.getElementById('slider-mb').value = fbdParams.Mb;
+      document.getElementById('slider-l').value = fbdParams.l;
+      document.getElementById('slider-kp').value = fbdParams.Kp;
+      document.getElementById('slider-kd').value = fbdParams.Kd;
+      updateFbdParam('Mb', fbdParams.Mb);
+      updateFbdParam('l', fbdParams.l);
+      updateFbdParam('Kp', fbdParams.Kp);
+      updateFbdParam('Kd', fbdParams.Kd);
+      triggerFbdImpulse();
+    }
+
+    function computeSystemDynamics() {
+      const g = 9.81;
+      const { Mb, l, Kp, Kd } = fbdParams;
+      // Moment of inertia J = I_b + Mb * l^2
+      const J = 0.25 + Mb * l * l;
+      const KpCrit = Mb * g * l;
+      const netStiffness = Kp - KpCrit; // > 0 for stability
+      // Characteristic eq: J s^2 + Kd s + (Kp - Mb g l) = 0
+      const a1 = Kd / J;
+      const a0 = netStiffness / J;
+      const disc = a1 * a1 - 4 * a0;
+
+      let p1 = { re: 0, im: 0 };
+      let p2 = { re: 0, im: 0 };
+      if (disc >= 0) {
+        p1.re = (-a1 + Math.sqrt(disc)) / 2;
+        p2.re = (-a1 - Math.sqrt(disc)) / 2;
+      } else {
+        p1.re = -a1 / 2;
+        p1.im = Math.sqrt(-disc) / 2;
+        p2.re = -a1 / 2;
+        p2.im = -Math.sqrt(-disc) / 2;
+      }
+
+      return { J, KpCrit, netStiffness, a1, a0, disc, p1, p2 };
+    }
+
+    function evalThetaAtTime(tSec, dyn) {
+      const v0 = fbdImpulseVel;
+      const { a1, disc, p1, p2 } = dyn;
+
+      if (Math.abs(disc) < 1e-5) {
+        return v0 * tSec * Math.exp(-0.5 * a1 * tSec);
+      } else if (disc > 0) {
+        const denom = p1.re - p2.re;
+        return (v0 / denom) * (Math.exp(p1.re * tSec) - Math.exp(p2.re * tSec));
+      } else {
+        const wd = p1.im;
+        return (v0 / wd) * Math.exp(p1.re * tSec) * Math.sin(wd * tSec);
+      }
+    }
+
+    function updateFbdAnalysis() {
+      const t = translations[currentLang];
+      const dyn = computeSystemDynamics();
+      const statusBar = document.getElementById('fbd-status-bar');
+      if (!statusBar) return;
+
+      const isUnstable = dyn.p1.re > 0.001 || dyn.p2.re > 0.001;
+      const isMarginal = !isUnstable && Math.abs(dyn.p1.re) <= 0.001;
+
+      let statusLabel = t.fbdStatusStable;
+      let styleClass = 'bg-emerald-50 border-emerald-300 text-emerald-950';
+      if (isUnstable) {
+        statusLabel = t.fbdStatusUnstable;
+        styleClass = 'bg-red-50 border-red-300 text-red-950';
+      } else if (isMarginal) {
+        statusLabel = t.fbdStatusMarginal;
+        styleClass = 'bg-amber-50 border-amber-300 text-amber-950';
+      }
+
+      const poleStr = dyn.disc < 0
+        ? `s = ${dyn.p1.re.toFixed(2)} ± j${dyn.p1.im.toFixed(2)}`
+        : `s₁ = ${dyn.p1.re.toFixed(2)}, s₂ = ${dyn.p2.re.toFixed(2)}`;
+
+      statusBar.className = `p-3.5 rounded-xl border mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs sm:text-sm font-bold ${styleClass}`;
+      statusBar.innerHTML = `
+        <div>${statusLabel}</div>
+        <div class="font-mono text-xs">
+          ${t.fbdCritLabel} Kp (${fbdParams.Kp.toFixed(1)}) ${fbdParams.Kp > dyn.KpCrit ? '>' : '≤'} Mb·g·l (${dyn.KpCrit.toFixed(1)} Nm/rad) | ${poleStr}
+        </div>
+      `;
+
+      drawSPlaneCanvas(dyn);
+      drawResponseCanvas(dyn);
+    }
+
+    function setupCanvasDpi(canvas) {
+      if (!canvas) return null;
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      if (canvas.width !== Math.floor(rect.width * dpr) || canvas.height !== Math.floor(rect.height * dpr)) {
+        canvas.width = Math.floor(rect.width * dpr);
+        canvas.height = Math.floor(rect.height * dpr);
+      }
+      const ctx = canvas.getContext('2d');
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      return { ctx, w: rect.width, h: rect.height };
+    }
+
+    function drawSPlaneCanvas(dyn) {
+      const setup = setupCanvasDpi(document.getElementById('canvas-splane'));
+      if (!setup) return;
+      const { ctx, w, h } = setup;
+
+      ctx.clearRect(0, 0, w, h);
+      const originX = w * 0.65;
+      const originY = h * 0.5;
+      const scale = 14;
+
+      // Shaded Unstable Right-Half Plane
+      ctx.fillStyle = 'rgba(239, 68, 68, 0.14)';
+      ctx.fillRect(originX, 0, w - originX, h);
+
+      // Axes
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, originY);
+      ctx.lineTo(w, originY);
+      ctx.moveTo(originX, 0);
+      ctx.lineTo(originX, h);
+      ctx.stroke();
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '10px Inter';
+      ctx.fillText('Im(s)', originX + 5, 12);
+      ctx.fillText('Re(s)', w - 30, originY - 5);
+      ctx.fillStyle = '#fca5a5';
+      ctx.fillText('RHP (Unstable)', originX + 6, h - 8);
+
+      // Plot Poles (X)
+      const poles = [dyn.p1, dyn.p2];
+      poles.forEach(p => {
+        const px = Math.max(10, Math.min(w - 10, originX + p.re * scale));
+        const py = Math.max(10, Math.min(h - 10, originY - p.im * scale));
+        ctx.strokeStyle = p.re > 0.001 ? '#ef4444' : '#34d399';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(px - 5, py - 5);
+        ctx.lineTo(px + 5, py + 5);
+        ctx.moveTo(px + 5, py - 5);
+        ctx.lineTo(px - 5, py + 5);
+        ctx.stroke();
+      });
+    }
+
+    function drawResponseCanvas(dyn) {
+      const setup = setupCanvasDpi(document.getElementById('canvas-resp'));
+      if (!setup) return;
+      const { ctx, w, h } = setup;
+
+      ctx.clearRect(0, 0, w, h);
+      const padL = 28, padR = 10, padT = 14, padB = 20;
+      const plotW = w - padL - padR;
+      const plotH = h - padT - padB;
+      const zeroY = padT + plotH * 0.5;
+
+      // Zero reference line
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(padL, zeroY);
+      ctx.lineTo(w - padR, zeroY);
+      ctx.moveTo(padL, padT);
+      ctx.lineTo(padL, h - padB);
+      ctx.stroke();
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '10px Inter';
+      ctx.fillText('0°', 8, zeroY + 3);
+      ctx.fillText('4s', w - 20, h - 6);
+
+      // Curve
+      ctx.strokeStyle = (dyn.p1.re > 0.001 || dyn.p2.re > 0.001) ? '#ef4444' : '#38bdf8';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      const tMax = 4.0;
+      const steps = 120;
+      for (let i = 0; i <= steps; i++) {
+        const ts = (i / steps) * tMax;
+        let deg = evalThetaAtTime(ts, dyn) * 57.2958;
+        deg = Math.max(-45, Math.min(45, deg));
+        const x = padL + (ts / tMax) * plotW;
+        const y = zeroY - (deg / 45) * (plotH * 0.45);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+
+    function drawFbdFrame(thetaRad) {
+      const setup = setupCanvasDpi(document.getElementById('canvas-fbd'));
+      if (!setup) return;
+      const { ctx, w, h } = setup;
+
+      ctx.clearRect(0, 0, w, h);
+      const cx = w * 0.5;
+      const groundY = h - 28;
+      const wheelR = 20;
+      const axleY = groundY - wheelR;
+
+      // Ground
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(20, groundY);
+      ctx.lineTo(w - 20, groundY);
+      ctx.stroke();
+
+      // Vertical reference dashed line
+      ctx.setLineDash([4, 4]);
+      ctx.strokeStyle = '#64748b';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(cx, axleY);
+      ctx.lineTo(cx, 22);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Pendulum rod scaled to l
+      const rodLen = 50 + fbdParams.l * 110;
+      const tipX = cx + Math.sin(thetaRad) * rodLen;
+      const tipY = axleY - Math.cos(thetaRad) * rodLen;
+
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 6;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(cx, axleY);
+      ctx.lineTo(tipX, tipY);
+      ctx.stroke();
+
+      // Wheel
+      ctx.fillStyle = '#1e293b';
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(cx, axleY, wheelR, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // CoG Mass Circle scaled to Mb
+      const massR = 8 + (fbdParams.Mb / 30) * 10;
+      ctx.fillStyle = '#f59e0b';
+      ctx.beginPath();
+      ctx.arc(tipX, tipY, massR, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Gravity Vector (Mb * g) downward
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(tipX, tipY);
+      ctx.lineTo(tipX, tipY + 34);
+      ctx.stroke();
+      ctx.fillStyle = '#fca5a5';
+      ctx.font = '10px Inter';
+      ctx.fillText('Mb·g', tipX + 6, tipY + 32);
+
+      // Normal Force N upward from ground
+      ctx.strokeStyle = '#34d399';
+      ctx.beginPath();
+      ctx.moveTo(cx - 26, groundY);
+      ctx.lineTo(cx - 26, groundY - 30);
+      ctx.stroke();
+      ctx.fillStyle = '#6ee7b7';
+      ctx.fillText('N', cx - 38, groundY - 22);
+
+      // Angle Readout
+      const deg = (thetaRad * 57.2958).toFixed(1);
+      ctx.fillStyle = '#f8fafc';
+      ctx.font = 'bold 11px JetBrains Mono';
+      ctx.fillText(`θ = ${deg}°`, 12, 20);
+    }
+
+    function initFbdSimulator() {
+      updateFbdAnalysis();
+      let lastTs = performance.now();
+
+      function animate(now) {
+        if (currentTab !== 'theory') return;
+        const dtFrame = Math.min(0.05, (now - lastTs) / 1000);
+        lastTs = now;
+        fbdSimTime += dtFrame;
+        if (fbdSimTime > 5.0) fbdSimTime = 5.0;
+
+        const dyn = computeSystemDynamics();
+        let theta = evalThetaAtTime(fbdSimTime, dyn);
+        // Clamp visual angle to +-75 deg so pendulum stops at floor
+        const maxRad = 75 * (Math.PI / 180);
+        theta = Math.max(-maxRad, Math.min(maxRad, theta));
+
+        drawFbdFrame(theta);
+        fbdAnimId = requestAnimationFrame(animate);
+      }
+
+      fbdAnimId = requestAnimationFrame(animate);
+    }
+
+    // =========================================================================
+    // 11. SYSTEM IDENTIFICATION CALCULATOR & HELPER ACTIONS
+    // =========================================================================
+    function calculateSystemId() {
+      const outEl = document.getElementById('sysid-output');
+      if (!outEl) return;
+
+      const t = translations[currentLang];
+      const os = Math.max(0.1, Math.min(99, parseFloat(document.getElementById('input-os').value) || 25));
+      const tp = Math.max(0.05, parseFloat(document.getElementById('input-tp').value) || 0.45);
+
+      const lnOs = Math.log(os / 100.0);
+      const zeta = -lnOs / Math.sqrt(Math.PI * Math.PI + lnOs * lnOs);
+      const wn = Math.PI / (tp * Math.sqrt(1 - zeta * zeta));
+      const ts = 4.0 / (zeta * wn);
+      const wnSq = wn * wn;
+      const twoZetaWn = 2 * zeta * wn;
+
+      outEl.innerHTML = `
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-3.5">
+          <div class="text-xs font-semibold text-blue-700">${t.calcResZeta}</div>
+          <div class="text-xl font-extrabold font-mono text-slate-900 mt-1">${zeta.toFixed(3)}</div>
+        </div>
+        <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3.5">
+          <div class="text-xs font-semibold text-emerald-700">${t.calcResWn}</div>
+          <div class="text-xl font-extrabold font-mono text-slate-900 mt-1">${wn.toFixed(2)} rad/s</div>
+        </div>
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-3.5">
+          <div class="text-xs font-semibold text-amber-800">${t.calcResTs}</div>
+          <div class="text-xl font-extrabold font-mono text-slate-900 mt-1">${ts.toFixed(2)} s</div>
+        </div>
+        <div class="bg-slate-900 text-white rounded-xl p-3.5">
+          <div class="text-xs font-semibold text-blue-300">${t.calcResTf}</div>
+          <div class="text-xs sm:text-sm font-mono font-bold text-amber-300 mt-1.5">
+            G(s) = ${wnSq.toFixed(2)} / (s² + ${twoZetaWn.toFixed(2)}s + ${wnSq.toFixed(2)})
+          </div>
+        </div>
+      `;
+    }
+
+    function setCodeMode(mode) {
+      codeMode = mode;
+      renderTabContent();
+    }
+
+    function copyStarterCode() {
+      const codeText = codeMode === 'usb' ? arduinoCodeUsb : arduinoCodeBlynk;
+      const tempArea = document.createElement('textarea');
+      tempArea.value = codeText;
+      document.body.appendChild(tempArea);
+      tempArea.select();
+      try {
+        document.execCommand('copy');
+        showToast(currentLang === 'ms' ? 'Kod Arduino berjaya disalin!' : 'Arduino code copied to clipboard!');
+      } catch (err) {
+        showToast(currentLang === 'ms' ? 'Sila salin kod secara manual.' : 'Please copy code manually.');
+      }
+      document.body.removeChild(tempArea);
+    }
+
+    function showToast(msg) {
+      const box = document.getElementById('toast-box');
+      const msgEl = document.getElementById('toast-msg');
+      msgEl.textContent = msg;
+      box.classList.remove('hidden');
+      setTimeout(() => {
+        box.classList.add('hidden');
+      }, 2600);
+    }
+
+    function selectGroup(num) {
+      selectedGroup = num;
+      localStorage.setItem('ce_lab_group', num);
+      renderTabContent();
+    }
+
+    function selectSessionWeek(wk) {
+      selectedSessionWeek = wk;
+      renderTabContent();
+    }
+
+    function toggleChecklist(id) {
+      checklistState[id] = !checklistState[id];
+      localStorage.setItem('ce_lab_checklist', JSON.stringify(checklistState));
+      renderTabContent();
+    }
+
+    function toggleVivaAnswer() {
+      vivaShowAnswer = !vivaShowAnswer;
+      renderTabContent();
+    }
+
+    function nextVivaQuestion() {
+      const total = translations[currentLang].vivaQuestions.length;
+      currentVivaIdx = (currentVivaIdx + 1) % total;
+      vivaShowAnswer = false;
+      renderTabContent();
+    }
+
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    // Inline SVG Schematics for the 3 Non-Invasive External Actuator Options
+    function renderActuatorSvg(type) {
+      if (type === 'countermass') {
+        return `
+          <svg viewBox="0 0 240 120" class="w-full h-28" aria-label="Active Sliding Counter-Mass Schematic">
+            <line x1="15" y1="105" x2="225" y2="105" stroke="#475569" stroke-width="2" />
+            <circle cx="120" cy="87" r="16" fill="#1e293b" stroke="#38bdf8" stroke-width="2.5" />
+            <line x1="120" y1="87" x2="120" y2="34" stroke="#e2e8f0" stroke-width="5" stroke-linecap="round" />
+            <rect x="108" y="66" width="24" height="8" rx="2" fill="#34d399" />
+            <text x="120" y="62" fill="#6ee7b7" font-size="8" font-family="monospace" text-anchor="middle">MPU6050</text>
+            <line x1="65" y1="32" x2="175" y2="32" stroke="#94a3b8" stroke-width="3" stroke-linecap="round" />
+            <rect x="142" y="21" width="26" height="18" rx="4" fill="#f59e0b" />
+            <text x="155" y="33" fill="#0f172a" font-size="9" font-weight="bold" font-family="sans-serif" text-anchor="middle">Mass</text>
+            <path d="M 75 16 L 135 16" stroke="#38bdf8" stroke-width="1.8" stroke-dasharray="3,2" />
+            <polygon points="72,16 79,12 79,20" fill="#38bdf8" />
+            <polygon points="138,16 131,12 131,20" fill="#38bdf8" />
+            <text x="105" y="11" fill="#bae6fd" font-size="8" font-family="sans-serif" text-anchor="middle">Servo Shift (CoG)</text>
+          </svg>
+        `;
+      }
+      if (type === 'flywheel') {
+        return `
+          <svg viewBox="0 0 240 120" class="w-full h-28" aria-label="Reaction Wheel Flywheel Schematic">
+            <line x1="15" y1="105" x2="225" y2="105" stroke="#475569" stroke-width="2" />
+            <circle cx="120" cy="87" r="16" fill="#1e293b" stroke="#38bdf8" stroke-width="2.5" />
+            <line x1="120" y1="87" x2="120" y2="38" stroke="#e2e8f0" stroke-width="5" stroke-linecap="round" />
+            <rect x="108" y="66" width="24" height="8" rx="2" fill="#34d399" />
+            <circle cx="120" cy="36" r="22" fill="rgba(245, 158, 11, 0.2)" stroke="#f59e0b" stroke-width="3" />
+            <circle cx="120" cy="36" r="5" fill="#f59e0b" />
+            <path d="M 90 24 A 32 32 0 0 1 150 24" fill="none" stroke="#38bdf8" stroke-width="2" />
+            <polygon points="152,26 144,25 148,19" fill="#38bdf8" />
+            <polygon points="88,26 92,19 96,25" fill="#38bdf8" />
+            <text x="120" y="10" fill="#fde68a" font-size="8.5" font-family="sans-serif" text-anchor="middle">Reaction Torque (τ_w)</text>
+          </svg>
+        `;
+      }
+      return `
+        <svg viewBox="0 0 240 120" class="w-full h-28" aria-label="Tilt-Induced Distance Control Schematic">
+          <line x1="15" y1="105" x2="225" y2="105" stroke="#475569" stroke-width="2" />
+          <rect x="195" y="30" width="14" height="75" rx="2" fill="#64748b" />
+          <text x="202" y="24" fill="#cbd5e1" font-size="8" font-family="sans-serif" text-anchor="middle">Target</text>
+          <circle cx="75" cy="87" r="16" fill="#1e293b" stroke="#38bdf8" stroke-width="2.5" />
+          <line x1="75" y1="87" x2="70" y2="32" stroke="#e2e8f0" stroke-width="5" stroke-linecap="round" />
+          <rect x="44" y="25" width="22" height="14" rx="3" fill="#f59e0b" />
+          <rect x="86" y="68" width="12" height="10" rx="2" fill="#34d399" />
+          <path d="M 103 68 Q 108 73 103 78 M 109 65 Q 116 73 109 81" fill="none" stroke="#34d399" stroke-width="1.5" />
+          <line x1="98" y1="92" x2="193" y2="92" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="3,2" />
+          <text x="145" y="88" fill="#bae6fd" font-size="8.5" font-family="monospace" text-anchor="middle">d = 1.0 m</text>
+        </svg>
+      `;
+    }
+
+    // =========================================================================
+    // 12. INITIALIZE ON WINDOW LOAD
+    // =========================================================================
+    window.addEventListener('resize', () => {
+      if (currentTab === 'theory') {
+        updateFbdAnalysis();
+      }
+    });
+
+    window.onload = function () {
+      setLanguage(currentLang);
+    };
+  </script>
+</body>
+</html>
